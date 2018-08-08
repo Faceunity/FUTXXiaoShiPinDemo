@@ -1,0 +1,74 @@
+PODS:
+  - AFNetworking (3.2.1):
+    - AFNetworking/NSURLSession (= 3.2.1)
+    - AFNetworking/Reachability (= 3.2.1)
+    - AFNetworking/Security (= 3.2.1)
+    - AFNetworking/Serialization (= 3.2.1)
+    - AFNetworking/UIKit (= 3.2.1)
+  - AFNetworking/NSURLSession (3.2.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.1)
+  - AFNetworking/Security (3.2.1)
+  - AFNetworking/Serialization (3.2.1)
+  - AFNetworking/UIKit (3.2.1):
+    - AFNetworking/NSURLSession
+  - BlocksKit (2.2.5):
+    - BlocksKit/All (= 2.2.5)
+  - BlocksKit/All (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+    - BlocksKit/MessageUI
+    - BlocksKit/UIKit
+  - BlocksKit/Core (2.2.5)
+  - BlocksKit/DynamicDelegate (2.2.5)
+  - BlocksKit/MessageUI (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+  - BlocksKit/UIKit (2.2.5):
+    - BlocksKit/Core
+    - BlocksKit/DynamicDelegate
+  - MBProgressHUD (1.1.0)
+  - MJExtension (3.0.15)
+  - MJRefresh (3.1.15.3)
+  - QBImagePickerController (3.4.0)
+  - SDWebImage (4.4.0):
+    - SDWebImage/Core (= 4.4.0)
+  - SDWebImage/Core (4.4.0)
+  - ZipArchive (1.4.0)
+
+DEPENDENCIES:
+  - AFNetworking (~> 3.1)
+  - BlocksKit (~> 2.2.5)
+  - MBProgressHUD (~> 1.1.0)
+  - MJExtension (~> 3.0.10)
+  - MJRefresh (~> 3.1.1)
+  - QBImagePickerController
+  - SDWebImage (~> 4.4.0)
+  - ZipArchive
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - BlocksKit
+    - MBProgressHUD
+    - MJExtension
+    - MJRefresh
+    - QBImagePickerController
+    - SDWebImage
+    - ZipArchive
+
+SPEC CHECKSUMS:
+  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
+  BlocksKit: 7f422b971407001178d181a43b99014ea2591fe6
+  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
+  MJExtension: 3f039575db1b135a20699ad298713b26acec1528
+  MJRefresh: b48380ae2b927b46c4ef000de9adb8dc748e1df7
+  QBImagePickerController: d54cf93db6decf26baf6ed3472f336ef35cae022
+  SDWebImage: b534502786e43dde36dfcaee89356fe6df30e203
+  ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
+
+PODFILE CHECKSUM: 35e20f1f253ad22156087db4588825031f2fb4fb
+
+COCOAPODS: 1.5.3
