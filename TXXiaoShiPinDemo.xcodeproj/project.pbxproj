@@ -1918,14 +1918,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = EF47CE3F1D4B03FC0028B598 /* Build configuration list for PBXNativeTarget "TXXiaoShiPinDemo" */;
 			buildPhases = (
+				CDA4593F2119D69800F5F864 /* unzip */,
 				053C9159096C0D842960296D /* [CP] Check Pods Manifest.lock */,
+				CFB30BFBE82844BD91BB30BC /* [CP] Copy Pods Resources */,
 				EF47CE241D4B03FC0028B598 /* Sources */,
 				EF47CE251D4B03FC0028B598 /* Frameworks */,
 				EF47CE261D4B03FC0028B598 /* Resources */,
 				EFCCED911D75CACE0062F02F /* Run Script */,
 				91BECB9A1D9B5C6B002FCD1E /* Embed Frameworks */,
 				91BECB9D1D9B61B7002FCD1E /* CopyFiles */,
-				CFB30BFBE82844BD91BB30BC /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2421,6 +2422,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# compress application.\n/bin/mkdir -p $CONFIGURATION_BUILD_DIR/Payload\n/bin/cp -R $CONFIGURATION_BUILD_DIR/TCLVBIMDemo.app $CONFIGURATION_BUILD_DIR/Payload\n#/bin/cp images/logo_itunes.png $CONFIGURATION_BUILD_DIR/iTunesArtwork\ncd $CONFIGURATION_BUILD_DIR\n# zip up the HelloWorld directory\n/usr/bin/zip -r -q XiaoZhiBo.ipa Payload iTunesArtwork";
+		};
+		CDA4593F2119D69800F5F864 /* unzip */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = unzip;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n#!/bin/sh\ncd TXXiaoShiPinDemo/FaceUnity/FaceUnity-SDK-iOS\nfilename=libnama.a\nzipname=libnama.zip \n\n#如果libnama.zip存在,则直接解压\nif [ -f \"$zipname\" ]\nthen\nrm -f $filename\nunzip $zipname\nmdcode=$(md5 $filename)\n\nif [ ${mdcode##*=}x = \"ef0a04dd568f485f6abb0c58ba74e08e\"x ]; then\necho \"ssss\"\nrm -f $zipname\nelse\necho \"fffff\"\nrm -f $filename\nfi\nfi \n";
 		};
 		CFB30BFBE82844BD91BB30BC /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
