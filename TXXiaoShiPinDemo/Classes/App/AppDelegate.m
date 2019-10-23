@@ -18,8 +18,6 @@
 
 #import "SDKHeader.h"
 
-#import "FUManager.h"
-
 @interface AppDelegate ()
 @end
 
@@ -79,7 +77,7 @@
     [[UMSocialManager defaultManager] setPlaform:UMSocialPlatformType_Sina appKey:kSina_WeiBo_Share_ID  appSecret:kSina_WeiBo_Share_Secrect redirectURL:@"http://sns.whalecloud.com/sina2/callback"];
 
     _beginTime = [[NSDate date] timeIntervalSince1970];
-    
+    [[TCLoginModel sharedInstance] refreshLogin];
     return YES;
 }
 
@@ -169,7 +167,7 @@
             [[NSUserDefaults standardUserDefaults] setBool:YES forKey:hasAgreeUserAgreement];
             [weakSelf confirmEnterMainUI];
         }else{
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"为了营造良好的用户环境，不同意用户协议将无法正常使用本APP" message:nil delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"AppDelegate.TitleAlert", nil)  message:nil delegate:self cancelButtonTitle:NSLocalizedString(@"Common.OK", nil) otherButtonTitles:nil, nil];
             [alertView show];
         }
     };

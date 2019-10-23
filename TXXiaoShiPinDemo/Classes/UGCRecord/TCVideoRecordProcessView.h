@@ -8,14 +8,16 @@
 
 #import <UIKit/UIKit.h>
 
-static int MAX_RECORD_TIME = 16;
-static int MIN_RECORD_TIME = 2;
+static CGFloat MAX_RECORD_TIME = 16.0;
+static CGFloat MIN_RECORD_TIME = 2.0;
 
 @interface TCVideoRecordProcessView : UIView
-
+@property (assign, nonatomic) BOOL minimumTimeTipHidden;
 -(void)update:(CGFloat)progress;
 
 -(void)pause;
+
+-(void)pauseAtTime:(CGFloat)time;
 
 -(void)prepareDeletePart;
 

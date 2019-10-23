@@ -25,6 +25,7 @@
 
 @interface EffectSelectView : UIView
 @property (nonatomic,weak) id <EffectSelectViewDelegate> delegate;
+@property (assign, nonatomic) NSInteger selectedIndex;
 /// 抬起手指时是否还原未选中状态
 @property (nonatomic) BOOL momentary;
 - (void)setEffectList:(NSArray<EffectInfo *> *)effecList;

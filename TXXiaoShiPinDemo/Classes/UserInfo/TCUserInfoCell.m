@@ -334,7 +334,7 @@
         {
             if ([TCUtil getContentLength:toBeString] > kNicknameMaxLength)
             {
-                [[HUDHelper sharedInstance] tipMessage:[NSString stringWithFormat:@"%@%d",@"昵称长度不能超过", kNicknameMaxLength/2]];
+                [[HUDHelper sharedInstance] tipMessage:[NSString stringWithFormat:@"%@%d",NSLocalizedString(@"TCUserInfoCell.ErrorNickLength", nil), kNicknameMaxLength/2]];
                 textField.text = [toBeString substringToIndex:[self getNickIndex:textField.text]];
             }
         }
@@ -344,7 +344,7 @@
         // 中文输入法以外的直接对其统计限制即可，不考虑其他语种情况
         if ([TCUtil getContentLength:toBeString] > kNicknameMaxLength)
         {
-            [[HUDHelper sharedInstance] tipMessage:[NSString stringWithFormat:@"%@%d",@"昵称长度不能超过", kNicknameMaxLength/2]];
+            [[HUDHelper sharedInstance] tipMessage:[NSString stringWithFormat:@"%@%d",NSLocalizedString(@"TCUserInfoCell.ErrorNickLength", nil), kNicknameMaxLength/2]];
             textField.text = [toBeString substringToIndex:[self getNickIndex:textField.text]];
         }
     }

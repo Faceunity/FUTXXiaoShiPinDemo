@@ -80,9 +80,11 @@
     //举报
     UIButton *reportBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     [reportBtn setFrame:CGRectMake(_topView.right + 15, _topView.top + 5, 150, 30)];
-    [reportBtn setTitle:@"举报/不感兴趣/拉黑" forState:UIControlStateNormal];
+    [reportBtn setTitle:NSLocalizedString(@"TCPlayDecorate.ActionList", nil) forState:UIControlStateNormal];
     reportBtn.titleLabel.font = [UIFont systemFontOfSize:13];
-    [reportBtn  setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [reportBtn sizeToFit];
+    reportBtn.width += 20;
+    [reportBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [reportBtn setBackgroundColor:[UIColor blackColor]];
     [reportBtn addTarget:self action:@selector(onReportClick) forControlEvents:UIControlEventTouchUpInside];
     [reportBtn setAlpha:0.7];
@@ -91,6 +93,18 @@
     reportBtn.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleRightMargin;
 
     [self addSubview:reportBtn];
+    
+    //合唱
+    _btnChorus = [UIButton buttonWithType:UIButtonTypeCustom];
+    [_btnChorus setImage:[UIImage imageNamed:@"GroupPhoto-normal"] forState:UIControlStateNormal];
+    [_btnChorus setImage:[UIImage imageNamed:@"GroupPhoto-press"] forState:UIControlStateHighlighted];
+    [_btnChorus sizeToFit];
+    _btnChorus.center = CGPointMake(self.frame.size.width - _btnChorus.size.width, reportBtn.center.y);
+    [_btnChorus addTarget:self action:@selector(clickChorus:) forControlEvents:UIControlEventTouchUpInside];
+    _btnChorus.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin;
+    [self addSubview:_btnChorus];
+
+    
     
     int   icon_size = BOTTOM_BTN_ICON_WIDTH;
     float startSpace = 15;
@@ -130,17 +144,6 @@
     _playDuration.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleRightMargin;
     [self addSubview:_playDuration];
     
-    //合唱
-    _btnChorus = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnChorus.center = CGPointMake(_closeBtn.center.x - icon_size - 15, icon_center_y);
-    _btnChorus.bounds = CGRectMake(0, 0, icon_size * 1.2, icon_size * 1.2);
-    [_btnChorus setTitle:@"合唱" forState:UIControlStateNormal];
-    [_btnChorus.titleLabel setFont:[UIFont systemFontOfSize:12]];
-    [_btnChorus setBackgroundColor:[UIColor redColor]];
-    _btnChorus.layer.cornerRadius = _btnChorus.width / 2.0;
-    [_btnChorus addTarget:self action:@selector(clickChorus:) forControlEvents:UIControlEventTouchUpInside];
-    _btnChorus.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleLeftMargin;
-    [self addSubview:_btnChorus];
     
     //log显示或隐藏
     _btnLog = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -219,54 +222,54 @@
 
 -(void)onReportClick{
     __weak __typeof(self) ws = self;
-    [_actionSheet1 bk_addButtonWithTitle:@"举报" handler:^{
+    [_actionSheet1 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ActionReport", nil) handler:^{
         [ws reportUser];
     }];
-    [_actionSheet1 bk_addButtonWithTitle:@"减少类似作品" handler:^{
+    [_actionSheet1 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ActionDiss", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"以后会减少类似作品"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ActionDissResult", nil)];
     }];
-    [_actionSheet1 bk_addButtonWithTitle:@"加入黑名单" handler:^{
+    [_actionSheet1 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ActionBlacklist", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"已加入黑名单"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ActionBlacklistResult", nil)];
     }];
-    [_actionSheet1 bk_setCancelButtonWithTitle:@"取消" handler:nil];
+    [_actionSheet1 bk_setCancelButtonWithTitle:NSLocalizedString(@"Common.Cancel", nil) handler:nil];
     [_actionSheet1 showInView:self];
 }
 
 - (void)reportUser{
     [_actionSheet1 setHidden:YES];
     __weak __typeof(self) ws = self;
-    _actionSheet2.title = @"请选择分类，分类越准，处理越快。";
-    [_actionSheet2 bk_addButtonWithTitle:@"违法违规" handler:^{
+    _actionSheet2.title = NSLocalizedString(@"TCPlayDecorate.ReportClass", nil);
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause1", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"色情低俗" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause2", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"标题党、封面党、骗点击" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause3", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"未成年人不适当行为" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause4", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"制售假冒伪劣商品" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause5", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"滥用作品" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause6", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_addButtonWithTitle:@"泄漏我的隐私" handler:^{
+    [_actionSheet2 bk_addButtonWithTitle:NSLocalizedString(@"TCPlayDecorate.ReportCause7", nil) handler:^{
         [ws confirmReportUser];
-        [[HUDHelper sharedInstance] tipMessage:@"举报成功，我们将在24小时内进行处理"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCPlayDecorate.ReportResult", nil)];
     }];
-    [_actionSheet2 bk_setCancelButtonWithTitle:@"取消" handler:^{
+    [_actionSheet2 bk_setCancelButtonWithTitle:NSLocalizedString(@"Common.Cancel", nil) handler:^{
         [_actionSheet1 showInView:self];
     }];
     [_actionSheet2 showInView:self];

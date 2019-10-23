@@ -38,13 +38,17 @@
         CGFloat btnHeight = 46 * kScaleY;
         _animateBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.width / 2 -  btnWidth, 0 , btnWidth, btnHeight)];
         [_animateBtn setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-        [_animateBtn setTitle:@"动态贴纸" forState:UIControlStateNormal];
+        [_animateBtn setTitle:NSLocalizedString(@"PasterAddView.PasterDynamic", nil) forState:UIControlStateNormal];
+        [_animateBtn sizeToFit];
+        _animateBtn.left = self.width / 2 - _animateBtn.width - 2;
         [_animateBtn addTarget:self action:@selector(onAnimateBtnClicked:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_animateBtn];
         
         _staticBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.width / 2, 0 , btnWidth, btnHeight)];
         [_staticBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-        [_staticBtn setTitle:@"静态贴纸" forState:UIControlStateNormal];
+        [_staticBtn setTitle:NSLocalizedString(@"PasterAddView.PasterStatic", nil) forState:UIControlStateNormal];
+        [_staticBtn sizeToFit];
+        _staticBtn.left = self.width / 2 + 2;
         [_staticBtn addTarget:self action:@selector(onStaticBtnClicked:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_staticBtn];
         
@@ -60,7 +64,9 @@
         
         _qipaoBtn = [[UIButton alloc] initWithFrame:CGRectMake(self.width / 2 - btnWidth / 2, 0 , btnWidth, btnHeight)];
         [_qipaoBtn setTitleColor:UIColorFromRGB(0x0accac) forState:UIControlStateNormal];
-        [_qipaoBtn setTitle:@"选择气泡字幕" forState:UIControlStateNormal];
+        [_qipaoBtn setTitle:NSLocalizedString(@"PasterAddView.ChooseBubbleSub", nil) forState:UIControlStateNormal];
+        [_qipaoBtn sizeToFit];
+        _qipaoBtn.frame = CGRectMake(self.width / 2 - _qipaoBtn.width / 2, 0 , _qipaoBtn.width, btnHeight);
         _qipaoBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
         [_qipaoBtn addTarget:self action:@selector(onQipaoBtnClicked:) forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:_qipaoBtn];

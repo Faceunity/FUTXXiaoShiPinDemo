@@ -19,7 +19,6 @@
     UIImageView *_headImageView;
     UIImageView *_bigPicView;
     UIImageView *_flagView;
-    UIImageView *_timeSelectView;
     UILabel     *_titleLabel;
     UILabel     *_nameLabel;
     UILabel     *_locationLabel;
@@ -75,10 +74,6 @@
     [self.contentView addSubview:_reviewLabel];
     
     //右上角的时间
-    _timeSelectView = [[UIImageView alloc] initWithFrame:CGRectZero];
-    _timeSelectView.image = [UIImage imageNamed:@"time"];
-    [self.contentView addSubview:_timeSelectView];
-    
     _timeLable = [[UILabel alloc] initWithFrame:CGRectZero];
     [_timeLable setFont:[UIFont systemFontOfSize:12]];
     [_timeLable setTextColor:UIColorFromRGB(0xFFFFFF)];
@@ -114,8 +109,7 @@
     _reviewLabel.frame = CGRectMake(14, 5, 62, 20);
 
     //右上角的时间
-    _timeSelectView.frame = CGRectMake(self.width - 67, 5, 62, 20);
-    _timeLable.frame = _timeSelectView.frame;
+    _timeLable.frame = CGRectMake(self.width - _timeLable.frame.size.width-5, 5, _timeLable.frame.size.width, 20);
     
     //用户信息
     _userMsgView.frame = CGRectMake(0, _bigPicView.bottom - 50, self.width, 50);
@@ -143,13 +137,13 @@
     
     if (_reviewLabel){
         if (_model.reviewStatus == 0) {
-            _reviewLabel.text = @"未审核";
+            _reviewLabel.text = NSLocalizedString(@"TCLiveListView.Uncensored", nil);
         }
         else if(_model.reviewStatus == 1){
-            _reviewLabel.text = @"已审核";
+            _reviewLabel.text = NSLocalizedString(@"TCLiveListView.Censored", nil);
         }
         else if(_model.reviewStatus == 2){
-            _reviewLabel.text = @"涉黄";
+            _reviewLabel.text = NSLocalizedString(@"TCLiveListView.AdultContent", nil);
         }
     }
     
@@ -174,7 +168,7 @@
     
     //self.locationImageView.hidden = NO;
     if (_locationLabel && _locationLabel.text.length == 0) {
-        _locationLabel.text = @"不显示地理位置";
+        _locationLabel.text = NSLocalizedString(@"TCLiveListCell.HideLocation", nil);
     }
     
     __weak typeof(_bigPicView) weakPicView =  _bigPicView;
@@ -250,24 +244,32 @@
     return newImage;
 }
 
+- (NSString *)localizedNumber:(int)number key:(NSString *)key {
+    if (number > 1) {
+        key = [key stringByAppendingString:@"Plur"];
+    }
+    return [[NSString alloc] initWithFormat:NSLocalizedString(key, nil), number];
+}
+
 - (void)setTimeLable:(int)timestamp {
-    NSString *timeStr = @"刚刚";
+    NSString *timeStr = NSLocalizedString(@"TCLiveListCell.TimeSecondsAgo", nil);
     if (timestamp == 0) {
         timeStr = @"";
     } else {
         int interval = [[NSDate date] timeIntervalSince1970] - timestamp;
         
         if (interval >= 60 && interval < 3600) {
-            timeStr = [[NSString alloc] initWithFormat:@"%d分钟前", interval/60];
+            timeStr = [self localizedNumber:interval/60 key:@"TCLiveListCell.TimeMinutesAgo"];
         } else if (interval >= 3600 && interval < 60*60*24) {
-            timeStr = [[NSString alloc] initWithFormat:@"%d小时前", interval/3600];
+            timeStr = [self localizedNumber:interval/3600 key:@"TCLiveListCell.TimeHoursAgo"];
         } else if (interval >= 60*60*24 && interval < 60*60*24*365) {
-            timeStr = [[NSString alloc] initWithFormat:@"%d天前", interval/3600/24];
-        } else if (interval >= 60*60*24*265) {
-            timeStr = [[NSString alloc] initWithFormat:@"很久前"];
+            timeStr = [self localizedNumber:interval/3600/24 key:@"TCLiveListCell.TimeDaysAgo"];
+        } else if (interval >= 60*60*24*365) {
+            timeStr = [[NSString alloc] initWithFormat:NSLocalizedString(@"TCLiveListCell.TimeLongAgo", nil)];
         }
     }
     _timeLable.text = timeStr;
+    [_timeLable sizeToFit];
 }
 
 @end

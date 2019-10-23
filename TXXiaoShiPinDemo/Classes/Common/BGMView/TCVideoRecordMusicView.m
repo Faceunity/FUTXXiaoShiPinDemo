@@ -10,6 +10,9 @@
 #import "ColorMacro.h"
 #import "UIView+Additions.h"
 #import "TCBGMSliderCutView.h"
+
+#define L(x) NSLocalizedString((x),nil)
+
 @interface TCVideoRecordMusicView() <BGMCutDelegate>{
     
 }
@@ -33,8 +36,27 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        _audioEffectArry = [NSMutableArray arrayWithObjects:@"原声", @"KTV", @"房间", @"会堂", @"低沉", @"洪亮", @"金属", @"磁性", nil];
-        _audioEffectArry2 = [NSMutableArray arrayWithObjects:@"原声", @"熊孩子", @"萝莉", @"大叔", @"重金属", @"外国人", @"困兽", @"死肥仔", @"强电流", @"重机械", @"空灵", nil];
+        _audioEffectArry = [NSMutableArray arrayWithObjects:L(@"TCVideoRecordMusicView.Origin"), 
+                                                            L(@"TCVideoRecordMusicView.KTV"), 
+                                                            L(@"TCVideoRecordMusicView.Room"), 
+                                                            L(@"TCVideoRecordMusicView.Hall"), 
+                                                            L(@"TCVideoRecordMusicView.Low"), 
+                                                            L(@"TCVideoRecordMusicView.Bright"), 
+                                                            L(@"TCVideoRecordMusicView.Metal"), 
+                                                            L(@"TCVideoRecordMusicView.Magnetic"), 
+                                                            nil];
+        _audioEffectArry2 = [NSMutableArray arrayWithObjects:L(@"TCVideoRecordMusicView.Origin"), 
+                                                             L(@"TCVideoRecordMusicView.Child"), 
+                                                             L(@"TCVideoRecordMusicView.Loli"), 
+                                                             L(@"TCVideoRecordMusicView.Uncle"), 
+                                                             L(@"TCVideoRecordMusicView.HeavyMetal"), 
+                                                             L(@"TCVideoRecordMusicView.Foreigner"), 
+                                                             L(@"TCVideoRecordMusicView.Beast"), 
+                                                             L(@"TCVideoRecordMusicView.Fatty"), 
+                                                             L(@"TCVideoRecordMusicView.StrongCurrent"), 
+                                                             L(@"TCVideoRecordMusicView.HeavyMachinery"), 
+                                                             L(@"TCVideoRecordMusicView.Ethereal"), 
+                                                             nil];
         [self initUI:needEffect];
     }
     return self;
@@ -42,7 +64,7 @@
 
 -(void)initUI:(BOOL)needEffect{
     self.backgroundColor = [UIColor clearColor];
-    //***
+    /***
     //混响，功能展示用，暂时先放这里
     if (needEffect) {
         CGFloat btnSpace = 10;
@@ -96,40 +118,46 @@
         [self addSubview:_audioScrollView];
         [self addSubview:_audioScrollView2];
     }
-
+   */
     
     //BGM
-    UIButton *btnSelectBGM = [[UIButton alloc] initWithFrame:CGRectMake(self.width - 90 * kScaleX, needEffect ? _audioScrollView2.bottom + 5 : 5, 30, 30)];
+    UIButton *btnSelectBGM = [[UIButton alloc] initWithFrame:CGRectMake(15,  5, 30, 30)];
     [btnSelectBGM setImage:[UIImage imageNamed:@"music_change_normal"] forState:UIControlStateNormal];
     [btnSelectBGM setImage:[UIImage imageNamed:@"music_change_press"] forState:UIControlStateHighlighted];
     [btnSelectBGM addTarget:self action:@selector(onBtnMusicSelected) forControlEvents:UIControlEventTouchUpInside];
+    btnSelectBGM.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
     
-    UIButton *btnStopBGM = [[UIButton alloc] initWithFrame:CGRectMake(self.width - 36 * kScaleX,needEffect ? _audioScrollView2.bottom + 5 : 5, 30, 30)];
+    UIButton *btnStopBGM = [[UIButton alloc] initWithFrame:CGRectMake(btnSelectBGM.width + 30, 5, 30, 30)];
     [btnStopBGM setImage:[UIImage imageNamed:@"music_delete_normal"] forState:UIControlStateNormal];
     [btnStopBGM setImage:[UIImage imageNamed:@"music_delete_press"] forState:UIControlStateHighlighted];
     [btnStopBGM addTarget:self action:@selector(onBtnMusicStoped) forControlEvents:UIControlEventTouchUpInside];
+    btnStopBGM.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleBottomMargin;
 
     UILabel *labVolumeForVoice = [[UILabel alloc] initWithFrame:CGRectMake(15, btnSelectBGM.bottom + 10, 80, 16)];
-    [labVolumeForVoice setText:@"录音音量"];
+    [labVolumeForVoice setText:L(@"TCVideoRecordMusicView.VolumeRecord")];
     [labVolumeForVoice setFont:[UIFont systemFontOfSize:14.f]];
     labVolumeForVoice.textColor = UIColorFromRGB(0xFFFFFF);
+    [labVolumeForVoice sizeToFit];
     _sldVolumeForVoice = [[UISlider alloc] initWithFrame:CGRectMake(labVolumeForVoice.left, labVolumeForVoice.bottom + 10,self.width - 30, 20)];
     _sldVolumeForVoice.minimumValue = 0;
     _sldVolumeForVoice.maximumValue = 2;
     _sldVolumeForVoice.value = 1;
+    _sldVolumeForVoice.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [_sldVolumeForVoice setThumbImage:[UIImage imageNamed:@"slider"] forState:UIControlStateNormal];
     [_sldVolumeForVoice setMinimumTrackTintColor:RGB(238, 100, 85)];
     [_sldVolumeForVoice setMaximumTrackImage:[UIImage imageNamed:@"gray"] forState:UIControlStateNormal];
     [_sldVolumeForVoice addTarget:self action:@selector(onVoiceValueChange:) forControlEvents:UIControlEventValueChanged];
     
     UILabel *labVolumeForBGM = [[UILabel alloc] initWithFrame:CGRectMake(labVolumeForVoice.left, _sldVolumeForVoice.bottom + 20 , 80 , 16)];
-    [labVolumeForBGM setText:@"背景音音量"];
+    [labVolumeForBGM setText:L(@"TCVideoRecordMusicView.VolumeBGM")];
+    [labVolumeForBGM sizeToFit];
     [labVolumeForBGM setFont:[UIFont systemFontOfSize:14.f]];
     labVolumeForBGM.textColor = UIColorFromRGB(0xFFFFFF);
     _sldVolumeForBGM = [[UISlider alloc] initWithFrame:CGRectMake(labVolumeForVoice.left, labVolumeForBGM.bottom + 10,self.width - 30, 20)];
     _sldVolumeForBGM.minimumValue = 0;
     _sldVolumeForBGM.maximumValue = 2;
     _sldVolumeForBGM.value = 1;
+    _sldVolumeForBGM.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [_sldVolumeForBGM setThumbImage:[UIImage imageNamed:@"slider"] forState:UIControlStateNormal];
     [_sldVolumeForBGM setMinimumTrackTintColor:RGB(238, 100, 85)];
     [_sldVolumeForBGM setMaximumTrackImage:[UIImage imageNamed:@"gray"] forState:UIControlStateNormal];
@@ -138,7 +166,7 @@
     _startTimeLabel = [[UILabel alloc] initWithFrame:CGRectMake(15,_sldVolumeForBGM.bottom + 20,200,16)];
     [_startTimeLabel setTextColor:[UIColor whiteColor]];
     [_startTimeLabel setFont:[UIFont systemFontOfSize:14.f]];
-    [_startTimeLabel setText:[NSString stringWithFormat:@"当前从%@开始",[TCBGMSliderCutView timeString:0]]];
+    [_startTimeLabel setText:[NSString stringWithFormat:L(@"TCVideoRecordMusicView.StartFrom"),[TCBGMSliderCutView timeString:0]]];
     
     [self addSubview:btnSelectBGM];
     [self addSubview:btnStopBGM];
@@ -188,6 +216,7 @@
     if (self.delegate) [self.delegate selectAudioEffect:button.tag];
 }
 
+/// 变声类型
 - (void)selectEffect2:(UIButton *)button {
     for(UIButton *view in _audioScrollView2.subviews){
         if ([view isKindOfClass:[UIButton class]]) {
@@ -225,10 +254,10 @@
 #pragma mark - RangeContentDelegate
 - (void)onRangeLeftChanged:(TCBGMSliderCutView*)sender percent:(CGFloat)percent{
     if(sliderConfig){
-        [_startTimeLabel setText:[NSString stringWithFormat:@"当前从%@开始",[TCBGMSliderCutView timeString:percent*sliderConfig.duration]]];
+        [_startTimeLabel setText:[NSString stringWithFormat:L(@"TCVideoRecordMusicView.StartFrom"),[TCBGMSliderCutView timeString:percent*sliderConfig.duration]]];
     }
     else{
-        [_startTimeLabel setText:[NSString stringWithFormat:@"当前从%@开始",[TCBGMSliderCutView timeString:0]]];
+        [_startTimeLabel setText:[NSString stringWithFormat:L(@"TCVideoRecordMusicView.StartFrom"),[TCBGMSliderCutView timeString:0]]];
     }
 }
 

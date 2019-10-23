@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina5_5" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -21,7 +21,7 @@
             <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="video_record_share_loading_0.png" translatesAutoresizingMaskIntoConstraints="NO" id="rej-I3-pqg">
+                <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="video_record_share_loading_0" translatesAutoresizingMaskIntoConstraints="NO" id="rej-I3-pqg">
                     <rect key="frame" x="168" y="271.66666666666669" width="78" height="78"/>
                 </imageView>
                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="视频正在解码中，请稍等..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mrS-sE-jSq">
@@ -32,7 +32,7 @@
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hp7-Ta-wlZ">
                     <rect key="frame" x="354" y="357" width="20" height="22"/>
-                    <state key="normal" image="cancel.png"/>
+                    <state key="normal" image="cancel"/>
                     <connections>
                         <action selector="cancelLoad:" destination="-1" eventType="touchUpInside" id="EHj-2R-rYd"/>
                     </connections>
@@ -51,7 +51,7 @@
         </view>
     </objects>
     <resources>
-        <image name="cancel.png" width="20" height="20"/>
-        <image name="video_record_share_loading_0.png" width="78" height="78"/>
+        <image name="cancel" width="20" height="20"/>
+        <image name="video_record_share_loading_0" width="78" height="78"/>
     </resources>
 </document>

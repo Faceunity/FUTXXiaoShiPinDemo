@@ -22,15 +22,15 @@
 #define kEachKickErrorCode    6208   //互踢下线错误码
 
 static NSString * const UserNameRegex = @"^[a-zA-Z][a-zA-Z0-9_]{3,23}$";
-static NSString * const UserNameDesc = @"用户名请以字母开头, 支持字母、数字、下划线, 长度为4-24个字符。";
+static NSString * const UserNameDesc = @"TCRegisterView.UserNameRule";
 static NSString * const PasswordRegex = @"^[a-zA-Z0-9_]+$";
-static NSString * const PasswordDesc = @"密码请使用字母、数字、下划线";
+static NSString * const PasswordDesc = @"TCRegisterView.PasswordRule";
 
 
 @interface TCLoginModel()
 {
     TCLoginParam *_loginParam;
-
+    NSTimer *_refreshTimer;
 }
 @property (nonatomic, copy) NSString* sign;
 @property (nonatomic, copy) NSString* txTime;
@@ -75,13 +75,78 @@ static TCLoginModel *_sharedInstance = nil;
     [defaults setObject:@(autoLogin) forKey:kAutoLoginKey];
 }
 
+- (void)refreshLogin {
+    NSDate *expireDate = [_loginParam expireDate];
+    if (expireDate) {
+        if ([expireDate timeIntervalSinceNow] < 3600) {
+            [self _doRefresh];
+        } else {
+            [self scheduleRefreshLoginForExpireDate:expireDate];
+        }
+    }
+}
+
+- (void)onRefreshTimer:(NSTimer *)timer {
+    [self _doRefresh];
+}
+
+- (void)_doRefresh {
+    [self refreshLoginWithParam:_loginParam completion:^(TCLoginParam *param, int code, NSString *msg) {
+        if (code == 0) {
+            [param saveToLocal];
+            _loginParam = param;
+            [[TCLoginParam shareInstance] loadFromLocal];
+            [self scheduleRefreshLoginForExpireDate:param.expireDate];
+        }
+    }];
+}
+
+- (void)scheduleRefreshLoginForExpireDate:(NSDate *)date {
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        if (_refreshTimer) {
+            [_refreshTimer invalidate];
+            _refreshTimer = nil;
+        }
+        if (date == nil) {
+            return;
+        }
+        NSDate *nextRefreshDate = [date dateByAddingTimeInterval:-3600];
+        if ([nextRefreshDate compare:[NSDate date]] == NSOrderedAscending) {
+            nextRefreshDate = [NSDate dateWithTimeIntervalSinceNow:10];
+        }
+
+        _refreshTimer = [NSTimer scheduledTimerWithTimeInterval:[nextRefreshDate timeIntervalSinceNow]  target:self selector:@selector(onRefreshTimer:) userInfo:nil repeats:NO];
+    }];
+}
+
+- (void)refreshLoginWithParam:(TCLoginParam *)loginParam completion:(void(^)(TCLoginParam* param, int code, NSString *msg))completion {
+    [[TCLoginModel sharedInstance] login:loginParam.identifier hashPwd:loginParam.hashedPwd succ:^(NSString* userName, NSString* md5pwd ,NSString *token,NSString *refreshToken,NSInteger expires) {
+        TCLoginParam *param = [[TCLoginParam alloc] init];
+        param.identifier = userName;
+        param.hashedPwd = loginParam.hashedPwd;
+        param.token = token;
+        param.tokenTime = [[NSDate date] timeIntervalSince1970];
+        param.refreshToken = refreshToken;
+        param.expires = expires;
+        if (completion) {
+            completion(param, 0, nil);
+        }
+        [TCUtil report:xiaoshipin_login userName:userName code:200 msg:@"自动登录成功"];
+    } fail:^(NSString *userName, int errCode, NSString *errMsg) {
+        if (completion) {
+            completion(nil, errCode, errMsg);
+        }
+        [TCUtil report:xiaoshipin_login userName:userName code:errCode msg:@"自动登录失败"];
+    }];
+}
+
 - (void)registerWithUsername:(NSString *)username password:(NSString *)password succ:(TCRegistSuccess)succ fail:(TCRegistFail)fail
 {
     NSString* pwdMD5 = [password md5];
     NSString* hashPwd = [[pwdMD5 stringByAppendingString:username] md5];
-    
+
     NSDictionary* params = @{@"userid": username, @"password": hashPwd};
-    
+
     [TCUtil asyncSendHttpRequest:@"register" params:params handler:^(int resultCode, NSString *message, NSDictionary *resultDict) {
         NSLog(@"%d, %@, %@", resultCode, message, resultDict.description);
         if (resultCode == 200) {
@@ -97,7 +162,7 @@ static TCLoginModel *_sharedInstance = nil;
 {
     NSString* pwdMD5 = [password md5];
     NSString* hashPwd = [[pwdMD5 stringByAppendingString:username] md5];
-    
+
     [self login:username hashPwd:hashPwd succ:succ fail:fail];
 }
 
@@ -113,12 +178,12 @@ static TCLoginModel *_sharedInstance = nil;
             NSInteger expires = ((NSNumber*)resultDict[@"expires"]).unsignedLongLongValue;
             if (resultDict[@"cos_info"]) {
                 [[TCUserInfoModel sharedInstance] setBucket:resultDict[@"cos_info"][@"Bucket"] secretId:resultDict[@"cos_info"][@"SecretId"]
-                                        appid:[resultDict[@"cos_info"][@"Appid"] longLongValue] region:resultDict[@"cos_info"][@"Region"] accountType:weakSelf.accountType];
+                                                      appid:[resultDict[@"cos_info"][@"Appid"] longLongValue] region:resultDict[@"cos_info"][@"Region"] accountType:weakSelf.accountType];
             }
             //_loginParam
             [TCLoginModel setAutoLogin:YES];
             succ(username, hashPwd ,token,refreshToken,expires);
-            
+
             [[TCUserInfoModel sharedInstance] fetchUserInfo];
         }
         else {
@@ -135,6 +200,7 @@ static TCLoginModel *_sharedInstance = nil;
     }
     self.sign = nil;
     self.txTime = nil;
+    _loginParam = nil;
 }
 
 - (TCLoginParam *)getLoginParam {
@@ -147,7 +213,7 @@ static TCLoginModel *_sharedInstance = nil;
 - (void)getCosSign:(void (^)(int, NSString *, NSDictionary *))completion
 {
     NSDictionary* params = @{@"userid": _loginParam.identifier, @"timestamp":@([[NSDate date] timeIntervalSince1970] * 1000), @"expires":@(_loginParam.expires)};
-    
+
     [TCUtil asyncSendHttpRequest:@"get_cos_sign" token:_loginParam.token params:params handler:^(int resultCode, NSString *message, NSDictionary *resultDict) {
         completion(resultCode, message, resultDict);
     }];
@@ -167,7 +233,7 @@ static TCLoginModel *_sharedInstance = nil;
 
     NSMutableDictionary* mparams = [NSMutableDictionary dictionaryWithDictionary:hparams];
     [mparams addEntriesFromDictionary:params];
-    
+
     [TCUtil asyncSendHttpRequest:@"upload_ugc" token:_loginParam.token params:mparams handler:^(int resultCode, NSString *message, NSDictionary *resultDict) {
         completion(resultCode, message, resultDict);
     }];
@@ -188,27 +254,27 @@ static TCLoginModel *_sharedInstance = nil;
 {
     if (username == nil || [username length] == 0) {
         if (reason) {
-            *reason = @"用户名不能为空";
+            *reason = NSLocalizedString(@"TCLoginView.ErrorEmptyUserName", nil);
         }
         return NO;
     }
-    
+
     if (![self _validateString:username regex:UserNameRegex]) {
         if (reason) {
-            *reason = UserNameDesc;
+            *reason = NSLocalizedString(UserNameDesc, nil);
         }
         return NO;
     }
-    
+
     return YES;
 }
 
 - (BOOL)validatePassword:(NSString *)pwd failedReason:(NSString **)reason
 {
-    
+
     if (pwd == nil || [pwd length] == 0) {
         if (reason) {
-            *reason = @"密码不能为空";
+            *reason = NSLocalizedString(@"TCLoginView.ErrorEmptyPassword", nil);
         }
         return NO;
     }

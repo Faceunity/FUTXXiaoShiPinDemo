@@ -36,8 +36,8 @@
 @property (nonatomic, weak) id<VideoCutViewDelegate> delegate;
 @property (nonatomic, strong)  NSMutableArray  *imageList;         //缩略图列表
 
-- (id)initWithFrame:(CGRect)frame videoPath:(NSString *)videoPath  videoAssert:(AVAsset *)videoAssert config:(RangeContentConfig *)config;
-- (id)initWithFrame:(CGRect)frame pictureList:(NSArray *)pictureList  duration:(CGFloat)duration config:(RangeContentConfig *)config;
+- (id)initWithFrame:(CGRect)frame videoPath:(NSString *)videoPath  videoAsset:(AVAsset *)videoAsset config:(RangeContentConfig *)config;
+- (id)initWithFrame:(CGRect)frame pictureList:(NSArray *)pictureList  duration:(CGFloat)duration fps:(float)fps config:(RangeContentConfig *)config;
 - (void)updateFrame:(CGFloat)duration;
 - (void)stopGetImageList;
 

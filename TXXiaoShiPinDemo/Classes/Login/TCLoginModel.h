@@ -44,6 +44,10 @@ typedef void (^TCLogoutComplete)(void);
 
 + (void)setAutoLogin:(BOOL)autoLogin;
 
+- (void)refreshLogin;
+
+- (void)scheduleRefreshLoginForExpireDate:(NSDate *)date;
+
 - (void)registerWithUsername:(NSString *)username password:(NSString *)password succ:(TCRegistSuccess)succ fail:(TCRegistFail)fail;
 
 - (void)loginWithUsername:(NSString*)username password:(NSString*)password succ:(TCLoginSuccess)succ fail:(TCLoginFail)fail;

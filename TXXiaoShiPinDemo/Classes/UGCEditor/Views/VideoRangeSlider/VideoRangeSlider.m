@@ -194,13 +194,20 @@
     if (_colorType == ColorType_Effect) {
         VideoColorInfo *info = [_colorInfos lastObject];
         info.endPos = _currentPos;
+        
+        if (_currentPos + 1.5/ _fps >= _durationMs) {
+            info.colorView.frame = [self coloredFrameForStartTime:info.startPos endTime:_durationMs];
+            info.endPos = _durationMs;
+        } else {
+            info.endPos = _currentPos;
+        }
     }
     _startColor = NO;
 }
 
 - (VideoColorInfo *)removeLastColoration:(ColorType)colorType;
 {
-    for (NSInteger i = _colorInfos.count - 1; i >= 0; i ++) {
+    for (NSInteger i = _colorInfos.count - 1; i >= 0; i --) {
         VideoColorInfo *info = (VideoColorInfo *)_colorInfos[i];
         if (info.colorType == colorType) {
             [info.colorView removeFromSuperview];
@@ -225,6 +232,11 @@
             count++;
         }
     }
+}
+
+- (CGRect)coloredFrameForStartTime:(float)start endTime:(float)end {
+    CGFloat boxWidth = self.rangeContent.imageListWidth / _durationMs; // 帧的宽度
+    return CGRectMake(self.rangeContent.pinWidth + start * boxWidth, 0, (end - start) * boxWidth, self.rangeContent.height);
 }
 
 - (void)setDurationMs:(CGFloat)durationMs {
@@ -262,14 +274,13 @@
     
     VideoColorInfo *info = [_colorInfos lastObject];
     if (_colorType == ColorType_Effect && _startColor) {
-        CGFloat x = 0;
+        CGRect frame;
         if (_currentPos > info.startPos) {
-            x = self.rangeContent.pinWidth + info.startPos * self.rangeContent.imageListWidth / _durationMs;
+            frame = [self coloredFrameForStartTime:info.startPos endTime:_currentPos];
         }else{
-            x = self.rangeContent.pinWidth + _currentPos * self.rangeContent.imageListWidth / _durationMs;
+            frame = [self coloredFrameForStartTime:_currentPos endTime:info.startPos];
         }
-        CGFloat width = fabs(_currentPos - info.startPos) * self.rangeContent.imageListWidth / _durationMs;
-        info.colorView.frame = CGRectMake(x, 0, width, self.height);
+        info.colorView.frame = frame;
     }
     self.disableSeek = NO;
 }

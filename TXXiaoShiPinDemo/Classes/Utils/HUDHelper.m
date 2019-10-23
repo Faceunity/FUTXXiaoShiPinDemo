@@ -33,19 +33,19 @@ static HUDHelper *_instance = nil;
 
 + (void)alert:(NSString *)msg
 {
-    [HUDHelper alert:msg cancel:@"确定"];
+    [HUDHelper alert:msg cancel:NSLocalizedString(@"Common.OK", nil)];
 }
 + (void)alert:(NSString *)msg action:(CommonVoidBlock)action
 {
-    [HUDHelper alert:msg cancel:@"确定" action:action];
+    [HUDHelper alert:msg cancel:NSLocalizedString(@"Common.OK", nil) action:action];
 }
 + (void)alert:(NSString *)msg cancel:(NSString *)cancel
 {
-    [HUDHelper alertTitle:@"提示" message:msg cancel:cancel];
+    [HUDHelper alertTitle:NSLocalizedString(@"Common.Hint", nil) message:msg cancel:cancel];
 }
 + (void)alert:(NSString *)msg cancel:(NSString *)cancel action:(CommonVoidBlock)action
 {
-    [HUDHelper alertTitle:@"提示" message:msg cancel:cancel action:action];
+    [HUDHelper alertTitle:NSLocalizedString(@"Common.Hint", nil) message:msg cancel:cancel action:action];
 }
 + (void)alertTitle:(NSString *)title message:(NSString *)msg cancel:(NSString *)cancel
 {

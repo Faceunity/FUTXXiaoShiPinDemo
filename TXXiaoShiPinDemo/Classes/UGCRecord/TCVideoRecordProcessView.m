@@ -16,6 +16,7 @@
 {
     UIView *    _processView;
     UIView *    _deleteView;
+    UIView *    _minimumView;
     CGSize      _viewSize;
     NSMutableArray * _pauseViewList;
 }
@@ -24,20 +25,35 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.backgroundColor = [UIColor whiteColor];
-        
-        _viewSize = frame.size;
-        _processView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, _viewSize.height)];
-        _processView.backgroundColor = UIColorFromRGB(0xFF584C);
-        [self addSubview:_processView];
-        
-        UIView * minimumView = [[UIView alloc] initWithFrame:CGRectMake(self.width * MIN_RECORD_TIME / MAX_RECORD_TIME, 0, 2, self.frame.size.height)];
-        minimumView.backgroundColor = [UIColor whiteColor];
-        [self addSubview:minimumView];
-        
-        _pauseViewList = [NSMutableArray array];
+        [self setup];
     }
     return self;
+}
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super initWithCoder:aDecoder]) {
+        [self setup];
+    }
+    return self;
+}
+
+- (void)setMinimumTimeTipHidden:(BOOL)minimumTimeTipHidden {
+    _minimumTimeTipHidden = minimumTimeTipHidden;
+    _minimumView.hidden = minimumTimeTipHidden;
+}
+
+- (void)setup {
+    _viewSize = self.frame.size;
+    _processView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 0, _viewSize.height)];
+    _processView.backgroundColor = UIColorFromRGB(0xFF584C);
+    [self addSubview:_processView];
+    
+    UIView * minimumView = [[UIView alloc] initWithFrame:CGRectMake(self.width * MIN_RECORD_TIME / MAX_RECORD_TIME, 0, 2, self.frame.size.height)];
+    minimumView.backgroundColor = [UIColor whiteColor];
+    [self addSubview:minimumView];
+    _minimumView = minimumView;
+    _pauseViewList = [NSMutableArray array];
 }
 
 -(void)update:(CGFloat)progress
@@ -51,6 +67,12 @@
     pauseView.backgroundColor = UIColorFromRGB(0xA8002D);
     [_pauseViewList addObject:pauseView];
     [self addSubview:pauseView];
+}
+
+-(void)pauseAtTime:(CGFloat)time
+{
+    _processView.frame = CGRectMake(0, 0, _viewSize.width * time / MAX_RECORD_TIME, _viewSize.height);
+    [self pause];
 }
 
 -(void)prepareDeletePart

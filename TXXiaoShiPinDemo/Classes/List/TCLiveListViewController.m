@@ -57,7 +57,7 @@
     self.automaticallyAdjustsScrollViewInsets = YES;
     self.edgesForExtendedLayout = UIRectEdgeAll;
     self.view.backgroundColor = UIColorFromRGB(0xF6F2F4);
-    self.navigationItem.title = @"点播列表";
+     self.navigationItem.title = NSLocalizedString(@"TCLiveListView.NewLive", nil);
     
     CGFloat btnWidth         = 38;
     CGFloat btnHeight        = 24;
@@ -69,10 +69,12 @@
     tabView.backgroundColor = [UIColor whiteColor];
 
     _ugcVideoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_ugcVideoBtn setFrame:CGRectMake(self.view.width / 2 - (btnWidth + 20) / 2 , 11, btnWidth + 20, btnHeight)];
-    [_ugcVideoBtn setTitle:@"小视频" forState:UIControlStateNormal];
+    [_ugcVideoBtn setTitle:NSLocalizedString(@"Common.App", nil) forState:UIControlStateNormal];
     [_ugcVideoBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     _ugcVideoBtn.titleLabel.font = [UIFont systemFontOfSize:18];
+    [_ugcVideoBtn sizeToFit];
+    btnWidth = _ugcVideoBtn.width - 20;
+    [_ugcVideoBtn setFrame:CGRectMake(self.view.width / 2 - (btnWidth + 20) / 2 , 11, btnWidth + 20, btnHeight)];
     [_ugcVideoBtn addTarget:self action:@selector(videoBtnClick:) forControlEvents:UIControlEventTouchUpInside];
     
     _scrollView = [[UIView alloc] initWithFrame:CGRectMake(_ugcVideoBtn.left - (scrollViewWidth - _ugcVideoBtn.width)/2, _ugcVideoBtn.bottom + 5, scrollViewWidth, scrollViewHeight)];
@@ -106,7 +108,7 @@
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake((nullViewWidth - imageViewWidth)/2, 0, imageViewWidth, imageViewHeight)];
     imageView.image = [UIImage imageNamed:@"null_image"];
     UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, imageView.bottom + 5, nullViewWidth, 22)];
-    label.text = @"暂无内容哦";
+    label.text = NSLocalizedString(@"TCLiveListView.NoContent", nil);
     label.font = [UIFont systemFontOfSize:16];
     label.textColor = UIColorFromRGB(0x777777);
     
@@ -288,7 +290,7 @@
         [self.lives addObjectsFromArray:result];
     } else {
         if (finish) {
-            MBProgressHUD *hud = [[HUDHelper sharedInstance] tipMessage:@"没有啦"];
+            MBProgressHUD *hud = [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCLiveListView.NoMore", nil)];
             hud.userInteractionEnabled = NO;
         }
     }

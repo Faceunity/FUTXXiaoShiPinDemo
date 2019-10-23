@@ -565,11 +565,11 @@ typedef NS_ENUM(NSInteger,DragDirection){
     }
     _hub = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     _hub.mode = MBProgressHUDModeText;
-    _hub.label.text = @"正在加载视频...";
+    _hub.label.text = NSLocalizedString(@"TCVodPlay.VideoLoading", nil);
     
     __weak __typeof(self) weakSelf = self;
     NSMutableDictionary *playerParam = [self getPlayerParam:_currentPlayer];
-    [TCUtil downloadVideo:playerParam[@"playUrl"] process:^(CGFloat process) {
+    [TCUtil downloadVideo:playerParam[@"playUrl"] cachePath:nil process:^(CGFloat process) {
         [weakSelf onloadVideoProcess:process];
     } complete:^(NSString *videoPath) {
         [weakSelf onloadVideoComplete:videoPath];
@@ -577,7 +577,7 @@ typedef NS_ENUM(NSInteger,DragDirection){
 }
 
 -(void)onloadVideoProcess:(CGFloat)process {
-    _hub.label.text = [NSString stringWithFormat:@"正在加载视频%d%%",(int)(process * 100)];
+    _hub.label.text = [NSString stringWithFormat: NSLocalizedString(@"TCVodPlay.VideoLoadingFmt", nil),(int)(process * 100)];
 }
 
 -(void)onloadVideoComplete:(NSString *)videoPath {
@@ -587,7 +587,7 @@ typedef NS_ENUM(NSInteger,DragDirection){
         [self.navigationController pushViewController:vc animated:YES];
         [_hub hideAnimated:YES];
     }else{
-        _hub.label.text = @"视频加载失败";
+        _hub.label.text = NSLocalizedString(@"TCVodPlay.VideoLoadFailed", nil);
         [_hub hideAnimated:YES afterDelay:1.0];
     }
 }

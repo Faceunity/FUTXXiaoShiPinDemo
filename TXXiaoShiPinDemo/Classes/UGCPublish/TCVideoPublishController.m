@@ -9,6 +9,7 @@
 #import "TCLoginModel.h"
 #import <UMSocialCore/UMSocialCore.h>
 #import <AFNetworking.h>
+#import "TCLoginParam.h"
 
 @interface TCVideoPublishController()
 @property UILabel         *labPublishState;
@@ -111,11 +112,11 @@
     [super viewDidLoad];
     
     self.navigationController.navigationBar.tintColor = UIColorFromRGB(0x0ACCAC);
-    self.navigationItem.title = @"发布";
+    self.navigationItem.title = NSLocalizedString(@"Common.Release", nil);
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:18],NSForegroundColorAttributeName:[UIColor blackColor]}] ;
     self.view.backgroundColor = UIColorFromRGB(0xefeff4);
     
-    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:@"发布" style:UIBarButtonItemStylePlain target:self action:@selector(videoPublish)];
+    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Common.Release", nil) style:UIBarButtonItemStylePlain target:self action:@selector(videoPublish)];
     self.navigationItem.rightBarButtonItems = [NSMutableArray arrayWithObject:btn];
 
     self.view.userInteractionEnabled = YES;
@@ -139,7 +140,7 @@
     _txtShareWords.textColor = UIColorFromRGB(0x0ACCAC);
  
     _labDefaultWords = [[UILabel alloc] init];
-    _labDefaultWords.text = @"说点什么...";
+    _labDefaultWords.text = NSLocalizedString(@"TCVideoPublish.SaySomething", nil);
     _labDefaultWords.textColor = UIColorFromRGB(0xefeff4);
     _labDefaultWords.font = [UIFont systemFontOfSize:16];
     _labDefaultWords.backgroundColor =[UIColor clearColor];
@@ -156,11 +157,11 @@
     _vSharePlatform.backgroundColor = [UIColor whiteColor];
     
     NSArray * shareTitleArray       = @[
-                                        @"微信",
-                                        @"朋友圈",
-                                        @"QQ",
-                                        @"QQ空间",
-                                        @"微博"];
+                                        NSLocalizedString(@"ShareTitleArray1", nil),
+                                        NSLocalizedString(@"ShareTitleArray2", nil),
+                                        NSLocalizedString(@"ShareTitleArray3", nil),
+                                        NSLocalizedString(@"ShareTitleArray4", nil),
+                                        NSLocalizedString(@"ShareTitleArray5", nil)];
     
     NSArray * shareIconPressArray        = @[
                                         @"video_record_wechat",
@@ -235,7 +236,7 @@
     
     
     UILabel* publish_promise = [[UILabel alloc] init];
-    publish_promise.text = @"发布到小视频";
+    publish_promise.text = NSLocalizedString(@"TCVideoPublish.ReleaseToApp", nil);
     publish_promise.textColor = UIColorFromRGB(0x777777);
     publish_promise.font = [UIFont systemFontOfSize:12];
     publish_promise.backgroundColor =[UIColor clearColor];
@@ -246,7 +247,7 @@
     [publish_promise alignParentLeftWithMargin:15];
     
     UILabel* share_promise = [[UILabel alloc] init];
-    share_promise.text = @"同时分享到";
+    share_promise.text = NSLocalizedString(@"TCVideoPublish.AndShareTo", nil);
     share_promise.textColor = UIColorFromRGB(0x777777);
     share_promise.font = [UIFont systemFontOfSize:12];
     share_promise.backgroundColor =[UIColor clearColor];
@@ -289,7 +290,7 @@
     _imgPublishState.image = [UIImage imageNamed:@"video_record_share_loading_0"];
     
     _labPublishState = [[UILabel alloc] init];
-    _labPublishState.text = @"正在上传请稍等";
+    _labPublishState.text = NSLocalizedString(@"TCVideoPublish.VideoUploading", nil);
     _labPublishState.textColor = UIColorFromRGB(0x0ACCAC);
     _labPublishState.font = [UIFont systemFontOfSize:24];
     _labPublishState.backgroundColor =[UIColor clearColor];
@@ -389,7 +390,7 @@
             _videoPublishParams.videoPath = _recordResult.videoPath;
             errCode = [_videoPublish publishVideo:_videoPublishParams];
         }else{
-            [self toastTip:[NSString stringWithFormat:@"获取签名失败[errcode:%d]", errCode]];
+            [self toastTip:[NSString stringWithFormat:NSLocalizedString(@"TCVideoPublish.HintFetchingSignatureFailedFmt", nil), errCode]];
             return;
         }
     
@@ -397,7 +398,7 @@
         [[AFNetworkReachabilityManager sharedManager] setReachabilityStatusChangeBlock:^(AFNetworkReachabilityStatus status) {
             switch (status) {
                 case AFNetworkReachabilityStatusNotReachable:
-                    wkSelf.labPublishState.text = @"网络连接断开，视频上传失败";
+                    wkSelf.labPublishState.text = NSLocalizedString(@"TCVideoPublish.HintUploadingFailedNetwork", nil);
                     wkSelf.imgPublishState.hidden = YES;
                     wkSelf.isNetWorkErr = YES;
                     break;
@@ -408,17 +409,17 @@
         [[AFNetworkReachabilityManager sharedManager] startMonitoring]; //开启网络监控
         
         if(errCode != 0){
-            [self toastTip:[NSString stringWithFormat:@"视频上传失败[errcode:%d]", errCode]];
+            [self toastTip:[NSString stringWithFormat:NSLocalizedString(@"TCVideoPublish.HintUploadingFailedFmt", nil), errCode]];
             return;
         }
         
         self.navigationItem.rightBarButtonItems = nil;
-        self.navigationItem.title = @"发布中";
+        self.navigationItem.title = NSLocalizedString(@"TCVideoPublish.PublishingTitle", nil);
         
         _vPublishInfo.hidden = NO;
         _vShare.hidden = YES;
         
-        _labPublishState.text = @"正在发布请稍等";
+        _labPublishState.text = NSLocalizedString(@"TCVideoPublish.PublishingHint", nil);
         _imgPublishState.image = [UIImage imageNamed:@"video_record_share_loading_0"];
         
         [_txtShareWords resignFirstResponder];
@@ -462,21 +463,21 @@
 -(void) onPublishComplete:(TXPublishResult*)result
 {
     if (!result.retCode) {
-        _labPublishState.text = @"发布成功啦！";
+        _labPublishState.text = NSLocalizedString(@"TCVideoPublish.PublishingSucceeded", nil);
     } else {
         if (_isNetWorkErr == NO) {
-            _labPublishState.text = [NSString stringWithFormat:@"发布失败啦![%d]", result.retCode];
+            _labPublishState.text = [NSString stringWithFormat:NSLocalizedString(@"TCVideoPublish.PublishingFailedFmt", nil), result.retCode];
         }
         return;
     }
     
     NSString *title = _txtShareWords.text;
-    if (title.length<=0) title = @"小视频";
+    if (title.length<=0) title = NSLocalizedString(@"Common.App", nil);
     NSDictionary* dictParam = @{@"userid" :[TCLoginParam shareInstance].identifier,
                                 @"file_id" : result.videoId,
                                 @"title":title,
                                 @"frontcover":result.coverURL == nil ? @"" : result.coverURL,
-                                @"location":@"未知",
+                                @"location":NSLocalizedString(@"Common.Unknown", nil),
                                 @"play_url":result.videoURL};
     [[TCLoginModel sharedInstance] uploadUGC:dictParam completion:^(int errCode, NSString *msg, NSDictionary *resultDict)  {
         if (200 == errCode) {
@@ -492,7 +493,7 @@
     }];
     
     _imgPublishState.image = [UIImage imageNamed:@"video_record_success"];
-    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:@"完成" style:UIBarButtonItemStylePlain target:self action:@selector(publishFinished)];
+    UIBarButtonItem *btn = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Common.Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(publishFinished)];
     self.navigationItem.rightBarButtonItems = [NSMutableArray arrayWithObject:btn];
 }
 
@@ -527,7 +528,7 @@
     UMSocialMessageObject *messageObject = [UMSocialMessageObject messageObject];
     
     NSString *title = _txtShareWords.text;
-    NSString *text = [NSString stringWithFormat:@"%@ 的短视频", profile.nickName ? profile.nickName: profile.identifier];
+    NSString *text = [NSString stringWithFormat:NSLocalizedString(@"TCVideoPublish.WhoseAppFmt", nil), profile.nickName ? profile.nickName: profile.identifier];
     if ( [title length] == 0) title = text;
     
     NSString *url = [NSString stringWithFormat:@"%@?userid=%@&type=%@&fileid=%@&ts=%@&sdkappid=%@&acctype=%@",
@@ -565,21 +566,21 @@
         
         NSString *message = nil;
         if (!error) {
-            message = [NSString stringWithFormat:@"分享成功"];
+            message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareSucceeded", nil)];
         } else {
             if (error.code == UMSocialPlatformErrorType_Cancel) {
-                message = [NSString stringWithFormat:@"分享取消"];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareCanceled", nil)];
             } else if (error.code == UMSocialPlatformErrorType_NotInstall) {
-                message = [NSString stringWithFormat:@"应用未安装"];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.AppNotInstalled", nil)];
             } else {
-                message = [NSString stringWithFormat:@"分享失败，失败原因(Code＝%d)\n",(int)error.code];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareFailed", nil),(int)error.code];
             }
             
         }
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@""
                                                         message:message
                                                        delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"确定", nil)
+                                              cancelButtonTitle:NSLocalizedString(@"Common.OK", nil)
                                               otherButtonTitles:nil];
         [alert show];
     }];
@@ -589,7 +590,7 @@
 - (void)applicationWillEnterForeground:(NSNotification *)noti
 {
     //temporary fix bug
-    if ([self.navigationItem.title isEqualToString:@"发布中"])
+    if ([self.navigationItem.title isEqualToString:NSLocalizedString(@"TCVideoPublish.PublishingTitle", nil)])
         return;
     
     if (_isPublished == NO) {

@@ -34,6 +34,22 @@
     return self;
 }
 
+- (void)setSelectedIndex:(NSInteger)selectedIndex
+{
+    if (self.momentary) return;
+    if (selectedIndex < _selectViewList.count) {
+        _selectedIndex = selectedIndex;
+        for (UIImageView *view in _selectViewList) {
+            if (view.tag == selectedIndex) {
+                view.hidden = NO;
+            }else{
+                view.hidden = YES;
+            }
+        }
+    }
+
+}
+
 - (void)setEffectList:(NSArray<EffectInfo *> *)effecList
 {
     [self setEffectList:effecList momentary:NO];
@@ -46,18 +62,20 @@
     [_selectViewList removeAllObjects];
     CGFloat space = floorf(20 * kScaleX);
     CGFloat buttonSize = floorf(EFFCT_IMAGE_WIDTH);
+    
     for (int i = 0 ; i < effecList.count ; i ++){
+        EffectInfo *info = effecList[i];
         UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
         [btn setFrame:CGRectMake(space + (space + buttonSize) * i, 0, buttonSize, buttonSize)];
-        if (effecList[i].animateIcons) {
+        if (info.animateIcons) {
             UIImageView* animatedImageView = [[UIImageView alloc] initWithFrame:btn.bounds];
-            animatedImageView.animationImages = effecList[i].animateIcons;
-            if (effecList[i].isSlow) {
+            animatedImageView.animationImages = info.animateIcons;
+            if (info.isSlow) {
                 animatedImageView.animationDuration = 1.0 / 15 * effecList[i].animateIcons.count;
             }
             [animatedImageView startAnimating];
             [btn addSubview:animatedImageView];
-        }else{
+        } else {
             [btn setImage:effecList[i].icon forState:UIControlStateNormal];
         }
         btn.layer.cornerRadius = EFFCT_IMAGE_WIDTH / 2.0;
@@ -74,8 +92,10 @@
         selectView.tag = i;
         [_selectViewList addObject:selectView];
         
-        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(btn.x, btn.bottom + 8, btn.width, 12)];
+        UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(btn.x - space/2, btn.bottom + 8, btn.width+space, 12)];
         label.text = effecList[i].name;
+        label.adjustsFontSizeToFitWidth = YES;
+        label.minimumScaleFactor = 0.5;
         label.textColor = [UIColor whiteColor];
         label.textAlignment = NSTextAlignmentCenter;
         label.font = [UIFont systemFontOfSize:10];
@@ -95,7 +115,8 @@
 //开始按压
 -(void) beginPress: (UIButton *) button {
     CGFloat offset = _effectSelectView.contentOffset.x;
-    if (offset < 0 || offset > _effectSelectView.contentSize.width - _effectSelectView.bounds.size.width) {
+    CGFloat diff = _effectSelectView.contentSize.width - _effectSelectView.bounds.size.width;
+    if (offset < 0 ||  (diff > 0 && offset > diff)) {
         // 在回弹区域会触发button事件被cancel,导致收不到 TouchEnd 事件
         return;
     }
@@ -115,6 +136,8 @@
         [_selectViewList enumerateObjectsUsingBlock:^(UIImageView * obj, NSUInteger idx, BOOL * _Nonnull stop) {
             obj.hidden = YES;
         }];
+    } else {
+        _selectedIndex = button.tag;
     }
     [self.delegate onEffectBtnEndSelect:button];
 }

@@ -805,7 +805,7 @@
 // 本地保存 filePath --> session、filePath --> expireTime，filePath --> fileLastModTime, filePath --> resumeData 的映射集合，格式为json
 // "TVCMultipartResumeSessionKey": {filePath1: session1, filePath2: session2, filePath3: session3}
 // "TVCMultipartResumeExpireTimeKey": {filePath1: expireTime1, filePath2: expireTime2, filePath3: expireTime3}
-// session的过期时间是1天，参考文档：http://tapd.oa.com/VideoCloud_Vod/markdown_wikis/view/#1010095581005975321
+// session的过期时间是1天
 - (NSString *)getSessionFromFilepath:(TVCUploadContext *)uploadContext {
     NSString* filePath = uploadContext.uploadParam.videoPath;
     if (filePath == nil || filePath.length == 0) {

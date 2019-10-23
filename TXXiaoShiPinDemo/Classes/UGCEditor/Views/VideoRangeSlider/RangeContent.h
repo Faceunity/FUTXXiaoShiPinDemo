@@ -10,7 +10,7 @@
 #import "VideoRangeConst.h"
 
 
-/*用来辅僵定制外观*/
+/*用来辅助定制外观*/
 @interface RangeContentConfig : NSObject
 @property (nonatomic) NSInteger imageCount;
 @property (nonatomic) NSInteger pinWidth;

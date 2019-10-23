@@ -9,6 +9,9 @@
 #import "TCRegisterViewController.h"
 #import "UIView+CustomAutoLayout.h"
 #import "TCLoginModel.h"
+#import "TXWechatInfoView.h"
+
+#define L(X) NSLocalizedString((X), nil)
 
 @interface TCRegisterViewController ()
 
@@ -19,7 +22,7 @@
     UITextField    *_accountTextField;  // 用户名/手机号
     UITextField    *_pwdTextField;      // 密码/验证码
     UITextField    *_pwdTextField2;     // 确认密码（用户名注册）
-
+    TXWechatInfoView *_wechatInfoView;
     UIButton       *_regBtn;            // 注册
     UIView         *_lineView1;
     UIView         *_lineView2;
@@ -65,6 +68,8 @@
     _accountTextField.font = [UIFont systemFontOfSize:14];
     _accountTextField.textColor = [UIColor colorWithWhite:1 alpha:1];
     _accountTextField.returnKeyType = UIReturnKeyNext;
+    _accountTextField.adjustsFontSizeToFitWidth = YES;
+    _accountTextField.minimumFontSize = 9;
     _accountTextField.delegate = self;
     
     _pwdTextField = [[UITextField alloc] init];
@@ -77,10 +82,11 @@
     _pwdTextField2.font = [UIFont systemFontOfSize:14];
     _pwdTextField2.textColor = [UIColor colorWithWhite:1 alpha:1];
     _pwdTextField2.secureTextEntry = YES;
-    [_pwdTextField2 setPlaceholder:@"确认密码"];
+    [_pwdTextField2 setPlaceholder:NSLocalizedString(@"TCRegisterView.HintConfirmPassword", nil)];
     _pwdTextField2.returnKeyType = UIReturnKeyGo;
     _pwdTextField2.delegate = self;
     
+
     _lineView1 = [[UIView alloc] init];
     [_lineView1 setBackgroundColor:[UIColor whiteColor]];
     
@@ -90,24 +96,26 @@
     _lineView3 = [[UIView alloc] init];
     [_lineView3 setBackgroundColor:[UIColor whiteColor]];
     
-    
     _regBtn = [[UIButton alloc] init];
     _regBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-    [_regBtn setTitle:@"注册" forState:UIControlStateNormal];
+    [_regBtn setTitle:NSLocalizedString(@"TCRegisterView.DoRegister", nil) forState:UIControlStateNormal];
     [_regBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_regBtn setBackgroundImage:[UIImage imageNamed:@"button"] forState:UIControlStateNormal];
     [_regBtn setBackgroundImage:[UIImage imageNamed:@"button_pressed"] forState:UIControlStateSelected];
     [_regBtn addTarget:self action:@selector(reg:) forControlEvents:UIControlEventTouchUpInside];
     
-   
-    [self.view addSubview:_accountTextField];
+    TXWechatInfoView *infoView = [[TXWechatInfoView alloc] initWithFrame:CGRectMake(10, _regBtn.bottom+20, self.view.width - 20, 100)];
+    _wechatInfoView = infoView;
+
+        [self.view addSubview:_accountTextField];
     [self.view addSubview:_lineView1];
     [self.view addSubview:_pwdTextField];
     [self.view addSubview:_lineView2];
     [self.view addSubview:_pwdTextField2];
     [self.view addSubview:_lineView3];
     [self.view addSubview:_regBtn];
-    
+    [self.view addSubview:infoView];
+
     [self relayout];
 }
 
@@ -144,10 +152,12 @@
     [_regBtn layoutBelow:_lineView3 margin:36];
     [_regBtn alignParentLeftWithMargin:22];
     
-    [_accountTextField setPlaceholder:@"用户名以字母开头，支持字母、数字、下划线"];
+    _wechatInfoView.top = _regBtn.bottom + 30;
+    
+    [_accountTextField setPlaceholder:NSLocalizedString(@"TCRegisterView.PlaceholderUserName", nil)];
     [_accountTextField setText:@""];
     _accountTextField.keyboardType = UIKeyboardTypeDefault;
-    [_pwdTextField setPlaceholder:@"用户密码支持字母、数字、下划线"];
+    [_pwdTextField setPlaceholder:NSLocalizedString(@"TCRegisterView.PlaceholderPassword", nil)];
     [_pwdTextField setText:@""];
     [_pwdTextField2 setText:@""];
     _pwdTextField.secureTextEntry = YES;
@@ -172,19 +182,19 @@
     NSString *failedReason = nil;
     
     if (![loginModel validateUserName:userName failedReason:&failedReason]) {
-        [HUDHelper alertTitle:@"用户名错误" message:failedReason cancel:@"确定"];
+        [HUDHelper alertTitle:NSLocalizedString(@"TCLoginView.HintUserNameError", nil) message:failedReason cancel:NSLocalizedString(@"Common.OK", nil)];
         return;
     }
     
     NSString *pwd = _pwdTextField.text;
     if (![loginModel validatePassword:pwd failedReason:&failedReason]) {
-        [HUDHelper alertTitle:@"密码错误" message:failedReason cancel:@"确定"];
+        [HUDHelper alertTitle:NSLocalizedString(@"TCLoginView.ErrorPasswordWrong", nil) message:failedReason cancel:NSLocalizedString(@"Common.OK", nil)];
         return;
     }
    
     NSString *pwd2 = _pwdTextField2.text;
     if ([pwd compare:pwd2] != NSOrderedSame) {
-        [HUDHelper alertTitle:@"密码错误" message:@"两次密码不一致" cancel:@"确定"];
+        [HUDHelper alertTitle:NSLocalizedString(@"TCLoginView.ErrorPasswordWrong", nil) message:NSLocalizedString(@"TCRegisterView.ErrorPasswordConsistency", nil) cancel:NSLocalizedString(@"Common.OK", nil)];
         return;
     }
     
@@ -210,10 +220,10 @@
         [param setObject:@"register" forKey:@"action"];
         
         if (errCode == 612) {
-            [HUDHelper alertTitle:@"提示" message:@"用户ID已经被注册" cancel:@"确定"];
+            [HUDHelper alertTitle:NSLocalizedString(@"Common.Hint", nil) message:NSLocalizedString(@"TCRegisterView.ErrorUserNameRegistered", nil) cancel:NSLocalizedString(@"Common.OK", nil)];
             [TCUtil report:xiaoshipin_register userName:userName code:errCode msg:@"用户ID已经被注册"];
         }else{
-            [HUDHelper alertTitle:@"提示" message:[NSString stringWithFormat:@"错误码: %d", errCode] cancel:@"确定"];
+            [HUDHelper alertTitle:NSLocalizedString(@"Common.Hint", nil) message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCode", nil), errCode] cancel:NSLocalizedString(@"Common.OK", nil)];
             [TCUtil report:xiaoshipin_register userName:userName code:errCode msg:errMsg];
         }
     }];

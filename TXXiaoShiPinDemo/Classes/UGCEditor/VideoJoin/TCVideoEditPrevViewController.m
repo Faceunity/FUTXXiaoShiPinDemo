@@ -61,13 +61,13 @@ typedef  NS_ENUM(NSInteger,ActionType)
     _outFilePath = [documentsDirectory stringByAppendingPathComponent:@"output.mp4"];
 #endif
   
-    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:@"返回"
+    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Common.Back", nil)
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self
                                                                         action:@selector(goBack)];
     self.navigationItem.leftBarButtonItem = customBackButton;
     customBackButton.tintColor = UIColorFromRGB(0x0accac);
-    self.navigationItem.title = @"视频预览";
+    self.navigationItem.title = NSLocalizedString(@"TCVideoEditPrevView.TitleVideoPreview", nil);
     
     _actionType = -1;
 }
@@ -89,7 +89,7 @@ typedef  NS_ENUM(NSInteger,ActionType)
         
         _generationTitleLabel = [UILabel new];
         _generationTitleLabel.font = [UIFont systemFontOfSize:14];
-        _generationTitleLabel.text = @"视频合成中";
+        _generationTitleLabel.text = NSLocalizedString(@"TCVideoEditPrevView.VideoSynthesizing", nil);
         _generationTitleLabel.textColor = UIColor.whiteColor;
         _generationTitleLabel.textAlignment = NSTextAlignmentCenter;
         _generationTitleLabel.frame = CGRectMake(0, _generateProgressView.y - 34, _generationView.width, 14);
@@ -200,10 +200,10 @@ typedef  NS_ENUM(NSInteger,ActionType)
         _generationView.hidden = YES;
         [_ugcJoin cancelJoin];
         
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频合成失败"
-                                                            message:@"中途切后台导致,请重新合成"
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoEditPrevView.HintVideoSynthesizeFailed", nil)
+                                                            message:NSLocalizedString(@"TCVideoEditPrevView.ErrorSwitchBackend", nil)
                                                            delegate:self
-                                                  cancelButtonTitle:@"知道了"
+                                                  cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                   otherButtonTitles:nil, nil];
         [alertView show];
     }
@@ -224,10 +224,10 @@ typedef  NS_ENUM(NSInteger,ActionType)
     }else{
         [MBProgressHUD hideHUDForView:self.view animated:YES];
         
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频合成失败"
-                                                            message:[NSString stringWithFormat:@"错误码：%ld 错误信息：%@",(long)result.retCode,result.descMsg]
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoEditPrevView.HintVideoSynthesizeFailed", nil)
+                                                            message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCodeMessage", nil),(long)result.retCode,result.descMsg]
                                                            delegate:self
-                                                  cancelButtonTitle:@"知道了"
+                                                  cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                   otherButtonTitles:nil, nil];
         [alertView show];
     }

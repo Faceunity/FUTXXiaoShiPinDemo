@@ -23,6 +23,8 @@
 
 + (instancetype)shareInstance;
 
+- (void)loadFromLocal;
+
 - (void)saveToLocal;
 
 - (void)clearLocal;
@@ -30,5 +32,7 @@
 - (BOOL)isExpired;
 
 - (BOOL)isValid;
+
+- (NSDate *)expireDate;
 
 @end

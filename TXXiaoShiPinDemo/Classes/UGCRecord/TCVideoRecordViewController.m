@@ -1,8 +1,9 @@
 
 #import <Foundation/Foundation.h>
+#import <TXLiteAVSDK_UGC_IJK/TXLiteAVSDK.h>
 #import <AVFoundation/AVFoundation.h>
 #import <MediaPlayer/MPMediaPickerController.h>
-#import <TXLiteAVSDK_UGC_IJK/TXVideoEditer.h>
+#import "SDKHeader.h"
 #import "TCVideoRecordViewController.h"
 #import "TCVideoPublishController.h"
 #import "TCVideoEditViewController.h"
@@ -15,6 +16,9 @@
 #import "MBProgressHUD.h"
 #import "UIAlertView+BlocksKit.h"
 #import "SDKHeader.h"
+#import "SoundMixView.h"
+#import "Label.h"
+#import <Masonry/Masonry.h>
 
 #define BUTTON_RECORD_SIZE          75
 #define BUTTON_CONTROL_SIZE         40
@@ -26,6 +30,10 @@
 #define BUTTON_SPEED_CHANGE_WIDTH   50
 #define BUTTON_SPEED_CHANGE_HEIGHT  34
 
+
+
+#import "FUManager.h"
+#import <FUAPIDemoBar/FUAPIDemoBar.h>
 
 typedef NS_ENUM(NSInteger,SpeedMode)
 {
@@ -42,6 +50,13 @@ typedef NS_ENUM(NSInteger,RecordType)
     RecordType_Chorus,
 };
 
+typedef NS_ENUM(NSInteger,CaptureMode)
+{
+    CaptureModeStill,
+    CaptureModeTap,
+    CaptureModePress
+};
+
 @implementation RecordMusicInfo
 @end
 
@@ -49,20 +64,12 @@ typedef NS_ENUM(NSInteger,RecordType)
 #import "MCCameraDynamicView.h"
 #import "MaterialManager.h"
 #import "MCTip.h"
-
-
-#import "FUManager.h"
-#import <FUAPIDemoBar/FUAPIDemoBar.h>
-
-
-@interface TCVideoRecordViewController () <MCCameraDynamicDelegate,VideoRecordMusicViewDelegate,BeautySettingPanelDelegate,BeautyLoadPituDelegate,
-
-TXVideoCustomProcessDelegate>
+@interface TCVideoRecordViewController () <MCCameraDynamicDelegate,VideoRecordMusicViewDelegate,BeautySettingPanelDelegate,BeautyLoadPituDelegate, SoundMixViewDelegate>
 
 @end
 #endif
 
-@interface TCVideoRecordViewController()<TXUGCRecordListener,V8HorizontalPickerViewDelegate,V8HorizontalPickerViewDataSource,MPMediaPickerControllerDelegate,TCBGMControllerListener,TXVideoJoinerListener>
+@interface TCVideoRecordViewController()<TXUGCRecordListener,V8HorizontalPickerViewDelegate,V8HorizontalPickerViewDataSource,MPMediaPickerControllerDelegate,TCBGMControllerListener,TXVideoJoinerListener, TXVideoCustomProcessDelegate, FUAPIDemoBarDelegate>
 {
     BOOL                            _cameraFront;
     BOOL                            _lampOpened;
@@ -78,37 +85,17 @@ TXVideoCustomProcessDelegate>
     BOOL                            _videoRecording;
     UIView *                        _videoRecordView;
     UIView *                        _videoPlayView;
-    UIButton *                      _btnStartRecord;
-    UIButton *                      _btnCamera;
-    UIButton *                      _btnLamp;
-    UIButton *                      _btnBeauty;
-    UILabel *                       _recordTimeLabel;
+    UIButton *                      _btnTorch;
     CGFloat                         _currentRecordTime;
     
-    UIView *                        _beautyPage;
-    UIView *                        _filterPage;
-    UIView *                        _speedView;
     
-    UIButton *                      _btnNext;
     UIButton *                      _btnRatio;
-    UIButton *                      _btnRatio43;
-    UIButton *                      _btnRatio11;
-    UIButton *                      _btnRatio169;
-    UILabel  *                      _labelRatio43;
-    UILabel  *                      _labelRatio11;
-    UILabel  *                      _labelRatio169;
-    UIButton *                      _btnMusic;
-    UIButton *                      _btnFlash;
-    UIButton *                      _btnDelete;
-    UIButton *                      _beautyBtn;
-    UIButton *                      _filterBtn;
-    UIButton *                      _speedChangeBtn;
     
-    UISlider*                       _sdBeauty;
-    UISlider*                       _sdWhitening;
     V8HorizontalPickerView *        _filterPickerView;
     NSMutableArray *                _filterArray;
     NSInteger                       _filterIndex;
+    
+    SoundMixView  *_soundMixView;
     
     BOOL                            _navigationBarHidden;
     BOOL                            _statusBarHidden;
@@ -116,48 +103,41 @@ TXVideoCustomProcessDelegate>
     BOOL                            _isPaused;
     
     UIButton              *_motionBtn;
+    UIButton              * __weak * _ratioMenuButtonIvarPtr;
+    
+    // 倒计时
+    UILabel *_countDownLabel;
+    UIView *_countDownView;
+    NSTimer *_countDownTimer;
+    
 #if POD_PITU
     MCCameraDynamicView   *_tmplBar;
     NSString              *_materialID;
 #else
     UIView                *_tmplBar;
 #endif
-    UIButton              *_greenBtn;
     V8HorizontalPickerView  *_greenPickerView;
     NSMutableArray *_greenArray;
     
     TCBGMListViewController*        _bgmListVC;
+    UIButton *_speedChangeBtn;
     
-    UILabel               *_beautyLabel;
-    UILabel               *_whiteLabel;
-    UILabel               *_bigEyeLabel;
-    UILabel               *_slimFaceLabel;
-    
-    UISlider              *_sdBigEye;
-    UISlider              *_sdSlimFace;
-    
-    int    _filterType;
     NSInteger    _greenIndex;;
     
     float  _eye_level;
     float  _face_level;
     
-    CGRect                    _btnRatioFrame;
-    UIView *                  _mask_buttom;
     NSMutableArray *          _speedBtnList;
-    NSInteger                 _speedBtnSelectTag;
     NSObject*                 _BGMPath;
     CGFloat                   _BGMDuration;
     CGFloat                   _recordTime;
-
+    
     int                       _deleteCount;
     float                     _zoom;
     BOOL                      _isBackDelete;
     BOOL                      _isFlash;
     
-    TXVideoAspectRatio        _videoRatio;
     TCVideoRecordMusicView *  _musicView;
-    TCVideoRecordProcessView* _progressView;
     TXVideoAspectRatio        _aspectRatio;
     SpeedMode                 _speedMode;
     
@@ -171,8 +151,46 @@ TXVideoCustomProcessDelegate>
     RecordType                _recordType;
     NSString *                _recordVideoPath;
     NSString *                _joinVideoPath;
+    
+    TXVideoVoiceChangerType   _voiceChangeType; // 变声参数
+    NSInteger                 _soundMixChangeType; // 混音参数
 }
+@property (weak, nonatomic) IBOutlet UILabel *stillModeLabel;
+@property (weak, nonatomic) IBOutlet UILabel *tapModeLabel;
+@property (weak, nonatomic) IBOutlet UILabel *pressModeLabel;
 
+@property (weak, nonatomic) IBOutlet Label *recordTimeLabel;
+
+@property (weak, nonatomic) IBOutlet UIButton *btnNext;
+@property (weak, nonatomic) IBOutlet UIButton *btnMusic;
+
+@property (weak, nonatomic) IBOutlet UIButton *btnRatio169;
+@property (weak, nonatomic) IBOutlet UIButton *btnRatio43;
+@property (weak, nonatomic) IBOutlet UIButton *btnRatio11;
+@property (weak, nonatomic) IBOutlet UIButton *btnRatioMenu;
+
+@property (weak, nonatomic) IBOutlet UIButton *btnBeauty;
+@property (weak, nonatomic) IBOutlet UIButton *btnAudioMix;
+@property (weak, nonatomic) IBOutlet UIButton *btnCountDown;
+
+@property (weak, nonatomic) IBOutlet UIButton *btnStartRecord;
+@property (weak, nonatomic) IBOutlet UIButton *btnFlash;
+@property (weak, nonatomic) IBOutlet UIButton *btnCamera;
+@property (weak, nonatomic) IBOutlet UIButton *btnDelete;
+@property (weak, nonatomic) IBOutlet UIButton *beautyBtn;
+@property (weak, nonatomic) IBOutlet UIButton *filterBtn;
+
+@property (weak, nonatomic) IBOutlet UIView *speedView;
+@property (weak, nonatomic) IBOutlet UIView *captureModeView;
+
+@property (weak, nonatomic) IBOutlet UIView *bottomMask;
+@property (weak, nonatomic) IBOutlet TCVideoRecordProcessView *progressView;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *bottomMaskHeight;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *centerConstraint;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *speedViewHeight;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *ratioTopConstraint;
+
+@property (assign, nonatomic) CaptureMode captureMode;
 
 @property (nonatomic, strong) FUAPIDemoBar *demoBar ;
 @end
@@ -195,28 +213,33 @@ TXVideoCustomProcessDelegate>
         
         _cameraPreviewing = NO;
         _videoRecording = NO;
-
-        _currentRecordTime = 0;
-        _sampleRate = AUDIO_SAMPLERATE_44100;
         
+        _currentRecordTime = 0;
+        _sampleRate = AUDIO_SAMPLERATE_48000;
+        
+        _speedMode = SpeedMode_Standard;
+        
+        _voiceChangeType = -1; // 无变声
+        _soundMixChangeType = -1; // 无混音效果
+
         _greenArray = [NSMutableArray new];
         [_greenArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"无";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label1", nil);
             v.file = nil;
             v.face = [UIImage imageNamed:@"greens_no"];
             v;
         })];
         [_greenArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"卡通";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label2", nil);
             v.file = [[NSBundle mainBundle] URLForResource:@"goodluck" withExtension:@"mp4"];;
             v.face = [UIImage imageNamed:@"greens_1"];
             v;
         })];
         [_greenArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"DJ";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label3", nil);
             v.file = [[NSBundle mainBundle] URLForResource:@"2gei_5" withExtension:@"mp4"];
             v.face = [UIImage imageNamed:@"greens_2"];
             v;
@@ -226,74 +249,126 @@ TXVideoCustomProcessDelegate>
         _filterArray = [NSMutableArray new];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"原图";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label4", nil);
             v.face = [UIImage imageNamed:@"orginal"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label5", nil);
+            v.face = [UIImage imageNamed:@"biaozhun"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label6", nil);
+            v.face = [UIImage imageNamed:@"yinghong"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label7", nil);
+            v.face = [UIImage imageNamed:@"yunshang"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label8", nil);
+            v.face = [UIImage imageNamed:@"chunzhen"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label9", nil);
+            v.face = [UIImage imageNamed:@"bailan"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label10", nil);
+            v.face = [UIImage imageNamed:@"yuanqi"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label11", nil);
+            v.face = [UIImage imageNamed:@"chaotuo"];
+            v;
+        })];
+        [_filterArray addObject:({
+            V8LabelNode *v = [V8LabelNode new];
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label12", nil);
+            v.face = [UIImage imageNamed:@"xiangfen"];
             v;
         })];
         
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"美白";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label13", nil);
             v.face = [UIImage imageNamed:@"fwhite"];
             v;
         })];
         
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"浪漫";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label14", nil);
             v.face = [UIImage imageNamed:@"langman"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"清新";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label15", nil);
             v.face = [UIImage imageNamed:@"qingxin"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"唯美";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label16", nil);
             v.face = [UIImage imageNamed:@"weimei"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"粉嫩";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label17", nil);
             v.face = [UIImage imageNamed:@"fennen"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"怀旧";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label18", nil);
             v.face = [UIImage imageNamed:@"huaijiu"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"蓝调";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label19", nil);
             v.face = [UIImage imageNamed:@"landiao"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"清凉";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label20", nil);
             v.face = [UIImage imageNamed:@"qingliang"];
             v;
         })];
         [_filterArray addObject:({
             V8LabelNode *v = [V8LabelNode new];
-            v.title = @"日系";
+            v.title = NSLocalizedString(@"TCVideoRecordView.V8Label21", nil);
             v.face = [UIImage imageNamed:@"rixi"];
             v;
         })];
-
-        _videoRatio = VIDEO_ASPECT_RATIO_9_16;
+        
+        _aspectRatio = VIDEO_ASPECT_RATIO_9_16;
         [TXUGCRecord shareInstance].recordDelegate = self;
         
         _bgmListVC = [[TCBGMListViewController alloc] init];
         [_bgmListVC setBGMControllerListener:self];
         _recordVideoPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"outputRecord.mp4"];
         _joinVideoPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"outputJoin.mp4"];
+        
+        self.captureMode = CaptureModeTap;
+        
+        NSLog(@"--- tx sdk version: %@", [TXLiveBase getSDKVersionStr]);
     }
     return self;
 }
@@ -305,20 +380,18 @@ TXVideoCustomProcessDelegate>
 
 - (void)dealloc
 {
-    
     [[FUManager shareManager] destoryItems];
     
-    [[TXUGCRecord shareInstance].partsManager deleteAllParts];
-    [[TXUGCRecord shareInstance] stopCameraPreview];
-    [TCUtil removeCacheFile:_videoPath];
-    [TCUtil removeCacheFile:_recordVideoPath];
-    [TCUtil removeCacheFile:_joinVideoPath];
+    [self uinit];
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
-
 -(void)viewDidLoad
 {
     [super viewDidLoad];
+    if (@available(iOS 11, *)) {
+        self.bottomMaskHeight.constant += [UIApplication sharedApplication].keyWindow.safeAreaInsets.bottom;
+    }
+    _ratioMenuButtonIvarPtr = &_btnRatio169;
     [self initUI];
     [self initBeautyUI];
     
@@ -332,9 +405,11 @@ TXVideoCustomProcessDelegate>
     
     [[TXUGCRecord shareInstance] setVideoProcessDelegate:self];
     
+    /**       FaceUnity       **/
     [[FUManager shareManager] loadItems];
     [self.view addSubview:self.demoBar];
 }
+
 
 - (GLuint)onPreProcessTexture:(GLuint)texture width:(CGFloat)width height:(CGFloat)height {
     
@@ -345,7 +420,7 @@ TXVideoCustomProcessDelegate>
 -(FUAPIDemoBar *)demoBar {
     if (!_demoBar) {
         
-        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 164 - 200, self.view.frame.size.width, 164)];
+        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height - 164 - 200, [UIScreen mainScreen].bounds.size.width, 164)];
         
         _demoBar.itemsDataSource = [FUManager shareManager].itemsDataSource;
         _demoBar.selectedItem = [FUManager shareManager].selectedItem ;
@@ -411,15 +486,6 @@ TXVideoCustomProcessDelegate>
 
 
 
-
-
-
-
-
-
-
-
-
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     
@@ -431,9 +497,15 @@ TXVideoCustomProcessDelegate>
     if (_cameraPreviewing == NO) {
         [self startCameraPreview];
     }else{
-        [[TXUGCRecord shareInstance] resumeAudioSession];
         //停止特效的声音
         [[TXUGCRecord shareInstance] setMotionMute:NO];
+    }
+    // 恢复变声与混音效果
+    if (_voiceChangeType >= 0) {
+        [[TXUGCRecord shareInstance] setVoiceChangerType:_voiceChangeType];
+    }
+    if (_soundMixChangeType >= 0) {
+        [[TXUGCRecord shareInstance] setReverbType:_soundMixChangeType];
     }
 }
 
@@ -445,6 +517,7 @@ TXVideoCustomProcessDelegate>
     [[UIApplication sharedApplication]setStatusBarHidden:_statusBarHidden];
 }
 
+#pragma mark - Notification Handler
 -(void)onAudioSessionEvent:(NSNotification*)notification
 {
     NSDictionary *info = notification.userInfo;
@@ -470,39 +543,11 @@ TXVideoCustomProcessDelegate>
     _appForeground = NO;
     if (!_isPaused && _videoRecording)
         [self onBtnRecordStartClicked];
-
 }
 
 - (void)onAppWillEnterForeground:(UIApplication*)app
 {
     _appForeground = YES;
-}
-
--(void)onBtnPopClicked
-{
-    NSArray *videoPaths = [[TXUGCRecord shareInstance].partsManager getVideoPathList];
-    if (videoPaths.count > 0) {
-        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"您确定要退出当前录制 ? 退出录制后，当前录制的片段会被删除" message:nil cancelButtonTitle:@"取消" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
-            if (buttonIndex == 1) {
-                [[TXUGCRecord shareInstance].partsManager deleteAllParts];
-                [self stopCameraPreview];
-                if (_recordType == RecordType_Normal) {
-                    [self dismissViewControllerAnimated:YES completion:nil];
-                }else{
-                    [self.navigationController popViewControllerAnimated:YES];
-                }
-            }
-        }];
-        [alert show];
-    }else{
-        [self stopCameraPreview];
-        [self stopVideoRecord];
-        if (_recordType == RecordType_Normal) {
-            [self dismissViewControllerAnimated:YES completion:nil];
-        }else{
-            [self.navigationController popViewControllerAnimated:YES];
-        }
-    }
 }
 
 - (void)handlePinch:(UIPinchGestureRecognizer*)recognizer
@@ -520,18 +565,73 @@ TXVideoCustomProcessDelegate>
 {
     self.title = @"";
     self.view.backgroundColor = UIColor.blackColor;
+    [_btnNext setTitle:NSLocalizedString(@"Common.Next", nil)
+              forState:UIControlStateNormal];
+    [_btnMusic setTitle:NSLocalizedString(@"TCVideoRecordView.BeautyLabelMusic", nil)
+               forState:UIControlStateNormal];
+    [_btnBeauty setTitle:NSLocalizedString(@"TCVideoRecordView.BeautyLabelBeauty", nil)
+                forState:UIControlStateNormal];    
+    [_btnAudioMix setTitle:NSLocalizedString(@"TCVideoRecordView.AudioMix", nil)
+                  forState:UIControlStateNormal];
+    [_btnCountDown setTitle:NSLocalizedString(@"TCVideoRecordView.CountDown", nil)
+                   forState:UIControlStateNormal];
+    _stillModeLabel.text = NSLocalizedString(@"TCVideoRecordView.StillPhoto",nil);
+    _tapModeLabel.text = NSLocalizedString(@"TCVideoRecordView.TapCapture", nil);
+    _pressModeLabel.text = NSLocalizedString(@"TCVideoRecordView.PressCapture", nil);
     
-    _videoPlayView = [UIView new];
-    _videoPlayView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:_videoPlayView];
+    self.recordTimeLabel.backgroundColor = [UIColor colorWithWhite:0 alpha:0.8];
+    self.recordTimeLabel.edgeInsets = UIEdgeInsetsMake(2, 8, 2, 8);
+    self.recordTimeLabel.layer.cornerRadius  = self.recordTimeLabel.height / 2;
+    self.recordTimeLabel.layer.masksToBounds = YES;
     
     _videoRecordView = [UIView new];
     _videoRecordView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
-    [self.view addSubview:_videoRecordView];
+    [self.view insertSubview:_videoRecordView atIndex:0];
     
     if (_videoPath) {
-        _videoRecordView.frame = CGRectMake(0, 0, self.view.width / 2, self.view.height);
-        _videoPlayView.frame = CGRectMake(self.view.width / 2, 0, self.view.width / 2, self.view.height);
+        // 合唱
+        self.speedView.hidden = YES;
+        self.speedViewHeight.constant = 1;
+        
+        self.stillModeLabel.hidden = YES;
+        self.progressView.minimumTimeTipHidden = YES;
+        self.btnRatioMenu.hidden = YES;
+        for (UIButton *button in @[self.btnRatio11, self.btnRatio43, self.btnRatio169]) {
+            [button removeFromSuperview];
+        }
+        [self.btnMusic removeFromSuperview];
+        [self.btnAudioMix removeFromSuperview];
+        
+        [self.btnBeauty mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.top.equalTo(self.btnNext.mas_bottom).offset(38);
+            make.right.equalTo(self.view).offset(-16);
+        }];
+        [self.btnCountDown mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.centerX.equalTo(self.btnBeauty);
+            make.top.equalTo(self.btnBeauty.mas_bottom).offset(30);
+        }];
+        
+        
+        _videoPlayView = [[UIView alloc] initWithFrame:CGRectZero];
+        _videoPlayView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        [self.view insertSubview:_videoPlayView atIndex:0];
+        
+        [_videoPlayView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(self.view).dividedBy(2);
+            make.height.equalTo(self.view).dividedBy(2);
+            make.right.equalTo(self.view.mas_right);
+            make.bottom.equalTo(self.bottomMask.mas_top).offset(30);
+        }];
+        
+        [_videoRecordView mas_remakeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(self.view).dividedBy(2);
+            make.height.equalTo(self.view).dividedBy(2);
+            make.left.equalTo(self.view.mas_left);
+            make.bottom.equalTo(self.bottomMask.mas_top).offset(30);
+        }];
+        
+        _videoRecordView.translatesAutoresizingMaskIntoConstraints = NO;
+        _videoPlayView.translatesAutoresizingMaskIntoConstraints = NO;
         
         TXVideoInfo *info = [TXVideoInfoReader getVideoInfo:_videoPath];
         CGFloat duration = info.duration;
@@ -561,7 +661,9 @@ TXVideoCustomProcessDelegate>
         //用于模仿视频和录制视频的合成
         _videoJoiner = [[TXVideoJoiner alloc] initWithPreview:nil];
         _videoJoiner.joinerDelegate = self;
+        [self.view layoutIfNeeded];
     }else{
+        self.btnCountDown.hidden = YES;
         _videoRecordView.frame = self.view.bounds;
         MAX_RECORD_TIME = 16;
         MIN_RECORD_TIME = 2;
@@ -571,193 +673,56 @@ TXVideoCustomProcessDelegate>
     UIPinchGestureRecognizer* pinchGensture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinch:)];
     [_videoRecordView addGestureRecognizer:pinchGensture];
     
-    UIButton *btnPop = [UIButton buttonWithType:UIButtonTypeCustom];
-    btnPop.bounds = CGRectMake(0, 0, BUTTON_CONTROL_SIZE, BUTTON_CONTROL_SIZE);
-    btnPop.center = CGPointMake(7 + BUTTON_CONTROL_SIZE / 2, 20 + BUTTON_CONTROL_SIZE / 2);
-    [btnPop setImage:[UIImage imageNamed:@"back"] forState:UIControlStateNormal];
-    [btnPop addTarget:self action:@selector(onBtnPopClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:btnPop];
-    
-    CGFloat btnNextWidth = 70;
-    CGFloat btnNextHeight = 30;
-    _btnNext = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnNext.bounds = CGRectMake(0, 0, btnNextWidth, btnNextHeight);
-    _btnNext.center = CGPointMake(self.view.right - 15 - btnNextWidth / 2, 20 + btnNextHeight / 2);
-    [_btnNext setTitle:@"下一步" forState:UIControlStateNormal];
-    _btnNext.titleLabel.font = [UIFont systemFontOfSize:14];
-    [_btnNext setBackgroundImage:[UIImage imageNamed:@"next_normal"] forState:UIControlStateNormal];
-    [_btnNext setBackgroundImage:[UIImage imageNamed:@"next_press"] forState:UIControlStateHighlighted];
-    [_btnNext addTarget:self action:@selector(onBtnDoneClicked) forControlEvents:UIControlEventTouchUpInside];
     _btnNext.enabled = NO;
-    [self.view addSubview:_btnNext];
     
-    //BGM
-    CGFloat btnMusicSize = 44;
-    _btnMusic = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnMusic.bounds = CGRectMake(0, 0, btnMusicSize, btnMusicSize);
-    _btnMusic.center = CGPointMake(self.view.right - 9 - btnMusicSize / 2, _btnNext.bottom + 44 + btnMusicSize / 2);
-    [_btnMusic setImage:[UIImage imageNamed:@"backMusic"] forState:UIControlStateNormal];
-//    [_btnMusic setImage:[UIImage imageNamed:@"backMusic_hover"] forState:UIControlStateHighlighted];
-    [_btnMusic addTarget:self action:@selector(onBtnMusicClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btnMusic];
     
-    UILabel *musicLabel = [[UILabel alloc] initWithFrame:CGRectMake(_btnMusic.x, _btnMusic.bottom + 4, btnMusicSize, 14)];
-    musicLabel.text = @"音乐";
-    musicLabel.textColor = UIColorFromRGB(0xffffffff);
-    musicLabel.font = [UIFont systemFontOfSize:10];
-    musicLabel.textAlignment = NSTextAlignmentCenter;
-    [self.view addSubview:musicLabel];
     
-    //
-    _btnRatio169 = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnRatio169.frame = CGRectOffset(_btnMusic.frame, 0, 44 + btnMusicSize);
-    [_btnRatio169 setImage:[UIImage imageNamed:@"169"] forState:UIControlStateNormal];
-    [_btnRatio169 setImage:[UIImage imageNamed:@"169_hover"] forState:UIControlStateHighlighted];
-    [_btnRatio169 addTarget:self action:@selector(onBtnRatioClicked:) forControlEvents:UIControlEventTouchUpInside];
     _btnRatio169.tag = VIDEO_ASPECT_RATIO_9_16;
-    _btnRatio169.hidden = NO;
+    _btnRatio11.tag  = VIDEO_ASPECT_RATIO_1_1;
+    _btnRatio43.tag  = VIDEO_ASPECT_RATIO_3_4;
     _btnRatio169.enabled = _recordType == RecordType_Normal;
-    [self.view addSubview:_btnRatio169];
-    _btnRatioFrame = _btnRatio169.frame;
     
-    _labelRatio169 = [[UILabel alloc] initWithFrame:CGRectMake(_btnRatio169.x, _btnRatio169.bottom + 4, btnMusicSize, 14)];
-    _labelRatio169.text = @"16:9";
-    _labelRatio169.textColor = UIColorFromRGB(0xffffffff);
-    _labelRatio169.font = [UIFont systemFontOfSize:10];
-    _labelRatio169.textAlignment = NSTextAlignmentCenter;
-    _labelRatio169.enabled = _recordType == RecordType_Normal;
-    [self.view addSubview:_labelRatio169];
-    
-    _btnRatio11 = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnRatio11.frame = CGRectOffset(_btnRatioFrame, -(30 + BUTTON_CONTROL_SIZE), 0);
-    [_btnRatio11 setImage:[UIImage imageNamed:@"11"] forState:UIControlStateNormal];
-    [_btnRatio11 setImage:[UIImage imageNamed:@"11_hover"] forState:UIControlStateHighlighted];
-    [_btnRatio11 addTarget:self action:@selector(onBtnRatioClicked:) forControlEvents:UIControlEventTouchUpInside];
-    _btnRatio11.tag = VIDEO_ASPECT_RATIO_1_1;
-    _btnRatio11.hidden = YES;
-    _btnRatio11.enabled = _recordType == RecordType_Normal;
-    [self.view addSubview:_btnRatio11];
-    
-    _labelRatio11 = [[UILabel alloc] initWithFrame:CGRectMake(_btnRatio11.x, _btnRatio11.bottom + 4, btnMusicSize, 14)];
-    _labelRatio11.text = @"1:1";
-    _labelRatio11.textColor = UIColorFromRGB(0xffffffff);
-    _labelRatio11.font = [UIFont systemFontOfSize:10];
-    _labelRatio11.textAlignment = NSTextAlignmentCenter;
-    _labelRatio11.hidden = YES;
-    [self.view addSubview:_labelRatio11];
-    
-    _btnRatio43 = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnRatio43.frame = CGRectOffset(_btnRatio11.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-    [_btnRatio43 setImage:[UIImage imageNamed:@"43"] forState:UIControlStateNormal];
-    [_btnRatio43 setImage:[UIImage imageNamed:@"43_hover"] forState:UIControlStateHighlighted];
-    [_btnRatio43 addTarget:self action:@selector(onBtnRatioClicked:) forControlEvents:UIControlEventTouchUpInside];
-    _btnRatio43.tag = VIDEO_ASPECT_RATIO_3_4;
-    _btnRatio43.hidden = YES;
-    [self.view addSubview:_btnRatio43];
-    
-    _labelRatio43 = [[UILabel alloc] initWithFrame:CGRectMake(_btnRatio43.x, _btnRatio43.bottom + 4, btnMusicSize, 14)];
-    _labelRatio43.text = @"4:3";
-    _labelRatio43.textColor = UIColorFromRGB(0xffffffff);
-    _labelRatio43.font = [UIFont systemFontOfSize:10];
-    _labelRatio43.textAlignment = NSTextAlignmentCenter;
-    _labelRatio43.hidden = YES;
-    [self.view addSubview:_labelRatio43];
-    
-    _btnBeauty = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnBeauty.frame = CGRectOffset(_btnRatio169.frame, 0, 44 + btnMusicSize);
-    [_btnBeauty setImage:[UIImage imageNamed:@"beauty_record"] forState:UIControlStateNormal];
-    [_btnBeauty setImage:[UIImage imageNamed:@"beauty_hover"] forState:UIControlStateHighlighted];
-    [_btnBeauty addTarget:self action:@selector(onBtnBeautyClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btnBeauty];
-    
-    UILabel *beautyLabel = [[UILabel alloc] initWithFrame:CGRectMake(_btnBeauty.x, _btnBeauty.bottom + 10, BUTTON_CONTROL_SIZE, 11)];
-    beautyLabel.text = @"美颜";
-    beautyLabel.textColor = UIColorFromRGB(0xffffffff);
-    beautyLabel.font = [UIFont systemFontOfSize:12];
-    beautyLabel.textAlignment = NSTextAlignmentCenter;
-    [self.view addSubview:beautyLabel];
     
     _musicView = [[TCVideoRecordMusicView alloc] initWithFrame:CGRectMake(0, self.view.bottom - 330 * kScaleY, self.view.width, 330 * kScaleY) needEffect:YES];
     _musicView.delegate = self;
     _musicView.hidden = YES;
     [self.view addSubview:_musicView];
+    _musicView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     
-    _mask_buttom = [[UIView alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - BUTTON_MASK_HEIGHT, self.view.frame.size.width, BUTTON_MASK_HEIGHT)];
-    [_mask_buttom setBackgroundColor:UIColorFromRGB(0x000000)];
-    [_mask_buttom setAlpha:0.3];
-    [self.view addSubview:_mask_buttom];
+    _soundMixView = [SoundMixView instantiateFromNib];
+    _soundMixView.delegate = self;
+    _soundMixView.width = self.view.width;
+    _soundMixView.top = self.view.height - _soundMixView.height; 
+    //    _soundMixView = [[SoundMixView alloc] initWithFrame:_musicView.frame];
+    [self.view addSubview:_soundMixView];
+    _soundMixView.hidden = YES;
+    _soundMixView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     
-    CGFloat recordBtnSize = 82;
-    _btnStartRecord = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, recordBtnSize, recordBtnSize)];
-    _btnStartRecord.center = CGPointMake(self.view.frame.size.width / 2, self.view.height - recordBtnSize / 2 - 20);
-    [_btnStartRecord setImage:[UIImage imageNamed:@"start_record"] forState:UIControlStateNormal];
-    [_btnStartRecord setBackgroundImage:[UIImage imageNamed:@"start_ring"] forState:UIControlStateNormal];
-    [_btnStartRecord addTarget:self action:@selector(onBtnStartRecord) forControlEvents:UIControlEventTouchDown];
-    [_btnStartRecord addTarget:self action:@selector(onBtnStopRecord) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside];
-    [self.view addSubview:_btnStartRecord];
-    
-    CGFloat btnStartSpace = (_btnStartRecord.left - BUTTON_CONTROL_SIZE * 2) / 3.0;
-    _btnFlash = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnFlash.bounds = CGRectMake(0, 0, BUTTON_CONTROL_SIZE, BUTTON_CONTROL_SIZE);
-    _btnFlash.center = CGPointMake(btnStartSpace + BUTTON_CONTROL_SIZE / 2, _btnStartRecord.center.y);
     if (_cameraFront) {
-        [_btnFlash setImage:[UIImage imageNamed:@"openFlash_disable"] forState:UIControlStateNormal];
         _btnFlash.enabled = NO;
     }else{
-        [_btnFlash setImage:[UIImage imageNamed:@"closeFlash"] forState:UIControlStateNormal];
-        [_btnFlash setImage:[UIImage imageNamed:@"closeFlash_hover"] forState:UIControlStateHighlighted];
         _btnFlash.enabled = YES;
     }
-    [_btnFlash addTarget:self action:@selector(onBtnFlashClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btnFlash];
     
-    _btnCamera = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnCamera.bounds = CGRectMake(0, 0, BUTTON_CONTROL_SIZE, BUTTON_CONTROL_SIZE);
-    _btnCamera.center = CGPointMake(_btnFlash.right + btnStartSpace + BUTTON_CONTROL_SIZE / 2, _btnStartRecord.center.y);
-    [_btnCamera setImage:[UIImage imageNamed:@"camera_record"] forState:UIControlStateNormal];
-    [_btnCamera setImage:[UIImage imageNamed:@"camera_hover"] forState:UIControlStateHighlighted];
-    [_btnCamera addTarget:self action:@selector(onBtnCameraClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btnCamera];
-    
-    _btnDelete = [UIButton buttonWithType:UIButtonTypeCustom];
-    _btnDelete.bounds = CGRectMake(0, 0, BUTTON_CONTROL_SIZE, BUTTON_CONTROL_SIZE);
-    _btnDelete.center = CGPointMake(_btnStartRecord.right + (self.view.width - _btnStartRecord.right) / 2, _btnStartRecord.center.y);
-    [_btnDelete setImage:[UIImage imageNamed:@"backDelete"] forState:UIControlStateNormal];
-    [_btnDelete setImage:[UIImage imageNamed:@"backDelete_hover"] forState:UIControlStateHighlighted];
-    [_btnDelete addTarget:self action:@selector(onBtnDeleteClicked) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_btnDelete];
-    
-    _progressView = [[TCVideoRecordProcessView alloc] initWithFrame:CGRectMake(0,_mask_buttom.y - BUTTON_PROGRESS_HEIGHT + 0.5, self.view.frame.size.width, BUTTON_PROGRESS_HEIGHT)];
-    _progressView.backgroundColor = [UIColor blackColor];
-    _progressView.alpha = 0.4;
-    [self.view addSubview:_progressView];
-    
-    _recordTimeLabel = [[UILabel alloc]init];
-    _recordTimeLabel.frame = CGRectMake(0, 0, 100, 100);
     [_recordTimeLabel setText:@"00:00"];
-    _recordTimeLabel.font = [UIFont systemFontOfSize:10];
-    _recordTimeLabel.textColor = [UIColor whiteColor];
-    _recordTimeLabel.textAlignment = NSTextAlignmentLeft;
-    [_recordTimeLabel sizeToFit];
-    _recordTimeLabel.center = CGPointMake(CGRectGetMaxX(_progressView.frame) - _recordTimeLabel.frame.size.width / 2, _progressView.frame.origin.y - _recordTimeLabel.frame.size.height);
-    [self.view addSubview:_recordTimeLabel];
     
-    [self createSpeedView];
-    
-    switch (_videoRatio) {
-        case VIDEO_ASPECT_RATIO_3_4:
-            [self onBtnRatioClicked:_btnRatio43];
-            break;
-        case VIDEO_ASPECT_RATIO_1_1:
-            [self onBtnRatioClicked:_btnRatio11];
-            break;
-        case VIDEO_ASPECT_RATIO_9_16:
-            [self onBtnRatioClicked:_btnRatio169];
-            break;
-            
-        default:
-            break;
-    }
+    [self configSpeedView];
+    UIPanGestureRecognizer* panGensture = [[UIPanGestureRecognizer alloc] initWithTarget:self action: @selector (handlePanSlide:)];
+    [self.view addGestureRecognizer:panGensture];
+    //    switch (_videoRatio) {
+    //        case VIDEO_ASPECT_RATIO_3_4:
+    //            [self onBtnRatioClicked:_btnRatio43];
+    //            break;
+    //        case VIDEO_ASPECT_RATIO_1_1:
+    //            [self onBtnRatioClicked:_btnRatio11];
+    //            break;
+    //        case VIDEO_ASPECT_RATIO_9_16:
+    //            [self onBtnRatioClicked:_btnRatio169];
+    //            break;
+    //            
+    //        default:
+    //            break;
+    //    }
 }
 
 #pragma mark ---- Video Beauty UI ----
@@ -772,57 +737,96 @@ TXVideoCustomProcessDelegate>
     _vBeauty.hidden = YES;
     _vBeauty.delegate = self;
     _vBeauty.pituDelegate = self;
+    _vBeauty.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [self.view addSubview:_vBeauty];
 }
 
 //加速录制
--(void)createSpeedView
+-(void)configSpeedView
 {
     _speedBtnList = [NSMutableArray array];
-    CGFloat viewWidth = self.view.frame.size.width;
-    _speedView = [[UIView alloc] init];
-    _speedView.bounds = CGRectMake(0, 0, viewWidth - 30 * kScaleX * 2, BUTTON_SPEED_HEIGHT * kScaleY);
-    _speedView.center = CGPointMake(viewWidth / 2, self.view.frame.size.height - 140);
-    _speedView.layer.cornerRadius = BUTTON_SPEED_HEIGHT / 2;
+    
+    _speedView.layer.cornerRadius = _speedView.size.height / 2;
     _speedView.layer.masksToBounds = YES;
     _speedView.backgroundColor = [UIColor blackColor];
     _speedView.alpha = 0.5;
     
-    _speedChangeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    
-    CGFloat btnSpace = 30;
-    CGFloat btnWidth = (_speedView.width - 16 * 2 * kScaleX - btnSpace * 4 * kScaleX) / 5;
-    for(int i = 0 ; i < BUTTON_SPEED_COUNT ; i ++)
-    {
-        UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
-        btn.frame = CGRectMake(16 * kScaleX + (btnSpace * kScaleX + btnWidth) * i, 0, btnWidth, _speedView.height);
-        [btn setTitle:[self getSpeedText:(SpeedMode)i] forState:UIControlStateNormal];
-        [btn setTitleColor:UIColorFromRGB(0xffffff) forState:UIControlStateNormal];
-        [btn.titleLabel setFont:[UIFont systemFontOfSize:15 * kScaleX]];
-        [btn addTarget:self action:@selector(onBtnSpeedClicked:) forControlEvents:UIControlEventTouchUpInside];
-        btn.tag = i;
-        [_speedView addSubview:btn];
-        [_speedBtnList addObject:btn];
+    if (_recordType != RecordType_Chorus)  {
+        //合唱暂不支持变速录制
         
-        if(i == 2){
-            CGRect rect = [_speedView convertRect:btn.frame toView:self.view];
-            _speedChangeBtn.frame = CGRectMake(rect.origin.x - (BUTTON_SPEED_CHANGE_WIDTH - rect.size.width) / 2, rect.origin.y - (BUTTON_SPEED_CHANGE_HEIGHT - rect.size.height) / 2, BUTTON_SPEED_CHANGE_WIDTH, BUTTON_SPEED_CHANGE_HEIGHT);
-            [_speedChangeBtn setTitle:[self getSpeedText:(SpeedMode)i] forState:UIControlStateNormal];
-            [_speedChangeBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-            [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:@"speedChange_center"] forState:UIControlStateNormal];
-        }else{
-            //合唱暂不支持变速录制
-            if (_recordType == RecordType_Chorus) {
-                btn.hidden = YES;
-            }
+        _speedChangeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        _speedChangeBtn.titleLabel.adjustsFontSizeToFitWidth = YES;
+        _speedChangeBtn.titleLabel.minimumScaleFactor = 0.5;
+        [_speedChangeBtn setTitle:[self getSpeedText:2] forState:UIControlStateNormal];
+        [_speedChangeBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:@"speedChange_center"] forState:UIControlStateNormal];
+        
+        CGFloat btnSpace = 0;
+        CGFloat padding = 16 * kScaleX;
+        CGFloat btnWidth = (_speedView.width -  2 * padding - btnSpace * 4 ) / 5;
+        for(int i = 0 ; i < BUTTON_SPEED_COUNT ; i ++)
+        {
+            UIButton *btn = [UIButton buttonWithType:UIButtonTypeCustom];
+            btn.titleLabel.minimumScaleFactor = 0.5;
+            btn.frame = CGRectMake(padding + (btnSpace + btnWidth) * i, 0, btnWidth, _speedView.height);
+            [btn setTitle:[self getSpeedText:(SpeedMode)i] forState:UIControlStateNormal];
+            [btn setTitleColor:UIColorFromRGB(0xffffff) forState:UIControlStateNormal];
+            [btn.titleLabel setFont:[UIFont systemFontOfSize:15]];
+            btn.titleLabel.minimumScaleFactor = 0.5;
+            btn.titleLabel.adjustsFontSizeToFitWidth = YES;
+            [btn addTarget:self action:@selector(onBtnSpeedClicked:) forControlEvents:UIControlEventTouchUpInside];
+            btn.tag = i;
+            [_speedView addSubview:btn];
+            [_speedBtnList addObject:btn];
         }
+        [self setSelectedSpeed:SpeedMode_Standard];
+        [self.bottomMask addSubview:_speedChangeBtn];
     }
-    [self.view addSubview:_speedView];
-    [self.view addSubview:_speedChangeBtn];
-    _speedBtnSelectTag = 2;
+}
+
+- (void)setSelectedSpeed:(SpeedMode)tag
+{
+    if (tag >= _speedBtnList.count) {
+        return;
+    }
+    const float padding = 16 * kScaleX;
+    UIButton *btn = _speedBtnList[(NSInteger)tag];
+    //    UIButton *btn = [self.speedView viewWithTag:(NSInteger)tag];
+    CGRect rect = CGRectIntegral([_speedView convertRect:btn.frame toView:self.bottomMask]);
+    CGRect frame = rect;
+    frame.origin.y -= (BUTTON_SPEED_CHANGE_HEIGHT - rect.size.height) * 0.5;
+    frame.size.height = BUTTON_SPEED_CHANGE_HEIGHT;
+    
+    NSString *bgName = @"speedChange_center";
+    if (tag == 0) {
+        frame.origin.x -= padding;
+        frame.size.width += padding;
+        bgName = @"speedChange_left";
+    } else if (tag == 4) {
+        frame.size.width += padding;
+        bgName = @"speedChange_right";
+    }
+    [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:bgName] forState:UIControlStateNormal];
+    _speedChangeBtn.frame = frame;
+    
+    [_speedChangeBtn setTitle:[self getSpeedText:(SpeedMode)tag] forState:UIControlStateNormal];
+    
+    _speedMode = tag;
+}
+
+- (void)viewDidLayoutSubviews
+{
+    CGFloat btnSpace = 0;
+    CGFloat padding = 16 * kScaleX;
+    CGFloat btnWidth = (_speedView.width -  2 * padding - btnSpace * 4 ) / 5;
+    [_speedBtnList enumerateObjectsUsingBlock:^(UIButton *btn, NSUInteger i, BOOL * _Nonnull stop) {
+        btn.frame = CGRectMake(padding + (btnSpace + btnWidth) * i, 0, btnWidth, _speedView.height);
+    }];
+    [self setSelectedSpeed:_speedMode];
 }
 
 -(void)setSpeedBtnHidden:(BOOL)hidden{
+    if (_videoPath != nil) hidden = YES;
     _speedView.hidden = hidden;
     _speedChangeBtn.hidden = hidden;
 }
@@ -832,19 +836,19 @@ TXVideoCustomProcessDelegate>
     NSString *text = nil;
     switch (speedMode) {
         case SpeedMode_VerySlow:
-            text = @"极慢";
+            text = NSLocalizedString(@"TCVideoRecordView.SpeedSlow0", nil);
             break;
         case SpeedMode_Slow:
-            text = @"慢";
+            text = NSLocalizedString(@"TCVideoRecordView.SpeedSlow", nil);
             break;
         case SpeedMode_Standard:
-            text = @"标准";
+            text = NSLocalizedString(@"TCVideoRecordView.SpeedStandard", nil);
             break;
         case SpeedMode_Quick:
-            text = @"快";
+            text = NSLocalizedString(@"TCVideoRecordView.SpeedFast", nil);
             break;
         case SpeedMode_VeryQuick:
-            text = @"极快";
+            text = NSLocalizedString(@"TCVideoRecordView.SpeedFast0", nil);
             break;
         default:
             break;
@@ -852,78 +856,24 @@ TXVideoCustomProcessDelegate>
     return text;
 }
 
--(void)onBtnRatioClicked:(UIButton *)btn
+
+- (void)switchButton:(UIButton *)button0 withAnother:(UIButton *)button1
 {
-    switch (btn.tag) {
-        case VIDEO_ASPECT_RATIO_9_16:
-        {
-            if (btn.right + 9 == self.view.frame.size.width && [self ratioIsClosure]) {
-                _btnRatio11.frame = CGRectOffset(btn.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio43.frame = CGRectOffset(_btnRatio11.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio11.hidden = NO;
-                _btnRatio43.hidden = NO;
-                _labelRatio11.hidden = NO;
-                _labelRatio43.hidden = NO;
-            }else{
-                btn.frame = _btnRatioFrame;
-                _btnRatio11.frame = _btnRatioFrame;
-                _btnRatio43.frame = _btnRatioFrame;
-                _btnRatio11.hidden = YES;
-                _btnRatio43.hidden = YES;
-                _labelRatio11.hidden = YES;
-                _labelRatio43.hidden = YES;
-            }
-            [self setAspectRatio:VIDEO_ASPECT_RATIO_9_16];
-        }
-            break;
-        case VIDEO_ASPECT_RATIO_1_1:
-        {
-            if (btn.right + 9 == self.view.frame.size.width && [self ratioIsClosure]) {
-                _btnRatio43.frame = CGRectOffset(btn.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio169.frame = CGRectOffset(_btnRatio43.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio43.hidden = NO;
-                _btnRatio169.hidden = NO;
-                _labelRatio43.hidden = NO;
-                _labelRatio169.hidden = NO;
-            }else{
-                btn.frame = _btnRatioFrame;
-                _btnRatio43.frame = _btnRatioFrame;
-                _btnRatio169.frame = _btnRatioFrame;
-                _btnRatio43.hidden = YES;
-                _btnRatio169.hidden = YES;
-                _labelRatio43.hidden = YES;
-                _labelRatio169.hidden = YES;
-            }
-            [self setAspectRatio:VIDEO_ASPECT_RATIO_1_1];
-        }
-            
-            break;
-        case VIDEO_ASPECT_RATIO_3_4:
-        {
-            if (btn.right + 9 == self.view.frame.size.width && [self ratioIsClosure]) {
-                _btnRatio169.frame = CGRectOffset(btn.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio11.frame = CGRectOffset(_btnRatio169.frame, -(30 + BUTTON_CONTROL_SIZE), 0);
-                _btnRatio169.hidden = NO;
-                _btnRatio11.hidden = NO;
-                _labelRatio169.hidden = NO;
-                _labelRatio11.hidden = NO;
-            }else{
-                btn.frame = _btnRatioFrame;
-                _btnRatio169.frame = _btnRatioFrame;
-                _btnRatio11.frame = _btnRatioFrame;
-                _btnRatio169.hidden = YES;
-                _btnRatio11.hidden = YES;
-                _labelRatio169.hidden = YES;
-                _labelRatio11.hidden = YES;
-            }
-            [self setAspectRatio:VIDEO_ASPECT_RATIO_3_4];
-        }
-            
-            break;
-        default:
-            break;
-    }
-    btn.hidden = NO;
+    NSInteger tmp = button0.tag;
+    button0.tag = button1.tag;
+    button1.tag = tmp;
+    
+    UIImage *tmpImage = [button0 imageForState:UIControlStateNormal];
+    UIImage *tmpImage0 = [button0 imageForState:UIControlStateHighlighted];
+    NSString *tmpTitle = [button0 titleForState:UIControlStateNormal];
+    
+    [button0 setImage:[button1 imageForState:UIControlStateNormal] forState:UIControlStateNormal];
+    [button0 setImage:[button1 imageForState:UIControlStateHighlighted] forState:UIControlStateHighlighted];
+    [button0 setTitle:[button1 titleForState:UIControlStateNormal] forState:UIControlStateNormal];
+    
+    [button1 setImage:tmpImage forState:UIControlStateNormal];
+    [button1 setImage:tmpImage0 forState:UIControlStateHighlighted];
+    [button1 setTitle:tmpTitle forState:UIControlStateNormal];
 }
 
 - (void)setAspectRatio:(NSInteger)aspectRatio
@@ -947,9 +897,6 @@ TXVideoCustomProcessDelegate>
     [UIView animateWithDuration:0.2 animations:^{
         _videoRecordView.frame = CGRectMake(0, (self.view.height - height) / 2.0, _videoRecordView.frame.size.width, height);;
     }];
-    _labelRatio11.frame = CGRectMake(_btnRatio11.x, _btnRatio11.bottom + 4, 44, 14);
-    _labelRatio43.frame = CGRectMake(_btnRatio43.x, _btnRatio43.bottom + 4, 44, 14);
-    _labelRatio169.frame = CGRectMake(_btnRatio169.x, _btnRatio169.bottom + 4, 44, 14);
 }
 
 -(BOOL)ratioIsClosure
@@ -960,7 +907,175 @@ TXVideoCustomProcessDelegate>
     return NO;
 }
 
-- (void)onBtnMusicClicked
+#pragma mark - Actions
+- (void)takePhoto {
+    [[TXUGCRecord shareInstance] snapshot:^(UIImage *image) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIImageView *imageView = [[UIImageView alloc] initWithImage:image];
+            UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), (__bridge void*)imageView);
+            imageView.contentMode = UIViewContentModeScaleAspectFit;
+            imageView.frame = self.view.bounds;
+            [self.view insertSubview:imageView belowSubview:self.bottomMask];
+            
+            CGAffineTransform t = CGAffineTransformMakeScale(0.33, 0.33);
+            [UIView animateWithDuration:0.3 animations:^{
+                imageView.transform = t;
+            } completion:^(BOOL finished) {
+                
+            }];
+        });
+    }];
+}
+
+-(void)startVideoRecord
+{
+    self.btnCountDown.enabled = NO;
+    [self startCameraPreview];
+    [self setSpeedRate];
+    int result = [[TXUGCRecord shareInstance] startRecord];
+    [TCUtil report:xiaoshipin_startrecord userName:nil code:result msg:result == 0 ? @"启动录制成功" : @"启动录制失败"];
+    if(0 != result)
+    {
+        if(-3 == result) [self alert:NSLocalizedString(@"TCVideoRecordView.HintLaunchRecordFailed", nil) msg:NSLocalizedString(@"TCVideoRecordView.ErrorCamera", nil)];
+        if(-4 == result) [self alert:NSLocalizedString(@"TCVideoRecordView.HintLaunchRecordFailed", nil) msg:NSLocalizedString(@"TCVideoRecordView.ErrorMIC", nil)];
+        if(-5 == result) [self alert:NSLocalizedString(@"TCVideoRecordView.HintLaunchRecordFailed", nil) msg:NSLocalizedString(@"TCVideoRecordView.ErrorLicense", nil)];
+    }else{
+        //如果设置了BGM，播放BGM
+        [self playBGM:_bgmBeginTime];
+        
+        //初始化录制状态
+        _bgmRecording = YES;
+        _videoRecording = YES;
+        _isPaused = NO;
+        
+        //录制过程中不能切换分辨率,不能切换拍照模式
+        _btnRatio169.enabled = NO;
+        _btnRatio43.enabled = NO;
+        _btnRatio11.enabled = NO;
+        self.captureModeView.userInteractionEnabled = NO;
+
+        [self setSpeedBtnHidden:YES];
+        [_btnStartRecord setImage:[UIImage imageNamed:@"pause_record"] forState:UIControlStateNormal];
+        [_btnStartRecord setBackgroundImage:[UIImage imageNamed:@"pause_ring"] forState:UIControlStateNormal];
+        _btnStartRecord.bounds = CGRectMake(0, 0, BUTTON_RECORD_SIZE * 0.85, BUTTON_RECORD_SIZE * 0.85);
+        
+        if (_recordType == RecordType_Chorus) {
+            [_videoEditer startPlayFromTime:_recordTime toTime:MAX_RECORD_TIME];
+        }
+    }
+}
+
+- (void)startCountDown {
+    if (_countDownTimer) {
+        return;
+    }
+    
+    if (_countDownView == nil) {
+        UIVisualEffectView *view = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle: UIBlurEffectStyleExtraLight]];
+        view.layer.cornerRadius = 20;
+        view.clipsToBounds = YES;
+        
+        view.translatesAutoresizingMaskIntoConstraints = NO;
+        UILabel *countDownLabel = [[UILabel alloc] init];
+        countDownLabel.translatesAutoresizingMaskIntoConstraints = NO;
+        countDownLabel.textColor = [UIColor colorWithWhite:0.33 alpha:1];
+        countDownLabel.font = [UIFont systemFontOfSize:100];
+        
+        [view.contentView addSubview:countDownLabel];
+        [view.contentView addConstraint:[NSLayoutConstraint constraintWithItem:view.contentView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:countDownLabel attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+        [view.contentView addConstraint:[NSLayoutConstraint constraintWithItem:view.contentView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:countDownLabel attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+        [view addConstraint:[NSLayoutConstraint constraintWithItem:view attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:150]];
+        
+        [self.view addSubview:view];
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterX multiplier:1 constant:0]];
+        [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.view attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:view attribute:NSLayoutAttributeCenterY multiplier:1 constant:0]];
+        
+        
+        _countDownView = view;
+        _countDownLabel = countDownLabel;
+    }
+    _countDownView.hidden = NO;
+    _countDownLabel.text = @"3";  
+    _countDownTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(onCountDownTimer:) userInfo:nil repeats:YES];
+    _countDownView.hidden = NO;
+}
+
+- (void)onCountDownTimer:(NSTimer *)timer {
+    int count = _countDownLabel.text.intValue - 1;
+    _countDownLabel.text = @(count).stringValue;
+    if (count == 0) {
+        [_countDownTimer invalidate];
+        _countDownTimer = nil;
+        _countDownView.hidden = YES;
+        [self changeCaptureModeUI:CaptureModeTap];
+        self.captureMode = CaptureModeTap;
+        [self onBtnRecordStartClicked];
+        [self hideBottomView:NO];
+    }
+}
+
+#pragma mark - Properties
+-(void)setSpeedRate{
+    switch (_speedMode) {
+        case SpeedMode_VerySlow:
+            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_SLOWEST];
+            break;
+        case SpeedMode_Slow:
+            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_SLOW];
+            break;
+        case SpeedMode_Standard:
+            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_NOMAL];
+            break;
+        case SpeedMode_Quick:
+            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_FAST];
+            break;
+        case SpeedMode_VeryQuick:
+            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_FASTEST];
+            break;
+        default:
+            break;
+    }
+}
+
+#pragma mark - Left Side Button Event Handler
+-(IBAction)onBtnPopClicked:(id)sender
+{
+    NSArray *videoPaths = [[TXUGCRecord shareInstance].partsManager getVideoPathList];
+    if (videoPaths.count > 0) {
+        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"TCVideoRecordView.AbandonRecord", nil) message:nil cancelButtonTitle:NSLocalizedString(@"Common.Cancel", nil) otherButtonTitles:@[NSLocalizedString(@"Common.OK", nil)] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+            if (buttonIndex == 1) {
+                [[NSUserDefaults standardUserDefaults] setObject:nil forKey:CACHE_PATH_LIST];
+                if (_recordType == RecordType_Normal) {
+                    [self dismissViewControllerAnimated:YES completion:nil];
+                }else{
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
+            }else{
+                return;
+            }
+        }];
+        [alert show];
+    }else{
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:CACHE_PATH_LIST];
+        if (_recordType == RecordType_Normal) {
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }else{
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }
+}
+
+#pragma mark - Right Side Button Event Handler
+- (IBAction)onBtnDoneClicked:(id)sender
+{
+//    if (!_videoRecording)
+//        return;
+    
+    [self stopVideoRecord];
+}
+
+- (IBAction)onBtnMusicClicked:(id)sender
 {
     _vBeauty.hidden = YES;
     if (_BGMPath) {
@@ -975,47 +1090,93 @@ TXVideoCustomProcessDelegate>
     }
 }
 
+- (IBAction)onBtnRatioClicked:(UIButton *)btn
+{
+    TXVideoAspectRatio targetRatio = btn.tag;
+    if (btn == self.btnRatioMenu) {
+        BOOL menuIsClosed = NO;
+        if (self.btnRatio169 == self.btnRatioMenu) {
+            menuIsClosed = self.btnRatio11.hidden;
+        } else {
+            menuIsClosed = self.btnRatio169.hidden;
+        }
+        BOOL shouldHidden = !menuIsClosed;
+        
+        self.btnRatio169.hidden = shouldHidden;
+        self.btnRatio11.hidden = shouldHidden;
+        self.btnRatio43.hidden = shouldHidden;
+        
+        self.btnRatioMenu.hidden = NO;
+        
+    } else {
+        [self switchButton:self.btnRatioMenu withAnother:btn];
+        __weak UIButton *tmp = *_ratioMenuButtonIvarPtr;
+        *_ratioMenuButtonIvarPtr = btn;
+        switch (targetRatio) {
+            case VIDEO_ASPECT_RATIO_9_16: 
+                self.btnRatio169 = tmp;
+                _ratioMenuButtonIvarPtr = &_btnRatio169;
+                break;
+            case VIDEO_ASPECT_RATIO_3_4:
+                self.btnRatio43 = tmp;
+                _ratioMenuButtonIvarPtr = &_btnRatio43;
+                break;
+            case VIDEO_ASPECT_RATIO_1_1:
+                self.btnRatio11 = tmp;
+                _ratioMenuButtonIvarPtr = &_btnRatio11;
+                break;
+            default:
+                break;
+        }
+        [self setAspectRatio:targetRatio];
+        self.btnRatio169.hidden = YES;
+        self.btnRatio11.hidden = YES;
+        self.btnRatio43.hidden = YES;
+        self.btnRatioMenu.hidden = NO;
+    }   
+}
+
+-(IBAction)onBtnBeautyClicked:(id)sender
+{
+    _vBeautyShow = !_vBeautyShow;
+    _musicView.hidden = YES;
+    _vBeauty.hidden = !_vBeautyShow;
+    [self hideBottomView:_vBeautyShow];
+}
+
+- (IBAction)onBtnAudioMix:(id)sender {
+    [self hideBottomView:YES];
+    _soundMixView.hidden = NO;
+    _vBeauty.hidden = YES;
+    _musicView.hidden = YES;
+    
+    UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];
+    button.frame = CGRectMake(0, 0, self.view.width, self.view.height - _soundMixView.height);
+    [self.view addSubview:button];
+    [button addTarget:self action:@selector(onHideSoundMix:) forControlEvents:UIControlEventTouchUpInside];
+    
+    CATransition *animation = [CATransition animation];
+    animation.type = kCATransitionFade;
+    [_soundMixView.layer addAnimation:animation forKey:nil];
+}
+
+- (IBAction)onCountDown:(id)sender {
+    [self hideBottomView:YES];
+    [self startCountDown];
+}
+
+
+#pragma mark * Bottom Control Tap Handler
 -(void)onBtnSpeedClicked:(UIButton *)btn
 {
-    [UIView animateWithDuration:0.5 animations:^{
-        _speedBtnSelectTag = btn.tag;
-        if (_speedBtnSelectTag == 0) {
-            [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:@"speedChange_left"] forState:UIControlStateNormal];
-        }else if (_speedBtnSelectTag == 4){
-            [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:@"speedChange_right"] forState:UIControlStateNormal];
-        }else{
-            [_speedChangeBtn setBackgroundImage:[UIImage imageNamed:@"speedChange_center"] forState:UIControlStateNormal];
-        }
-        CGRect rect = [_speedView convertRect:btn.frame toView:self.view];
-        _speedChangeBtn.frame = CGRectMake(rect.origin.x - (BUTTON_SPEED_CHANGE_WIDTH - rect.size.width) / 2, rect.origin.y - (BUTTON_SPEED_CHANGE_HEIGHT - rect.size.height) / 2, BUTTON_SPEED_CHANGE_WIDTH, BUTTON_SPEED_CHANGE_HEIGHT);
-        [_speedChangeBtn setTitle:[self getSpeedText:(SpeedMode)_speedBtnSelectTag] forState:UIControlStateNormal];
-        [_speedChangeBtn setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [UIView animateWithDuration:0.3 animations:^{
+        _speedMode = btn.tag;
+        [self setSelectedSpeed:_speedMode];
     }];
 }
 
--(void)setSpeedRate{
-    switch ((SpeedMode)_speedBtnSelectTag) {
-            case SpeedMode_VerySlow:
-            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_SLOWEST];
-            break;
-            case SpeedMode_Slow:
-            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_SLOW];
-            break;
-            case SpeedMode_Standard:
-            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_NOMAL];
-            break;
-            case SpeedMode_Quick:
-            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_FAST];
-            break;
-            case SpeedMode_VeryQuick:
-            [[TXUGCRecord shareInstance] setRecordSpeed:VIDEO_RECORD_SPEED_FASTEST];
-            break;
-        default:
-            break;
-    }
-}
 
--(void)onBtnFlashClicked
+-(IBAction)onBtnFlashClicked
 {
     if (_isFlash) {
         [_btnFlash setImage:[UIImage imageNamed:@"closeFlash"] forState:UIControlStateNormal];
@@ -1028,7 +1189,7 @@ TXVideoCustomProcessDelegate>
     [[TXUGCRecord shareInstance] toggleTorch:_isFlash];
 }
 
--(void)onBtnDeleteClicked
+-(IBAction)onBtnDeleteClicked
 {
     if (_videoRecording && !_isPaused) {
         [self onBtnRecordStartClicked];
@@ -1045,14 +1206,97 @@ TXVideoCustomProcessDelegate>
     }
 }
 
--(void)onBtnStartRecord
+-(IBAction)onBtnStartRecord // touch down
 {
-    [self onBtnRecordStartClicked];
+    if (self.captureMode == CaptureModePress) {
+        [self onBtnRecordStartClicked];
+    }
 }
 
--(void)onBtnStopRecord
+-(IBAction)onBtnStopRecord  // touch up
 {
-    [self onBtnRecordStartClicked];
+    switch (self.captureMode) {
+        case CaptureModePress:
+            [self onBtnRecordStartClicked];
+            break;
+        case CaptureModeTap: 
+            [self onBtnRecordStartClicked];
+            break;
+        default:
+            break;
+    }
+}
+
+- (IBAction)onRecordTouchUpInside:(id)sender
+{
+    if (self.captureMode == CaptureModeStill) {
+        [self takePhoto];
+    }
+}
+
+-(IBAction)onBtnCameraClicked
+{
+    _cameraFront = !_cameraFront;
+    [[TXUGCRecord shareInstance] switchCamera:_cameraFront];
+    if (_cameraFront) {
+        [_btnFlash setImage:[UIImage imageNamed:@"openFlash_disable"] forState:UIControlStateNormal];
+        _btnFlash.enabled = NO;
+    }else{
+        if (_isFlash) {
+            [_btnFlash setImage:[UIImage imageNamed:@"openFlash"] forState:UIControlStateNormal];
+            [_btnFlash setImage:[UIImage imageNamed:@"openFlash_hover"] forState:UIControlStateHighlighted];
+        }else{
+            [_btnFlash setImage:[UIImage imageNamed:@"closeFlash"] forState:UIControlStateNormal];
+            [_btnFlash setImage:[UIImage imageNamed:@"closeFlash_hover"] forState:UIControlStateHighlighted];
+        }
+        _btnFlash.enabled = YES;
+    }
+    [[TXUGCRecord shareInstance] toggleTorch:_isFlash];
+}
+
+- (IBAction)onTapCaptureMode:(UITapGestureRecognizer *)gesture
+{
+    CGPoint point = [gesture locationInView:gesture.view];
+    CGFloat itemWidth = CGRectGetWidth(gesture.view.frame) / 3;
+    CaptureMode mode = floor(point.x / itemWidth);
+    [self changeCaptureModeUI:mode];
+    self.captureMode = mode;
+}
+
+- (void)changeCaptureModeUI:(CaptureMode)captureMode
+{
+    NSInteger tag = captureMode + 1;
+    if (_videoPath) {
+        // 合唱
+        if (tag - 1 == CaptureModeStill) {
+            return;
+        }
+    }
+    UIView *targetView = [self.captureModeView viewWithTag:tag];
+    CGFloat offset = CGRectGetMidX(self.captureModeView.bounds) - targetView.center.x;
+    self.captureMode = tag - 1;
+    NSString *name = self.captureMode == CaptureModeStill ? @"start_record_white" : @"start_record";
+    [UIView animateWithDuration:0.1 animations:^{
+        [self.btnStartRecord setImage:[UIImage imageNamed:name] forState:UIControlStateNormal];
+        self.centerConstraint.constant = offset;
+        [self.captureModeView layoutIfNeeded];
+    }];
+}
+
+#pragma mark -
+
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
+{
+    UIImageView *imageView = (__bridge UIImageView *)contextInfo;
+    [UIView animateWithDuration:0.3
+                          delay:0
+                        options:UIViewAnimationOptionCurveLinear|UIViewAnimationOptionBeginFromCurrentState
+                     animations:^{
+                         CGAffineTransform t = CGAffineTransformTranslate(imageView.transform, 0, self.view.height);
+                         imageView.transform = CGAffineTransformScale(t, 0.5, 0.5);
+                     } completion:^(BOOL finished) {
+                         [imageView removeFromSuperview];
+                     }];
 }
 
 -(void)onBtnRecordStartClicked
@@ -1064,6 +1308,9 @@ TXVideoCustomProcessDelegate>
     else
     {
         if (_isPaused) {
+            self.btnCountDown.enabled = NO;
+            self.captureModeView.userInteractionEnabled = NO;
+
             [self setSpeedRate];
             
             if (_bgmRecording) {
@@ -1089,7 +1336,13 @@ TXVideoCustomProcessDelegate>
             [_videoEditer startPlayFromTime:_recordTime toTime:MAX_RECORD_TIME];
         }
         else {
-            [[TXUGCRecord shareInstance] pauseRecord];
+            self.captureModeView.userInteractionEnabled = YES;
+            self.btnCountDown.enabled = YES;
+            
+            __weak __typeof(self) weakSelf = self;
+            [[TXUGCRecord shareInstance] pauseRecord:^{
+                [weakSelf cacheVideoPathList];
+            }];
             [self pauseBGM];
             
             [_btnStartRecord setImage:[UIImage imageNamed:@"start_record"] forState:UIControlStateNormal];
@@ -1106,13 +1359,19 @@ TXVideoCustomProcessDelegate>
     }
 }
 
-- (void)onBtnDoneClicked
+- (void)onHideSoundMix:(UIButton *)sender
 {
-    if (!_videoRecording)
-        return;
+    [sender removeFromSuperview];
+    _soundMixView.hidden = YES;
+    self.bottomMask.hidden = NO;
+    [self hideBottomView:NO];
     
-    [self stopVideoRecord];
+    CATransition *animation = [CATransition animation];
+    animation.duration = 0.1;
+    animation.type = kCATransitionFade;
+    [_soundMixView.superview.layer addAnimation:animation forKey:nil];
 }
+
 
 -(void)startCameraPreview
 {
@@ -1125,10 +1384,10 @@ TXVideoCustomProcessDelegate>
         //自定义设置
         TXUGCCustomConfig * param = [[TXUGCCustomConfig alloc] init];
         param.videoResolution =  VIDEO_RESOLUTION_720_1280;
-        param.videoFPS = _fps > 0 ? _fps : 30;
+        param.videoFPS = 30;
         param.videoBitratePIN = 9600;
         param.GOP = 3;
-        param.audioSampleRate = _sampleRate;
+        param.audioSampleRate = AUDIO_SAMPLERATE_48000;
         param.minDuration = MIN_RECORD_TIME;
         param.maxDuration = MAX_RECORD_TIME;
         [[TXUGCRecord shareInstance] startCameraCustom:param preview:_videoRecordView];
@@ -1141,7 +1400,6 @@ TXVideoCustomProcessDelegate>
         
         [[TXUGCRecord shareInstance] setEyeScaleLevel:_eye_level];
         [[TXUGCRecord shareInstance] setFaceScaleLevel:_face_level];
-      
         UIImage *watermark = [UIImage imageNamed:@"watermark.png"];
         CGRect watermarkFrame = (CGRect){0.01, 0.01, 0.3 , 0};
         [[TXUGCRecord shareInstance] setWaterMark:watermark normalizationFrame:watermarkFrame];
@@ -1149,6 +1407,25 @@ TXVideoCustomProcessDelegate>
 #if POD_PITU
         [self motionTmplSelected:_materialID];
 #endif
+        
+        //加载缓存视频
+        if (_preloadingVideos) {
+            NSArray *cachePathList = [[NSUserDefaults standardUserDefaults] objectForKey:CACHE_PATH_LIST];
+            NSString *cacheFolder = [[[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"TXUGC"] stringByAppendingPathComponent:@"TXUGCParts"];
+            //预加载视频 -> SDK
+            for (NSInteger i = cachePathList.count - 1; i >= 0; i --) {
+                NSString *videoPath = [cacheFolder stringByAppendingPathComponent:cachePathList[i]];
+                [[TXUGCRecord shareInstance].partsManager insertPart:videoPath atIndex:0];
+            }
+            //进度条初始化
+            CGFloat time = 0;
+            for (NSInteger i = 0; i < cachePathList.count; i ++) {
+                NSString *videoPath = [cacheFolder stringByAppendingPathComponent:cachePathList[i]];
+                time = time + [TXVideoInfoReader getVideoInfo:videoPath].duration;
+                [_progressView pauseAtTime:time];
+            }
+            _preloadingVideos = NO;
+        }
         
         [_vBeauty resetValues];
         _cameraPreviewing = YES;
@@ -1164,95 +1441,83 @@ TXVideoCustomProcessDelegate>
     }
 }
 
--(void)startVideoRecord
-{
-    [self refreshRecordTime:0];
-    [self startCameraPreview];
-    [self setSpeedRate];
-    int result = [[TXUGCRecord shareInstance] startRecord];
-    [TCUtil report:xiaoshipin_startrecord userName:nil code:result msg:result == 0 ? @"启动录制成功" : @"启动录制失败"];
-    if(0 != result)
-    {
-        if(-3 == result) [self alert:@"启动录制失败" msg:@"请检查摄像头权限是否打开"];
-        if(-4 == result) [self alert:@"启动录制失败" msg:@"请检查麦克风权限是否打开"];
-        if(-5 == result) [self alert:@"启动录制失败" msg:@"licence 验证失败"];
-    }else{
-        //如果设置了BGM，播放BGM
-        [self playBGM:_bgmBeginTime];
-        
-        //初始化录制状态
-        _bgmRecording = YES;
-        _videoRecording = YES;
-        _isPaused = NO;
-        
-        //录制过程中不能切换分辨率
-        _btnRatio169.enabled = NO;
-        _btnRatio43.enabled = NO;
-        _btnRatio11.enabled = NO;
-        
-        [self setSpeedBtnHidden:YES];
-        [_btnStartRecord setImage:[UIImage imageNamed:@"pause_record"] forState:UIControlStateNormal];
-        [_btnStartRecord setBackgroundImage:[UIImage imageNamed:@"pause_ring"] forState:UIControlStateNormal];
-        _btnStartRecord.bounds = CGRectMake(0, 0, BUTTON_RECORD_SIZE * 0.85, BUTTON_RECORD_SIZE * 0.85);
-        
-        if (_recordType == RecordType_Chorus) {
-            [_videoEditer startPlayFromTime:_recordTime toTime:MAX_RECORD_TIME];
-        }
-    }
-}
-
 -(void)alert:(NSString *)title msg:(NSString *)msg
 {
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:msg delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:title message:msg delegate:self cancelButtonTitle:NSLocalizedString(@"Common.OK", nil) otherButtonTitles:nil, nil];
     [alert show];
 }
 
 -(void)stopVideoRecord
 {
+    self.btnCountDown.enabled = YES;
     [_btnStartRecord setImage:[UIImage imageNamed:@"start_record"] forState:UIControlStateNormal];
     [_btnStartRecord setBackgroundImage:[UIImage imageNamed:@"start_ring"] forState:UIControlStateNormal];
     _btnStartRecord.bounds = CGRectMake(0, 0, BUTTON_RECORD_SIZE, BUTTON_RECORD_SIZE);
     [self setSpeedBtnHidden:NO];
-
+    [_videoEditer stopPlay];
+    
     //调用partsManager快速合成视频，不破坏录制状态，下次返回后可以接着录制（注意需要先暂停视频录制）
-    if ([TXUGCRecord shareInstance].partsManager.getVideoPathList.count > 0) {
-        int result = [[TXUGCRecord shareInstance].partsManager joinAllParts:_recordVideoPath];
-        if(0 == result){
-            if (_recordType == RecordType_Normal) {
-                TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
-                vc.videoPath = _recordVideoPath;
-                [self.navigationController pushViewController:vc animated:YES];
+    __weak __typeof(self) weakSelf = self;
+    [[TXUGCRecord shareInstance] pauseRecord:^{
+        [weakSelf cacheVideoPathList];
+    }];
+    [[TXUGCRecord shareInstance].partsManager joinAllParts:_recordVideoPath complete:^(int result) {
+        [weakSelf joinAllPartsResult:result];
+    }];
+}
+
+- (void)cacheVideoPathList
+{
+    NSMutableArray *cachePathList = [NSMutableArray array];
+    for (NSString *videoPath in [TXUGCRecord shareInstance].partsManager.getVideoPathList) {
+        [cachePathList addObject:[[videoPath pathComponents] lastObject]];
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:cachePathList forKey:CACHE_PATH_LIST];
+}
+
+-(void)joinAllPartsResult:(int)result
+{
+    if(0 == result){
+        if (_recordType == RecordType_Normal) {
+            [self stopCameraPreview];
+            TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
+            vc.videoPath = _recordVideoPath;
+            [self.navigationController pushViewController:vc animated:YES];
+        }else{
+            CGFloat width = 720;
+            CGFloat height = 1280;
+            CGRect recordScreen = CGRectMake(0, 0, width, height);
+            //播放视频所占画布的大小这里要计算下，防止视频拉伸
+            CGRect playScreen = CGRectZero;
+            if (_size.height / _size.width >= height / width) {
+                CGFloat playScreen_w = height * _size.width / _size.height;
+                playScreen = CGRectMake(width + (width - playScreen_w) / 2.0, 0, playScreen_w, height);
             }else{
-                CGFloat width = 720;
-                CGFloat height = 1280;
-                CGRect recordScreen = CGRectMake(0, 0, width, height);
-                //播放视频所占画布的大小这里要计算下，防止视频拉伸
-                CGRect playScreen = CGRectZero;
-                if (_size.height / _size.width >= height / width) {
-                    CGFloat playScreen_w = height * _size.width / _size.height;
-                    playScreen = CGRectMake(width + (width - playScreen_w) / 2.0, 0, playScreen_w, height);
-                }else{
-                    CGFloat playScreen_h = width * _size.height / _size.width;
-                    playScreen = CGRectMake(width, (height - playScreen_h) / 2.0, width, playScreen_h);
-                }
-                if (_recordVideoPath && _videoPath && [[NSFileManager defaultManager] fileExistsAtPath:_recordVideoPath] && [[NSFileManager defaultManager] fileExistsAtPath:_videoPath]) {
-                    [_videoJoiner setVideoPathList:@[_recordVideoPath,_videoPath]];
+                CGFloat playScreen_h = width * _size.height / _size.width;
+                playScreen = CGRectMake(width, (height - playScreen_h) / 2.0, width, playScreen_h);
+            }
+            if (_recordVideoPath
+                && _videoPath
+                && [[NSFileManager defaultManager] fileExistsAtPath:_recordVideoPath]
+                && [[NSFileManager defaultManager] fileExistsAtPath:_videoPath]) {
+                if (0 == [_videoJoiner setVideoPathList:@[_recordVideoPath,_videoPath]]) {
                     [_videoJoiner setSplitScreenList:@[[NSValue valueWithCGRect:recordScreen],[NSValue valueWithCGRect:playScreen]] canvasWidth:720 * 2 canvasHeight:1280];
                     [_videoJoiner splitJoinVideo:VIDEO_COMPRESSED_720P videoOutputPath:_joinVideoPath];
-                    
                     _hub = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
                     _hub.mode = MBProgressHUDModeText;
-                    _hub.label.text = @"视频合成中...";
+                    _hub.label.text = NSLocalizedString(@"TCVideoEditPrevView.VideoSynthesizing", nil);
                 }else{
-                    [self alert:@"视频合成失败" msg:@"请重新录制合成"];
+                    UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"TCVideoEditPrevView.HintVideoSynthesizeFailed", nil) message:NSLocalizedString(@"TCVideoEditPrevView.VideoChorusNotSupported",nil) cancelButtonTitle:NSLocalizedString(@"Common.OK", nil) otherButtonTitles:nil handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+                    }];
+                    [alert show];
                 }
+            }else{
+                [self alert:NSLocalizedString(@"TCVideoEditPrevView.HintVideoSynthesizeFailed",nil) msg:NSLocalizedString(@"TCVideoEditPrevView.TryAgain",nil)];
             }
-            [[TXUGCRecord shareInstance] pauseAudioSession];
-            [[TXUGCRecord shareInstance] setMotionMute:YES];
-            [TCUtil report:xiaoshipin_videorecord userName:nil code:0 msg:@"视频录制成功"];
-        }else{
-            [TCUtil report:xiaoshipin_videorecord userName:nil code:-1 msg:@"视频录制失败"];
         }
+        [TCUtil report:xiaoshipin_videorecord userName:nil code:0 msg:@"视频录制成功"];
+    }else{
+        [TCUtil report:xiaoshipin_videorecord userName:nil code:-1 msg:@"视频录制失败"];
     }
 }
 
@@ -1287,26 +1552,6 @@ TXVideoCustomProcessDelegate>
     }
 }
 
--(void)onBtnCameraClicked
-{
-    _cameraFront = !_cameraFront;
-    [[TXUGCRecord shareInstance] switchCamera:_cameraFront];
-    if (_cameraFront) {
-        [_btnFlash setImage:[UIImage imageNamed:@"openFlash_disable"] forState:UIControlStateNormal];
-        _btnFlash.enabled = NO;
-    }else{
-        if (_isFlash) {
-            [_btnFlash setImage:[UIImage imageNamed:@"openFlash"] forState:UIControlStateNormal];
-            [_btnFlash setImage:[UIImage imageNamed:@"openFlash_hover"] forState:UIControlStateHighlighted];
-        }else{
-            [_btnFlash setImage:[UIImage imageNamed:@"closeFlash"] forState:UIControlStateNormal];
-            [_btnFlash setImage:[UIImage imageNamed:@"closeFlash_hover"] forState:UIControlStateHighlighted];
-        }
-        _btnFlash.enabled = YES;
-    }
-    [[TXUGCRecord shareInstance] toggleTorch:_isFlash];
-}
-
 -(void)onBtnLampClicked
 {
     _lampOpened = !_lampOpened;
@@ -1315,24 +1560,31 @@ TXVideoCustomProcessDelegate>
     if (result == NO)
     {
         _lampOpened = !_lampOpened;
-        [self toastTip:@"闪光灯启动失败"];
+        [self toastTip:NSLocalizedString(@"TCVideoRecordView.ErrorFlash", nil)];
     }
     
     if (_lampOpened)
     {
-        [_btnLamp setImage:[UIImage imageNamed:@"lamp_press"] forState:UIControlStateNormal];
+        [_btnTorch setImage:[UIImage imageNamed:@"lamp_press"] forState:UIControlStateNormal];
     }else
     {
-        [_btnLamp setImage:[UIImage imageNamed:@"lamp"] forState:UIControlStateNormal];
+        [_btnTorch setImage:[UIImage imageNamed:@"lamp"] forState:UIControlStateNormal];
     }
 }
 
--(void)onBtnBeautyClicked
+
+
+///  选拍照模式
+- (void)setCaptureMode:(CaptureMode)captureMode
 {
-    _vBeautyShow = !_vBeautyShow;
-    _musicView.hidden = YES;
-    _vBeauty.hidden = !_vBeautyShow;
-    [self hideBottomView:_vBeautyShow];
+    _captureMode = captureMode;
+    
+    BOOL isStillMode = captureMode == CaptureModeStill;
+    self.speedView.hidden = isStillMode;
+    self.progressView.hidden = isStillMode;
+    self.recordTimeLabel.hidden = isStillMode;
+    self.btnDelete.hidden = isStillMode;
+    _speedChangeBtn.hidden = isStillMode;
 }
 
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
@@ -1343,15 +1595,10 @@ TXVideoCustomProcessDelegate>
         CGPoint _touchPoint = [touch locationInView:self.view];
         if (NO == CGRectContainsPoint(_vBeauty.frame, _touchPoint))
         {
-            [self onBtnBeautyClicked];
+            [self onBtnBeautyClicked:nil];
         }
     }
     if (!_musicView.hidden) {
-//        [self onBtnMusicClicked];
-//        if([touches anyObject].view != _musicView){
-//            _musicView.hidden = !_musicView.hidden;
-//            [self hideBottomView:!_musicView.hidden];
-//        }
         CGPoint _touchPoint = [[[event allTouches] anyObject] locationInView:self.view];
         if (NO == CGRectContainsPoint(_musicView.frame, _touchPoint)){
             _musicView.hidden = !_musicView.hidden;
@@ -1362,77 +1609,8 @@ TXVideoCustomProcessDelegate>
 
 - (void)hideBottomView:(BOOL)bHide
 {
-    _speedView.hidden = bHide;
-    _speedChangeBtn.hidden = bHide;
-    _btnFlash.hidden = bHide;
-    _btnCamera.hidden = bHide;
-    _btnStartRecord.hidden = bHide;
-    _btnDelete.hidden = bHide;
-    _progressView.hidden = bHide;
     _recordTimeLabel.hidden = bHide;
-    _mask_buttom.hidden = bHide;
-}
-
--(void)selectBeautyPage:(UIButton *)button
-{
-    switch (button.tag)
-    {
-        case 0:
-            _beautyPage.hidden = NO;
-            _beautyBtn.selected = YES;
-            
-            _filterPage.hidden = YES;
-            _filterBtn.selected = NO;
-            
-            _motionBtn.selected = NO;
-            _greenBtn.selected  = NO;
-            _tmplBar.hidden = YES;
-            _greenPickerView.hidden = YES;
-            
-            break;
-            
-        case 1:
-            _beautyPage.hidden = YES;
-            _beautyBtn.selected = NO;
-            
-            _filterPage.hidden = NO;
-            _filterBtn.selected = YES;
-            
-            [_filterPickerView scrollToElement:_filterIndex animated:NO];
-            
-            _motionBtn.selected = NO;
-            _greenBtn.selected  = NO;
-            _tmplBar.hidden = YES;
-            _greenPickerView.hidden = YES;
-            break;
-            
-        case 2: {
-            _beautyPage.hidden = YES;
-            _beautyBtn.selected = NO;
-            
-            _filterPage.hidden = YES;
-            _filterBtn.selected = NO;
-            
-            _motionBtn.selected = YES;
-            _greenBtn.selected  = NO;
-            _tmplBar.hidden = NO;
-            _greenPickerView.hidden = YES;
-        }
-            break;
-        case 3: {
-            _beautyPage.hidden = YES;
-            _beautyBtn.selected = NO;
-            
-            _filterPage.hidden = YES;
-            _filterBtn.selected = NO;
-            
-            _motionBtn.selected = NO;
-            _greenBtn.selected  = YES;
-            _tmplBar.hidden = YES;
-            _greenPickerView.hidden = NO;
-            [_greenPickerView scrollToElement:_greenIndex animated:NO];
-        }
-    }
+    _bottomMask.hidden = bHide;
 }
 
 -(void)sliderValueChange:(UISlider*)obj
@@ -1454,7 +1632,7 @@ TXVideoCustomProcessDelegate>
             _eye_level = value;
             [[TXUGCRecord shareInstance] setEyeScaleLevel:_eye_level];
             break;
-         case 3:  //瘦脸
+        case 3:  //瘦脸
             _face_level = value;
             [[TXUGCRecord shareInstance] setFaceScaleLevel:_face_level];
             break;
@@ -1471,7 +1649,6 @@ TXVideoCustomProcessDelegate>
     long sec = (int)_currentRecordTime % 60;
     
     [_recordTimeLabel setText:[NSString stringWithFormat:@"%02ld:%02ld", min, sec]];
-    [_recordTimeLabel sizeToFit];
 }
 
 #pragma mark TXUGCRecordListener
@@ -1480,10 +1657,15 @@ TXVideoCustomProcessDelegate>
     _recordTime =  milliSecond / 1000.0;
     [self refreshRecordTime: _recordTime];
     
-    //录制过程中不能切换BGM
-    _btnMusic.enabled = (milliSecond == 0);
+    BOOL isEmpty = milliSecond == 0;
+    //录制过程中不能切换BGM, 不能改变声音效果
+    _btnMusic.enabled = isEmpty;
     _btnNext.enabled = milliSecond / 1000.0 >= MIN_RECORD_TIME;
-    
+    _btnAudioMix.enabled = _btnMusic.enabled;
+    _btnRatio169.enabled = isEmpty;
+    _btnRatio43.enabled = isEmpty;
+    _btnRatio11.enabled = isEmpty;
+
     //回删之后被模仿视频进度回退
     if (_isBackDelete && _recordType == RecordType_Chorus) {
         [_videoEditer previewAtTime:_recordTime];
@@ -1500,10 +1682,10 @@ TXVideoCustomProcessDelegate>
             if (result.retCode != UGC_RECORD_RESULT_FAILED) {
                 [self stopVideoRecord];
             }else{
-                [self toastTip:@"录制失败"];
+                [self toastTip:NSLocalizedString(@"TCVideoRecordView.ErrorREC", nil)];
             }
         } else {
-            [self toastTip:@"至少要录够5秒"];
+            [self toastTip:NSLocalizedString(@"TCVideoRecordView.ErrorTime", nil)];
         }
     }
 }
@@ -1511,18 +1693,21 @@ TXVideoCustomProcessDelegate>
 #pragma mark TXVideoJoinerListener
 -(void) onJoinProgress:(float)progress
 {
-    _hub.label.text = [NSString stringWithFormat:@"视频合成中%d%%",(int)(progress * 100)];
+    _hub.label.text = [NSString stringWithFormat:@"%@%d%%",NSLocalizedString(@"TCVideoEditPrevView.VideoSynthesizing",nil), (int)(progress * 100)];
 }
 -(void) onJoinComplete:(TXJoinerResult *)result
 {
     [_hub hideAnimated:YES];
     if (_appForeground && result.retCode == RECORD_RESULT_OK) {
+        [self stopCameraPreview];
         TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
         vc.videoPath = _joinVideoPath;
         vc.isFromChorus = YES;
         [self.navigationController pushViewController:vc animated:YES];
-        
-        [[TXUGCRecord shareInstance] pauseAudioSession];
+    }else{
+        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"TCVideoRecordView.VideoJoinerFailed", nil) message:result.descMsg cancelButtonTitle:NSLocalizedString(@"Common.OK", nil) otherButtonTitles:nil handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+        }];
+        [alert show];
     }
     [TCUtil report:xiaoshipin_videojoiner userName:nil code:result.retCode msg:result.descMsg];
 }
@@ -1556,27 +1741,28 @@ TXVideoCustomProcessDelegate>
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         _hub = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+        _hub.removeFromSuperViewOnHide = YES;
         _hub.mode = MBProgressHUDModeText;
-        _hub.label.text = @"开始加载资源";
+        _hub.label.text = NSLocalizedString(@"TCVideoRecordView.ResourceLoadBegin", nil);
     });
 }
 - (void)onLoadPituProgress:(CGFloat)progress
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        _hub.label.text = [NSString stringWithFormat:@"正在加载资源%d %%",(int)(progress * 100)];
+        _hub.label.text = [NSString stringWithFormat:NSLocalizedString(@"TCVideoRecordView.ResourceLoading", nil),(int)(progress * 100)];
     });
 }
 - (void)onLoadPituFinished
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        _hub.label.text = @"资源加载成功";
+        _hub.label.text = NSLocalizedString(@"TCVideoRecordView.ResourceLoadSucceeded", nil);
         [_hub hideAnimated:YES afterDelay:1];
     });
 }
 - (void)onLoadPituFailed
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        _hub.label.text = @"资源加载失败";
+        _hub.label.text = NSLocalizedString(@"TCVideoRecordView.ResourceLoadFailed", nil);
         [_hub hideAnimated:YES afterDelay:1];
     });
 }
@@ -1652,6 +1838,24 @@ TXVideoCustomProcessDelegate>
     });
 }
 
+#pragma mark - SoundMixView
+#pragma mark   * SoundMixViewDelegate
+- (void)soundMixView:(SoundMixView *)view didSelectMixIndex:(NSInteger)index
+{
+    _soundMixChangeType = index;
+    [[TXUGCRecord shareInstance] setReverbType:index];
+}
+
+- (void)soundMixView:(SoundMixView *)view didSelectVoiceChangeIndex:(NSInteger)index
+{
+    if (index >= VIDOE_VOICECHANGER_TYPE_5) {
+        // 去掉感冒
+        index ++;
+    }
+    _voiceChangeType = index;
+    [[TXUGCRecord shareInstance] setVoiceChangerType:index];
+}
+
 #pragma mark - VideoRecordMusicViewDelegate
 -(void)selectAudioEffect:(NSInteger)index
 {
@@ -1720,11 +1924,11 @@ TXVideoCustomProcessDelegate>
 -(void)playBGM:(CGFloat)beginTime{
     if (_BGMPath != nil) {
         [[TXUGCRecord shareInstance] playBGMFromTime:beginTime toTime:_BGMDuration withBeginNotify:^(NSInteger errCode) {
-
+            
         } withProgressNotify:^(NSInteger progressMS, NSInteger durationMS) {
-
+            
         } andCompleteNotify:^(NSInteger errCode) {
-
+            
         }];
         _bgmBeginTime = beginTime;
     }
@@ -1734,11 +1938,11 @@ TXVideoCustomProcessDelegate>
 {
     if (_BGMPath != nil) {
         [[TXUGCRecord shareInstance] playBGMFromTime:beginTime toTime:endTime withBeginNotify:^(NSInteger errCode) {
-
+            
         } withProgressNotify:^(NSInteger progressMS, NSInteger durationMS) {
-
+            
         } andCompleteNotify:^(NSInteger errCode) {
-
+            
         }];
         _bgmBeginTime = beginTime;
     }
@@ -1787,7 +1991,7 @@ TXVideoCustomProcessDelegate>
     }
     if (picker == _filterPickerView) {
         _filterIndex = index;
-
+        
         [self setFilter:_filterIndex];
     }
 }
@@ -1795,9 +1999,33 @@ TXVideoCustomProcessDelegate>
 - (void)setFilter:(NSInteger)index
 {
     NSString* lookupFileName = @"";
-
+    
     switch (index) {
         case FilterType_None:
+            break;
+        case FilterType_biaozhun:
+            lookupFileName = @"filter_biaozhun";
+            break;
+        case FilterType_yinghong:
+            lookupFileName = @"filter_yinghong";
+            break;
+        case FilterType_yunshang:
+            lookupFileName = @"filter_yunshang";
+            break;
+        case FilterType_chunzhen:
+            lookupFileName = @"filter_chunzhen";
+            break;
+        case FilterType_bailan:
+            lookupFileName = @"filter_bailan";
+            break;
+        case FilterType_yuanqi:
+            lookupFileName = @"filter_yuanqi";
+            break;
+        case FilterType_chaotuo:
+            lookupFileName = @"filter_chaotuo";
+            break;
+        case FilterType_xiangfen:
+            lookupFileName = @"filter_xiangfen";
             break;
         case FilterType_white:
             lookupFileName = @"filter_white";
@@ -1829,7 +2057,7 @@ TXVideoCustomProcessDelegate>
         default:
             break;
     }
-
+    
     NSString * path = [[NSBundle mainBundle] pathForResource:lookupFileName ofType:@"png"];
     if (path != nil && index != FilterType_None)
     {
@@ -1854,26 +2082,149 @@ TXVideoCustomProcessDelegate>
     frameRC.origin.y = frameRC.size.height - 100;
     frameRC.size.height -= 100;
     __block UITextView * toastView = [[UITextView alloc] init];
-
+    
     toastView.editable = NO;
     toastView.selectable = NO;
-
+    
     frameRC.size.height = [self heightForString:toastView andWidth:frameRC.size.width];
-
+    
     toastView.frame = frameRC;
-
+    
     toastView.text = toastInfo;
     toastView.backgroundColor = [UIColor whiteColor];
     toastView.alpha = 0.5;
-
+    
     [self.view addSubview:toastView];
-
+    
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, 2 * NSEC_PER_SEC);
-
+    
     dispatch_after(popTime, dispatch_get_main_queue(), ^(){
         [toastView removeFromSuperview];
         toastView = nil;
     });
+}
+
+#pragma mark - gesture handler
+- (void)handlePanSlide:(UIPanGestureRecognizer*)recognizer
+{
+    CGPoint translation = [recognizer translationInView:self.view.superview];
+    [recognizer velocityInView:self.view];
+    CGPoint speed = [recognizer velocityInView:self.view];
+    
+    NSLog(@"pan center:(%.2f)", translation.x);
+    NSLog(@"pan speed:(%.2f)", speed.x);
+    
+    float ratio = translation.x / self.view.frame.size.width;
+    float leftRatio = ratio;
+    NSInteger index = [_vBeauty currentFilterIndex];
+    UIImage* curFilterImage = [_vBeauty filterImageByIndex:index];
+    UIImage* filterImage1 = nil;
+    UIImage* filterImage2 = nil;
+    CGFloat filter1Level = 0.f;
+    CGFloat filter2Level = 0.f;
+    if (leftRatio > 0) {
+        filterImage1 = [_vBeauty filterImageByIndex:index - 1];
+        filter1Level = [_vBeauty filterMixLevelByIndex:index - 1] / 10;
+        filterImage2 = curFilterImage;
+        filter2Level = [_vBeauty filterMixLevelByIndex:index] / 10;
+    }
+    else {
+        filterImage1 = curFilterImage;
+        filter1Level = [_vBeauty filterMixLevelByIndex:index] / 10;
+        filterImage2 = [_vBeauty filterImageByIndex:index + 1];
+        filter2Level = [_vBeauty filterMixLevelByIndex:index + 1] / 10;
+        leftRatio = 1 + leftRatio;
+    }
+    
+    if (recognizer.state == UIGestureRecognizerStateChanged) {
+        [[TXUGCRecord shareInstance] setFilter:filterImage1 leftIntensity:filter1Level rightFilter:filterImage2 rightIntensity:filter2Level leftRatio:leftRatio];
+    }
+    else if (recognizer.state == UIGestureRecognizerStateEnded) {
+        BOOL isDependRadio = fabs(speed.x) < 500; //x方向的速度
+        [self animateFromFilter1:filterImage1 filter2:filterImage2 filter1MixLevel:filter1Level filter2MixLevel:filter2Level leftRadio:leftRatio speed:speed.x completion:^{
+            if (!isDependRadio) {
+                if (speed.x < 0) {
+                    _vBeauty.currentFilterIndex = index + 1;
+                }
+                else {
+                    _vBeauty.currentFilterIndex = index - 1;
+                }
+            }
+            else {
+                if (ratio > 0.5) {   //过半或者速度>500就切换
+                    _vBeauty.currentFilterIndex = index - 1;
+                }
+                else if  (ratio < -0.5) {
+                    _vBeauty.currentFilterIndex = index + 1;
+                }
+            }
+            
+            UILabel* filterTipLabel = [UILabel new];
+            filterTipLabel.text = [_vBeauty currentFilterName];
+            filterTipLabel.font = [UIFont systemFontOfSize:30];
+            filterTipLabel.textColor = UIColor.whiteColor;
+            filterTipLabel.alpha = 0.1;
+            [filterTipLabel sizeToFit];
+            filterTipLabel.center = CGPointMake(self.view.size.width / 2, self.view.size.height / 3);
+            [self.view addSubview:filterTipLabel];
+            
+            [UIView animateWithDuration:0.25 animations:^{
+                filterTipLabel.alpha = 1;
+            } completion:^(BOOL finished) {
+                [UIView animateWithDuration:0.25 delay:0.25 options:UIViewAnimationOptionCurveLinear animations:^{
+                    filterTipLabel.alpha = 0.1;
+                } completion:^(BOOL finished) {
+                    [filterTipLabel removeFromSuperview];
+                }];
+            }];
+        }];
+        
+        
+    }
+}
+
+- (void)animateFromFilter1:(UIImage*)filter1Image filter2:(UIImage*)filter2Image filter1MixLevel:(CGFloat)filter1MixLevel filter2MixLevel:(CGFloat)filter2MixLevel leftRadio:(CGFloat)leftRadio speed:(CGFloat)speed completion:(void(^)(void))completion
+{
+    if (leftRadio <= 0 || leftRadio >= 1) {
+        completion();
+        return;
+    }
+    
+    static float delta = 1.f / 12;
+    
+    BOOL isDependRadio = fabs(speed) < 500;
+    if (isDependRadio) {
+        if (leftRadio < 0.5) {
+            leftRadio -= delta;
+        }
+        else {
+            leftRadio += delta;
+        }
+    }
+    else {
+        if (speed > 0) {
+            leftRadio += delta;
+        }
+        else
+            leftRadio -= delta;
+    }
+    
+    [[TXUGCRecord shareInstance] setFilter:filter1Image leftIntensity:filter1MixLevel rightFilter:filter2Image rightIntensity:filter2MixLevel leftRatio:leftRadio];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.f / 30 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self animateFromFilter1:filter1Image filter2:filter2Image filter1MixLevel:filter1MixLevel filter2MixLevel:filter2MixLevel leftRadio:leftRadio speed:speed completion:completion];
+    });
+}
+
+- (void)uinit{
+    [[TXUGCRecord shareInstance] stopRecord];
+    [[TXUGCRecord shareInstance] stopCameraPreview];
+    [[TXUGCRecord shareInstance].partsManager deleteAllParts];
+    if (!_savePath) {
+        [TCUtil removeCacheFile:_videoPath];
+    }
+    [TCUtil removeCacheFile:_recordVideoPath];
+    [TCUtil removeCacheFile:_joinVideoPath];
 }
 
 @end

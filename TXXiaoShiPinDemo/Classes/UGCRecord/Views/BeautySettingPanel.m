@@ -20,14 +20,7 @@
 #define BeautyViewCollectionHeight 50
 #define BeautyViewTitleWidth 40
 
-typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
-    PannelMenuIndexBeautyStyle,
-    PannelMenuIndexBeauty,
-    PannelMenuIndexEffect,
-    PannelMenuIndexMotion,
-    PannelMenuIndexKoubei,
-    PannelMenuIndexGreen
-};
+#define L(x) NSLocalizedString((x), nil)
 
 @interface BeautySettingPanel() <UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout>
 {
@@ -51,6 +44,9 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
 @property (nonatomic, assign) CGFloat beautyLevel;
 @property (nonatomic, assign) CGFloat whiteLevel;
 @property (nonatomic, assign) CGFloat ruddyLevel;
+@property (nonatomic, assign) TXVideoBeautyStyle beautyStyle;
+@property (nonatomic, strong) NSMutableDictionary* filterMap;
+
 @end
 
 @implementation BeautySettingPanel
@@ -68,29 +64,69 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
 {
     self.beautySlider.frame = CGRectMake(BeautyViewMargin * 4, BeautyViewMargin, self.frame.size.width - 10 * BeautyViewMargin - BeautyViewSliderHeight, BeautyViewSliderHeight);
     [self addSubview:self.beautySlider];
+    self.beautySlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     
     self.beautyLabel.frame = CGRectMake(self.beautySlider.frame.size.width + self.beautySlider.frame.origin.x + BeautyViewMargin, BeautyViewMargin, BeautyViewSliderHeight, BeautyViewSliderHeight);
     self.beautyLabel.layer.cornerRadius = self.beautyLabel.frame.size.width / 2;
     self.beautyLabel.layer.masksToBounds = YES;
     [self addSubview:self.beautyLabel];
-    
+    self.beautyLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     
     self.filterSlider.frame = CGRectMake(BeautyViewMargin * 4, BeautyViewMargin, self.frame.size.width - 10 * BeautyViewMargin - BeautyViewSliderHeight, BeautyViewSliderHeight);
     self.filterSlider.hidden = YES;
     [self addSubview:self.filterSlider];
-    
+    self.filterSlider.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+
     self.filterLabel.frame = CGRectMake(self.filterSlider.frame.size.width + self.filterSlider.frame.origin.x + BeautyViewMargin, BeautyViewMargin, BeautyViewSliderHeight, BeautyViewSliderHeight);
     self.filterLabel.layer.cornerRadius = self.filterLabel.frame.size.width / 2;
     self.filterLabel.layer.masksToBounds = YES;
     self.filterLabel.hidden = YES;
     [self addSubview:self.filterLabel];
-    _menuArray = @[/*@"原图", */@"风格", @"美颜", @"滤镜", @"动效", @"抠背", @"绿幕"];
-
-    NSArray *effectArray = @[@"清除", @"美白", @"浪漫", @"清新", @"唯美", @"粉嫩", @"怀旧", @"蓝调", @"清亮", @"日系"];
-    NSArray *beautyArray = @[@"美颜", @"美白", @"红润", @"大眼", @"瘦脸", /*@"美型", */@"v脸", @"下巴", @"短脸", @"瘦鼻"];
-    NSArray *beautyStyleArray = @[@"光滑", @"自然", @"p图"];
+    self.filterLabel.autoresizingMask = UIViewAutoresizingFlexibleLeftMargin;
     
-    NSArray *motionArray = @[@"无动效", @"video_boom" , @"video_nihongshu",    @"video_3DFace_dogglasses2",
+    _menuArray = @[/*L(@"BeautySettingPanel.FunctionArray1"),*/
+                   /*L(@"BeautySettingPanel.FunctionArray2"),*/
+                   L(@"BeautySettingPanel.FunctionArray3"),
+                   L(@"BeautySettingPanel.FunctionArray4"),
+                   L(@"BeautySettingPanel.FunctionArray5"),
+                   L(@"BeautySettingPanel.FunctionArray6"),
+                   L(@"BeautySettingPanel.FunctionArray7")];
+
+    NSArray *effectArray = @[L(@"BeautySettingPanel.EffectArray1"),
+                             L(@"BeautySettingPanel.EffectArray2"),
+                             L(@"BeautySettingPanel.EffectArray3"),
+                             L(@"BeautySettingPanel.EffectArray4"),
+                             L(@"BeautySettingPanel.EffectArray5"),
+                             L(@"BeautySettingPanel.EffectArray6"),
+                             L(@"BeautySettingPanel.EffectArray7"),
+                             L(@"BeautySettingPanel.EffectArray8"),
+                             L(@"BeautySettingPanel.EffectArray9"),
+                             L(@"BeautySettingPanel.EffectArray10"),
+                             L(@"BeautySettingPanel.EffectArray11"),
+                             L(@"BeautySettingPanel.EffectArray12"),
+                             L(@"BeautySettingPanel.EffectArray13"),
+                             L(@"BeautySettingPanel.EffectArray14"),
+                             L(@"BeautySettingPanel.EffectArray15"),
+                             L(@"BeautySettingPanel.EffectArray16"),
+                             L(@"BeautySettingPanel.EffectArray17"),
+                             L(@"BeautySettingPanel.EffectArray18")];
+
+    NSArray *beautyArray = @[L(@"BeautySettingPanel.BeautyArray1"),
+                             L(@"BeautySettingPanel.Beauty-Natural"),
+                             L(@"BeautySettingPanel.Beauty-P"),
+                             L(@"BeautySettingPanel.BeautyArray2"), 
+                             L(@"BeautySettingPanel.BeautyArray3"),
+                             L(@"BeautySettingPanel.BeautyArray4"),
+                             L(@"BeautySettingPanel.BeautyArray5"),
+                             L(@"BeautySettingPanel.BeautyArray6"),
+                             L(@"BeautySettingPanel.BeautyArray7"),
+                             L(@"BeautySettingPanel.BeautyArray8"),
+                             L(@"BeautySettingPanel.BeautyArray9")];
+//    NSArray *beautyStyleArray = @[L(@"BeautySettingPanel.BeautyTypeArray1"),
+//                                  L(@"BeautySettingPanel.BeautyTypeArray2"),
+//                                  L(@"BeautySettingPanel.BeautyTypeArray3")];
+    
+    NSArray *motionArray = @[L(@"BeautySettingPanel.None"), @"video_boom" , @"video_nihongshu",    @"video_3DFace_dogglasses2",
                              @"video_fengkuangdacall", @"video_Qxingzuo_iOS", @"video_caidai_iOS",
                              @"video_liuhaifadai",     @"video_rainbow",      @"video_purplecat",
                              @"video_huaxianzi",       @"video_baby_agetest"];
@@ -99,18 +135,20 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
                                                         video_liuhaifadai, video_nihongshu, video_rainbow, video_boom, video_fengkuangdacall,
                                                         video_purplecat, video_Qxingzuo_iOS);
     
-    NSArray *koubeiArray = @[@"无动效", @"video_xiaofu"];
+    NSArray *koubeiArray = @[L(@"BeautySettingPanel.None"), @"video_xiaofu"];
     _koubeiAddressDic = NSDictionaryOfVariableBindings(video_xiaofu);
     
-    NSArray *greenArray = @[@"清除", @"goodluck"];
+    NSArray *greenArray = @[L(@"BeautySettingPanel.EffectArray1"), @"goodluck"];
     
-    _optionsContainer = @[beautyStyleArray, beautyArray, effectArray, motionArray, koubeiArray, greenArray];
+    _optionsContainer = @[ beautyArray, effectArray, motionArray, koubeiArray, greenArray];
     _selectedIndexMap = [NSMutableDictionary dictionaryWithCapacity:_optionsContainer.count];
     
     self.optionsCollectionView.frame = CGRectMake(0, self.beautySlider.frame.size.height + self.beautySlider.frame.origin.y + BeautyViewMargin, self.frame.size.width, BeautyViewSliderHeight * 2 + 2 * BeautyViewMargin);
+    self.optionsCollectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self addSubview:self.optionsCollectionView];
     
     self.menuCollectionView.frame = CGRectMake(0, self.optionsCollectionView.frame.size.height + self.optionsCollectionView.frame.origin.y, self.frame.size.width, BeautyViewCollectionHeight);
+    self.menuCollectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [self addSubview:self.menuCollectionView];
 }
 
@@ -183,13 +221,18 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
             // 和上次选的一样
             return;
         }
+
         [self setSelectedIndexPath:indexPath];
         switch (_currentMenuIndex) {
-            case PannelMenuIndexBeautyStyle:
-                [self onValueChanged:self.beautySlider];
-                break;
             case PannelMenuIndexBeauty: {
-                if(indexPath.row == 6){
+                float value = [[self.beautyValueMap objectForKey:[NSNumber numberWithInteger:indexPath.row]] floatValue];
+                
+                if (indexPath.row < 3) {
+                    self.beautyStyle = indexPath.item;
+                    _beautyLevel = value;
+                }
+                
+                if(indexPath.row == 8){
                     //下巴
                     self.beautySlider.minimumValue = -10;
                     self.beautySlider.maximumValue = 10;
@@ -197,12 +240,16 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
                     self.beautySlider.minimumValue = 0;
                     self.beautySlider.maximumValue = 10;
                 }
-                float value = [[self.beautyValueMap objectForKey:[NSNumber numberWithInteger:indexPath.row]] floatValue];
                 self.beautyLabel.text = [NSString stringWithFormat:@"%d",(int)value];
                 [self.beautySlider setValue:value];
+                [self _applyBeautySettings];
             } break;
-            case PannelMenuIndexEffect: 
+            case PannelMenuIndexEffect: {
                 [self onSetEffectWithIndex:indexPath.row];
+                NSNumber* value = [self.filterMap objectForKey:@(indexPath.row)];
+                [self.filterSlider setValue:value.floatValue];
+                [self onValueChanged:self.filterSlider];
+            }
                 break;
             case PannelMenuIndexMotion:
                 [self onSetMotionWithIndex:indexPath.row];
@@ -237,12 +284,13 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
 
 #pragma mark - layout
 
-- (void)changeFunction:(NSInteger)index
+- (void)changeFunction:(PannelMenuIndex)index
 {
-    self.beautyLabel.hidden = index == 1? NO: YES;
-    self.beautySlider.hidden = index == 1? NO: YES;
-    self.filterLabel.hidden = index == 2? NO: YES;
-    self.filterSlider.hidden = index == 2? NO: YES;
+    self.beautyLabel.hidden  = index != PannelMenuIndexBeauty;
+    self.beautySlider.hidden = self.beautyLabel.hidden;
+    
+    self.filterLabel.hidden  = index != PannelMenuIndexEffect;
+    self.filterSlider.hidden = self.filterLabel.hidden;
 
     NSAssert(index < _optionsContainer.count, @"index out of range");
     [self.menuCollectionView cellForItemAtIndexPath:[NSIndexPath indexPathForItem:_currentMenuIndex inSection:0]].selected = NO;
@@ -250,79 +298,76 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
     [self.optionsCollectionView reloadData];
 }
 
+- (void)_applyBeautySettings {
+    if([self.delegate respondsToSelector:@selector(onSetBeautyStyle:beautyLevel:whitenessLevel:ruddinessLevel:)]){
+        [self.delegate onSetBeautyStyle:self.beautyStyle beautyLevel:_beautyLevel whitenessLevel:_whiteLevel ruddinessLevel:_ruddyLevel];
+    }
+}
 
 #pragma mark - value changed
 - (void)onValueChanged:(id)sender
 {
     UISlider *slider = (UISlider *)sender;
+    float value = slider.value;
     if(slider == self.filterSlider){
+        [self.filterMap setObject:[NSNumber numberWithFloat:self.filterSlider.value] forKey:[NSNumber numberWithInteger:[self selectedIndexPath].row]];
+
         self.filterLabel.text = [NSString stringWithFormat:@"%d",(int)self.filterSlider.value];
         if([self.delegate respondsToSelector:@selector(onSetMixLevel:)]){
             [self.delegate onSetMixLevel:self.filterSlider.value];
         }
-    }
-    else{
+    } else {
+        // 判断选择了哪个二级菜单
         int beautyIndex = (int)[self selectedIndexPathForMenu:PannelMenuIndexBeauty].row;
-        int beautyStyleIndex = (int)[self selectedIndexPathForMenu:PannelMenuIndexBeautyStyle].row;
         
         [self.beautyValueMap setObject:[NSNumber numberWithFloat:self.beautySlider.value] forKey:@(beautyIndex)];
         self.beautyLabel.text = [NSString stringWithFormat:@"%d",(int)self.beautySlider.value];
         
-        if(beautyIndex == 0){
-            if([self.delegate respondsToSelector:@selector(onSetBeautyStyle:beautyLevel:whitenessLevel:ruddinessLevel:)]){
-                _beautyLevel = self.beautySlider.value;
-                [self.delegate onSetBeautyStyle:beautyStyleIndex beautyLevel:_beautyLevel whitenessLevel:_whiteLevel ruddinessLevel:_ruddyLevel];
+        if(beautyIndex < 5) {
+            if (beautyIndex < 3) {
+                _beautyLevel = slider.value;
+            } else if (beautyIndex == 3) {
+                _whiteLevel = value;
+            } else if (beautyIndex == 4) {
+                _ruddyLevel = value;
             }
-        }
-        else if(beautyIndex == 1){
-            if([self.delegate respondsToSelector:@selector(onSetBeautyStyle:beautyLevel:whitenessLevel:ruddinessLevel:)]){
-                _whiteLevel = self.beautySlider.value;
-                [self.delegate onSetBeautyStyle:beautyStyleIndex beautyLevel:_beautyLevel whitenessLevel:_whiteLevel ruddinessLevel:_ruddyLevel];
-            }
-        }
-        else if(beautyIndex == 2){
-            if([self.delegate respondsToSelector:@selector(onSetBeautyStyle:beautyLevel:whitenessLevel:ruddinessLevel:)]){
-                _ruddyLevel = self.beautySlider.value;
-                [self.delegate onSetBeautyStyle:beautyStyleIndex beautyLevel:_beautyLevel whitenessLevel:_whiteLevel ruddinessLevel:_ruddyLevel];
-            }
-        }
-        else if(beautyIndex == 3){
+            [self _applyBeautySettings];
+        } 
+        
+        if(beautyIndex == 5) {
             if([self.delegate respondsToSelector:@selector(onSetEyeScaleLevel:)]){
-                [self.delegate onSetEyeScaleLevel:self.beautySlider.value];
-            }
-        }
-        else if(beautyIndex == 4){
-            if([self.delegate respondsToSelector:@selector(onSetFaceScaleLevel:)]){
-                [self.delegate onSetFaceScaleLevel:self.beautySlider.value];
-            }
-        }
-//        else if(beautyIndex == 5){
-//            if([self.delegate respondsToSelector:@selector(onSetFaceBeautyLevel:)]){
-//                [self.delegate onSetFaceBeautyLevel:self.beautySlider.value];
-//            }
-//        }
-        else if(beautyIndex == 5){
-            if([self.delegate respondsToSelector:@selector(onSetFaceVLevel:)]){
-                [self.delegate onSetFaceVLevel:self.beautySlider.value];
+                [self.delegate onSetEyeScaleLevel:value];
             }
         }
         else if(beautyIndex == 6){
-            if([self.delegate respondsToSelector:@selector(onSetChinLevel:)]){
-                [self.delegate onSetChinLevel:self.beautySlider.value];
+            if([self.delegate respondsToSelector:@selector(onSetFaceScaleLevel:)]){
+                [self.delegate onSetFaceScaleLevel:value];
             }
         }
+        //        else if(beautyIndex == 5){
+        //            if([self.delegate respondsToSelector:@selector(onSetFaceBeautyLevel:)]){
+        //                [self.delegate onSetFaceBeautyLevel:self.beautySlider.value];
+        //            }
+        //        }
         else if(beautyIndex == 7){
-            if([self.delegate respondsToSelector:@selector(onSetFaceShortLevel:)]){
-                [self.delegate onSetFaceShortLevel:self.beautySlider.value];
+            if([self.delegate respondsToSelector:@selector(onSetFaceVLevel:)]){
+                [self.delegate onSetFaceVLevel:value];
             }
         }
         else if(beautyIndex == 8){
-            if([self.delegate respondsToSelector:@selector(onSetNoseSlimLevel:)]){
-                [self.delegate onSetNoseSlimLevel:self.beautySlider.value];
+            if([self.delegate respondsToSelector:@selector(onSetChinLevel:)]){
+                [self.delegate onSetChinLevel:value];
             }
         }
-        else{
-            
+        else if(beautyIndex == 9){
+            if([self.delegate respondsToSelector:@selector(onSetFaceShortLevel:)]){
+                [self.delegate onSetFaceShortLevel:value];
+            }
+        }
+        else if(beautyIndex == 10){
+            if([self.delegate respondsToSelector:@selector(onSetNoseSlimLevel:)]){
+                [self.delegate onSetNoseSlimLevel:value];
+            }
         }
     }
 }
@@ -330,51 +375,119 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
 - (void)onSetEffectWithIndex:(NSInteger)index
 {
     if ([self.delegate respondsToSelector:@selector(onSetFilter:)]) {
-        NSString* lookupFileName = @"";
-        
-        switch (index) {
-            case 0:
-                break;
-            case 1:
-                lookupFileName = @"white.png";
-                break;
-            case 2:
-                lookupFileName = @"langman.png";
-                break;
-            case 3:
-                lookupFileName = @"qingxin.png";
-                break;
-            case 4:
-                lookupFileName = @"weimei.png";
-                break;
-            case 5:
-                lookupFileName = @"fennen.png";
-                break;
-            case 6:
-                lookupFileName = @"huaijiu.png";
-                break;
-            case 7:
-                lookupFileName = @"landiao.png";
-                break;
-            case 8:
-                lookupFileName = @"qingliang.png";
-                break;
-            case 9:
-                lookupFileName = @"rixi.png";
-                break;
-            default:
-                break;
-        }
-        NSString * path = [[NSBundle mainBundle] pathForResource:@"FilterResource" ofType:@"bundle"];
-        if (path != nil && index != FilterType_None) {
-            path = [path stringByAppendingPathComponent:lookupFileName];
-            UIImage *image = [UIImage imageWithContentsOfFile:path];
-            [self.delegate onSetFilter:image];
-            
-        } else {
-            [self.delegate onSetFilter:nil];
-        }
+        UIImage* image = [self filterImageByIndex:index];
+        [self.delegate onSetFilter:image];
     }
+}
+
+- (UIImage*)filterImageByIndex:(NSInteger)index
+{
+    NSString* lookupFileName = @"";
+    if (index < 0)
+        index = _optionsContainer[1].count - 1;
+    if (index > _optionsContainer[1].count - 1)
+        index = 0;
+    
+    switch (index) {
+        case 0:
+            break;
+        case 1:
+            lookupFileName = @"biaozhun.png";
+            break;
+        case 2:
+            lookupFileName = @"yinghong.png";
+            break;
+        case 3:
+            lookupFileName = @"yunshang.png";
+            break;
+        case 4:
+            lookupFileName = @"chunzhen.png";
+            break;
+        case 5:
+            lookupFileName = @"bailan.png";
+            break;
+        case 6:
+            lookupFileName = @"yuanqi.png";
+            break;
+        case 7:
+            lookupFileName = @"chaotuo.png";
+            break;
+        case 8:
+            lookupFileName = @"xiangfen.png";
+            break;
+        case 9:
+            lookupFileName = @"white.png";
+            break;
+        case 10:
+            lookupFileName = @"langman.png";
+            break;
+        case 11:
+            lookupFileName = @"qingxin.png";
+            break;
+        case 12:
+            lookupFileName = @"weimei.png";
+            break;
+        case 13:
+            lookupFileName = @"fennen.png";
+            break;
+        case 14:
+            lookupFileName = @"huaijiu.png";
+            break;
+        case 15:
+            lookupFileName = @"landiao.png";
+            break;
+        case 16:
+            lookupFileName = @"qingliang.png";
+            break;
+        case 17:
+            lookupFileName = @"rixi.png";
+            break;
+        default:
+            break;
+    }
+    NSString * path = [[NSBundle mainBundle] pathForResource:@"FilterResource" ofType:@"bundle"];
+    if (path != nil && index != FilterType_None) {
+        path = [path stringByAppendingPathComponent:lookupFileName];
+        return [UIImage imageWithContentsOfFile:path];
+    }
+    
+    return nil;
+}
+
+- (NSInteger)currentFilterIndex
+{
+    return _selectedIndexMap[@(1)].row;
+}
+
+- (NSString*)currentFilterName
+{
+    NSInteger index = self.currentFilterIndex;
+    return _optionsContainer[1][index];
+}
+
+- (void)setCurrentFilterIndex:(NSInteger)currentFilterIndex
+{
+    if (currentFilterIndex < 0)
+        currentFilterIndex = _optionsContainer[1].count - 1;
+    if (currentFilterIndex >= _optionsContainer[1].count)
+        currentFilterIndex = 0;
+    
+    NSIndexPath* indexPath = [NSIndexPath indexPathForRow:currentFilterIndex inSection:0];
+    _selectedIndexMap[@(1)] = indexPath;
+    //    self.selectEffectIndexPath = indexPath;
+    //    [self.effectCollectionView selectItemAtIndexPath:indexPath animated:YES scrollPosition:UICollectionViewScrollPositionCenteredHorizontally];
+    //    [self onValueChanged:self.filterSlider];
+//        [self collectionView:self.effectCollectionView didSelectItemAtIndexPath:indexPath];
+    [self changeFunction:PannelMenuIndexEffect];
+}
+
+-(float)filterMixLevelByIndex:(NSInteger)index
+{
+    if (index < 0)
+        index = self.filterMap.count - 1;
+    if (index > self.filterMap.count - 1)
+        index = 0;
+    return ((NSNumber*)[self.filterMap objectForKey:@(index)]).floatValue;
 }
 
 - (void)onSetGreenWithIndex:(NSInteger)index
@@ -506,18 +619,18 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
 {
     if (_motionNameMap == nil) {
         _motionNameMap = @{
-                           @"video_boom": @"Boom",
-                           @"video_nihongshu": @"霓虹鼠",
-                           @"video_3DFace_dogglasses2": @"眼镜狗",
-                           @"video_fengkuangdacall": @"疯狂打call",
-                           @"video_Qxingzuo_iOS" : @"Q星座",
-                           @"video_caidai_iOS" : @"彩色丝带",
-                           @"video_liuhaifadai" : @"刘海发带",
-                           @"video_rainbow": @"彩虹云",
-                           @"video_purplecat": @"紫色小猫",
-                           @"video_huaxianzi": @"花仙子",
-                           @"video_baby_agetest": @"小公举",
-                           @"video_xiaofu": @"AI抠背"
+                           @"video_boom": L(@"BeautySettingPanel.MotionName1"),
+                           @"video_nihongshu": L(@"BeautySettingPanel.MotionName2"),
+                           @"video_3DFace_dogglasses2": L(@"BeautySettingPanel.MotionName3"),
+                           @"video_fengkuangdacall": L(@"BeautySettingPanel.MotionName4"),
+                           @"video_Qxingzuo_iOS" : L(@"BeautySettingPanel.MotionName5"),
+                           @"video_caidai_iOS" : L(@"BeautySettingPanel.MotionName6"),
+                           @"video_liuhaifadai" : L(@"BeautySettingPanel.MotionName7"),
+                           @"video_rainbow": L(@"BeautySettingPanel.MotionName8"),
+                           @"video_purplecat": L(@"BeautySettingPanel.MotionName9"),
+                           @"video_huaxianzi": L(@"BeautySettingPanel.MotionName10"),
+                           @"video_baby_agetest": L(@"BeautySettingPanel.MotionName11"),
+                           @"video_xiaofu": L(@"BeautySettingPanel.MotionName12")
                            };
     }
     return _motionNameMap[motion] ?: motion;
@@ -627,27 +740,46 @@ typedef NS_ENUM(NSUInteger, PannelMenuIndex) {
     [self onSetGreenWithIndex:0];
     
     [self.beautyValueMap removeAllObjects];
-    [self.beautyValueMap setObject:@(6.3) forKey:@(0)]; //美颜默认值
-    [self.beautyValueMap setObject:@(2.7) forKey:@(1)]; //美白默认值
-    [self.beautyValueMap setObject:@(2.7) forKey:@(2)]; //红润默认值
+    [self.beautyValueMap setObject:@(6) forKey:@(1)]; //美颜默认值（自然）
+    [self.beautyValueMap setObject:@(5) forKey:@(2)]; //美颜默认值（天天PITU）
+    [self.beautyValueMap setObject:@(1) forKey:@(3)]; //美白默认值
     
-    _whiteLevel = 2.7;
-    _beautyLevel = 6.3;
-    _ruddyLevel = 2.7;
+    self.filterMap = [NSMutableDictionary new];
+    [self.filterMap setObject:@(0) forKey:@(0)];
+    [self.filterMap setObject:@(5) forKey:@(1)];
+    [self.filterMap setObject:@(8) forKey:@(2)];
+    [self.filterMap setObject:@(8) forKey:@(3)];
+    [self.filterMap setObject:@(7) forKey:@(4)];
+    [self.filterMap setObject:@(10) forKey:@(5)];
+    [self.filterMap setObject:@(8) forKey:@(6)];
+    [self.filterMap setObject:@(10) forKey:@(7)];
+    [self.filterMap setObject:@(5) forKey:@(8)];
+    [self.filterMap setObject:@(3) forKey:@(9)];
+    [self.filterMap setObject:@(3) forKey:@(10)];
+    [self.filterMap setObject:@(3) forKey:@(11)];
+    [self.filterMap setObject:@(3) forKey:@(12)];
+    [self.filterMap setObject:@(3) forKey:@(13)];
+    [self.filterMap setObject:@(3) forKey:@(14)];
+    [self.filterMap setObject:@(3) forKey:@(15)];
+    [self.filterMap setObject:@(3) forKey:@(16)];
+    [self.filterMap setObject:@(3) forKey:@(17)];
+    
+    _whiteLevel = 1;
+    _beautyLevel = 6;
+    _ruddyLevel = 0;
     
     self.beautySlider.minimumValue = 0;
     self.beautySlider.maximumValue = 10;
     float value = 6.3;;
     self.beautyLabel.text = [NSString stringWithFormat:@"%d",(int)value];
     self.beautySlider.value = value;
-    self.filterSlider.value = 3;
-    
-    [self setSelectedIndexPath:[NSIndexPath indexPathForItem:VIDOE_BEAUTY_STYLE_NATURE inSection:0]
-                       forMenu:PannelMenuIndexBeautyStyle];
-    
+    self.filterSlider.value = 5;
+        
     self.currentMenuIndex = PannelMenuIndexBeauty;
     [self onValueChanged:self.beautySlider];
-    [self onValueChanged:self.filterSlider];
+//    [self onValueChanged:self.filterSlider];
+    [self onSetEffectWithIndex:1];
+    _selectedIndexMap[@(1)] = [NSIndexPath indexPathForRow:1 inSection:0];
 }
 
 @end

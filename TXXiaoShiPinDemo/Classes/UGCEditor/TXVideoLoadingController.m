@@ -32,7 +32,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    self.title = @"选择视频";
+    self.title = NSLocalizedString(@"TCVideoLoading.ChoosingVideo", nil);
     self.view.backgroundColor = UIColor.blackColor;
     
 }
@@ -156,8 +156,8 @@
 
 - (void)exportAssetError
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"视频导出失败，原因可能是在导出的过程中，程序进后台，或则被闹钟，电话等打断" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"好" style:0 handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:NSLocalizedString(@"TCVideoLoading.HintVideoExportingFailed", nil) preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:NSLocalizedString(@"Common.OK", nil) style:0 handler:^(UIAlertAction * _Nonnull action) {
         [self.navigationController dismissViewControllerAnimated:YES completion:nil];
     }];
     [alert addAction:ok];

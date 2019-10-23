@@ -18,7 +18,7 @@
 #import "VideoPreview.h"
 #import "VideoCutView.h"
 #import "SDKHeader.h"
-#import "TransitionView.h"
+#import "PhotoTransitionToolbar.h"
 #import "SmallButton.h"
 
 typedef  NS_ENUM(NSInteger,VideoType)
@@ -26,10 +26,6 @@ typedef  NS_ENUM(NSInteger,VideoType)
     VideoType_Video,
     VideoType_Picture,
 };
-
-#define HeightDist  52 * kScaleY
-
-
 @interface TCVideoCutViewController ()<TXVideoGenerateListener,VideoPreviewDelegate, VideoCutViewDelegate,TransitionViewDelegate>
 @property(nonatomic,strong) TXVideoEditer *ugcEdit;
 @property(nonatomic,strong) VideoPreview  *videoPreview;
@@ -62,9 +58,13 @@ typedef  NS_ENUM(NSInteger,VideoType)
     BOOL               _hasNomalGenerate;
     
     VideoCutView*    _videoCutView;
-    TransitionView*  _transitionView;
+    PhotoTransitionToolbar*  _photoTransitionToolbar;
     RangeContentConfig *_config;
     VideoType        _videoType;
+    int              _renderRotation;
+    
+    CGFloat bottomToolbarHeight;
+    CGFloat bottomInset;
 }
 
 
@@ -129,16 +129,26 @@ typedef  NS_ENUM(NSInteger,VideoType)
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    bottomToolbarHeight = 52;
+    bottomInset = 10;
+    
     _videoPreview = [[VideoPreview alloc] initWithFrame:CGRectMake(0, 0, self.view.width, self.view.height) coverImage:nil];
     _videoPreview.delegate = self;
     [self.view addSubview:_videoPreview];
     
+    if (@available(iOS 11, *)) {
+        bottomInset += [UIApplication sharedApplication].keyWindow.safeAreaInsets.bottom;
+    }
+    if (kScaleY < 1) {
+        bottomToolbarHeight = round(bottomToolbarHeight * kScaleY);
+    }
     UILabel *barTitleLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0 , 100, 44)];
     barTitleLabel.backgroundColor = [UIColor clearColor];
     barTitleLabel.font = [UIFont boldSystemFontOfSize:17];
     barTitleLabel.textColor = [UIColor whiteColor];
     barTitleLabel.textAlignment = NSTextAlignmentCenter;
-    barTitleLabel.text = @"编辑视频";
+    barTitleLabel.text = NSLocalizedString(@"TCVideoCutView.VideoEdit", nil);
     self.navigationItem.titleView = barTitleLabel;
     self.view.backgroundColor = UIColor.blackColor;
     
@@ -153,7 +163,7 @@ typedef  NS_ENUM(NSInteger,VideoType)
     UIButton *btnNext = [UIButton buttonWithType:UIButtonTypeCustom];
     btnNext.bounds = CGRectMake(0, 0, btnNextWidth, btnNextHeight);
     btnNext.center = CGPointMake(self.view.right - 15 * kScaleX - btnNextWidth / 2, 20 + btnNextHeight / 2);
-    [btnNext setTitle:@"下一步" forState:UIControlStateNormal];
+    [btnNext setTitle:NSLocalizedString(@"Common.Next", nil) forState:UIControlStateNormal];
     btnNext.titleLabel.font = [UIFont systemFontOfSize:14];
     [btnNext setBackgroundImage:[UIImage imageNamed:@"next_normal"] forState:UIControlStateNormal];
     [btnNext setBackgroundImage:[UIImage imageNamed:@"next_press"] forState:UIControlStateHighlighted];
@@ -194,6 +204,7 @@ typedef  NS_ENUM(NSInteger,VideoType)
     _ugcEdit.generateDelegate = self;
     _ugcEdit.previewDelegate = _videoPreview;
     
+    CGPoint rotateButtonCenter  = CGPointZero;
     //video
     if (_videoAsset != nil) {
         _videoType = VideoType_Video;
@@ -205,19 +216,31 @@ typedef  NS_ENUM(NSInteger,VideoType)
         _duration = videoMsg.duration;
         _rightTime = _duration;
         _endTimeLabel.text = [NSString stringWithFormat:@"%d:%02d", (int)_duration / 60, (int)_duration % 60];
+        rotateButtonCenter = CGPointMake(_videoCutView.right - 20, _videoCutView.top - 20);
     }
     //image
     if (_imageList != nil) {
         _videoType = VideoType_Picture;
         
-        _transitionView = [[TransitionView alloc] initWithFrame:CGRectMake(0, self.view.height - 2.5 * HeightDist - 20 * kScaleY, self.view.width,HeightDist)];
-        _transitionView.delegate = self;
-        [self.view addSubview:_transitionView];
-        
+        _photoTransitionToolbar = [[PhotoTransitionToolbar alloc] initWithFrame:CGRectMake(0, self.view.height - bottomInset - bottomToolbarHeight, self.view.width, bottomToolbarHeight)];
+        _photoTransitionToolbar.delegate = self;
+        [self.view addSubview:_photoTransitionToolbar];
+        _photoTransitionToolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         [_ugcEdit setPictureList:_imageList fps:30];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
              [self onVideoTransitionLefRightSlipping];
         });
+        rotateButtonCenter = CGPointMake(_photoTransitionToolbar.right - 20 - bottomToolbarHeight, _photoTransitionToolbar.top - bottomToolbarHeight - 10 - 20);
+    }
+    
+    if (_videoType == VideoType_Video) {
+        // rotation button
+        UIButton *rotateButton = [SmallButton buttonWithType:UIButtonTypeCustom];
+        [rotateButton setImage:[UIImage imageNamed:@"icon_rotate_video_view"] forState:UIControlStateNormal];
+        [rotateButton sizeToFit];
+        rotateButton.center = rotateButtonCenter;
+        [rotateButton addTarget:self action:@selector(onRotatePreview:) forControlEvents:UIControlEventTouchUpInside];
+        [self.view addSubview:rotateButton];
     }
 }
 
@@ -239,7 +262,7 @@ typedef  NS_ENUM(NSInteger,VideoType)
         
         _generationTitleLabel = [UILabel new];
         _generationTitleLabel.font = [UIFont systemFontOfSize:14];
-        _generationTitleLabel.text = @"视频生成中";
+        _generationTitleLabel.text = NSLocalizedString(@"TCVideoCutView.VideoGenerating", nil);
         _generationTitleLabel.textColor = UIColor.whiteColor;
         _generationTitleLabel.textAlignment = NSTextAlignmentCenter;
         _generationTitleLabel.frame = CGRectMake(0, _generateProgressView.y - 34, _generationView.width, 14);
@@ -261,20 +284,22 @@ typedef  NS_ENUM(NSInteger,VideoType)
 
 - (void)initVideoCutView
 {
-    CGRect frame = CGRectMake(0, self.view.height - HeightDist - 20 * kScaleY, self.view.width,HeightDist);
     if (_videoType == VideoType_Video) {
+        CGRect frame = CGRectMake(0, self.view.height - bottomToolbarHeight - bottomInset, self.view.width,bottomToolbarHeight);
         if(_videoCutView) [_videoCutView removeFromSuperview];
-        _videoCutView = [[VideoCutView alloc] initWithFrame:frame videoPath:nil videoAssert:_videoAsset config:_config];
+        _videoCutView = [[VideoCutView alloc] initWithFrame:frame videoPath:nil videoAsset:_videoAsset config:_config];
         [self.view addSubview:_videoCutView];
     }else{
+        CGRect frame = CGRectMake(0, self.view.height - bottomToolbarHeight - bottomInset - 10 - bottomToolbarHeight, self.view.width,bottomToolbarHeight);
         if (_videoCutView) {
             [_videoCutView updateFrame:_duration];
         }else{
             [_videoCutView removeFromSuperview];
-            _videoCutView = [[VideoCutView alloc] initWithFrame:frame pictureList:_imageList duration:_duration config:_config];
+            _videoCutView = [[VideoCutView alloc] initWithFrame:frame pictureList:_imageList duration:_duration fps:30 config:_config];
             [self.view addSubview:_videoCutView];
         }
     }
+    _videoCutView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _videoCutView.delegate = self;
     [_videoCutView setCenterPanHidden:YES];
 }
@@ -286,6 +311,12 @@ typedef  NS_ENUM(NSInteger,VideoType)
     [_videoPreview setPlayBtn:NO];
 }
 
+#pragma makr - Actions
+- (void)onRotatePreview:(id)sender
+{
+    _renderRotation += 90;
+    [_ugcEdit setRenderRotation:_renderRotation];    
+}
 
 - (void)onBtnPopClicked
 {
@@ -301,21 +332,29 @@ typedef  NS_ENUM(NSInteger,VideoType)
     [_videoPreview setPlayBtn:NO];
     
     if (_videoType == VideoType_Video) {
-        if (_leftTime == 0 && _rightTime == _duration) {
-            //视频如果没发生剪裁，这里不用走编辑逻辑，减少画面质量损失
+        TXVideoInfo *videoInfo = [TXVideoInfoReader getVideoInfoWithAsset:_videoAsset];
+        BOOL largerThan1080p = videoInfo.width * videoInfo.height > 1920*1080;
+        BOOL hasBeenRotated = _renderRotation % 360 != 0;
+        if (_leftTime == 0 && _rightTime == _duration && !largerThan1080p && !hasBeenRotated) {
+            //视频如果没发生剪裁，也没有旋转，这里不用走编辑逻辑，减少画面质量损失
             TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
+            vc.renderRotation = _renderRotation;
             vc.videoAsset = _videoAsset;
             vc.isFromCut = YES;
             [self.navigationController pushViewController:vc animated:YES];
             //销毁掉编辑器，减少内存占用
             _ugcEdit = nil;
         }else{
-            //优先使用快速剪切，速度快
             _generationView = [self generatingView];
             _generationView.hidden = NO;
-            _hasQuickGenerate = YES;
             [_ugcEdit setCutFromTime:_leftTime toTime:_rightTime];
-            [_ugcEdit quickGenerateVideo:VIDEO_COMPRESSED_720P videoOutputPath:_videoOutputPath];
+            if (largerThan1080p || _renderRotation % 360 != 0) {
+                [_ugcEdit generateVideo:VIDEO_COMPRESSED_720P videoOutputPath:_videoOutputPath];
+            } else {
+                //使用快速剪切，速度快
+                _hasQuickGenerate = YES;
+                [_ugcEdit quickGenerateVideo:VIDEO_COMPRESSED_720P videoOutputPath:_videoOutputPath];
+            }
         }
     }else{
         //图片编辑只能走正常生成逻辑，这里使用高码率，保留更多图片细节
@@ -335,71 +374,45 @@ typedef  NS_ENUM(NSInteger,VideoType)
 }
 
 #pragma mark TransitionViewDelegate
-- (void)onVideoTransitionLefRightSlipping
-{
+- (void)_onVideoTransition:(TXTransitionType)type {
     __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_LefRightSlipping duration:^(CGFloat duration) {
-        _duration = duration;
-        _rightTime = duration;
-        [weakSelf initVideoCutView];
-        [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
-    }];
-}
-
-- (void)onVideoTransitionUpDownSlipping
-{
-    __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_UpDownSlipping duration:^(CGFloat duration) {
-        _duration = duration;
-        _rightTime = duration;
-        [weakSelf initVideoCutView];
-        [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
-    }];
-}
-
-- (void)onVideoTransitionEnlarge
-{
-    __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_Enlarge duration:^(CGFloat duration) {
-        _duration = duration;
-        _rightTime = duration;
-        [weakSelf initVideoCutView];
-        [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
-    }];
-}
-
-- (void)onVideoTransitionNarrow
-{
-    __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_Narrow duration:^(CGFloat duration) {
-        _duration = duration;
-        _rightTime = duration;
-        [weakSelf initVideoCutView];
-        [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
-    }];
-}
-
-- (void)onVideoTransitionRotationalScaling
-{
-    __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_RotationalScaling duration:^(CGFloat duration) {
-        _duration = duration;
-        _rightTime = duration;
-        [weakSelf initVideoCutView];
-        [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
-    }];
-}
-
-- (void)onVideoTransitionFadeinFadeout
-{
-    __weak __typeof(self) weakSelf = self;
-    [_ugcEdit setPictureTransition:TXTransitionType_FadeinFadeout duration:^(CGFloat duration) {
+    [_ugcEdit setPictureTransition:type duration:^(CGFloat duration) {
         _duration = duration;
         _rightTime = duration;
         [weakSelf initVideoCutView];
         [weakSelf.ugcEdit startPlayFromTime:0 toTime:weakSelf.duration];
         [weakSelf.videoPreview setPlayBtn:YES];
     }];
+}
+
+- (void)onVideoTransitionLefRightSlipping
+{
+    [self _onVideoTransition:TXTransitionType_LefRightSlipping];
+}
+
+- (void)onVideoTransitionUpDownSlipping
+{
+    [self _onVideoTransition:TXTransitionType_UpDownSlipping];
+}
+
+- (void)onVideoTransitionEnlarge
+{
+    [self _onVideoTransition:TXTransitionType_Enlarge];
+}
+
+- (void)onVideoTransitionNarrow
+{
+    [self _onVideoTransition:TXTransitionType_Narrow];
+}
+
+- (void)onVideoTransitionRotationalScaling
+{
+    [self _onVideoTransition:TXTransitionType_RotationalScaling];
+}
+
+- (void)onVideoTransitionFadeinFadeout
+{
+    [self _onVideoTransition:TXTransitionType_FadeinFadeout];
 }
 
 #pragma mark TXVideoGenerateListener
@@ -412,12 +425,23 @@ typedef  NS_ENUM(NSInteger,VideoType)
 {
     _generationView.hidden = YES;
     if (result.retCode == 0) {
-        TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
-        vc.videoPath = _videoOutputPath;
-        vc.isFromCut = YES;
-        [self.navigationController pushViewController:vc animated:YES];
-        //销毁掉编辑器，减少内存占用
-        _ugcEdit = nil;
+        if (_videoType == VideoType_Picture) {
+            NSFileManager *fm = [[NSFileManager alloc] init];
+            NSString *rename = [_videoOutputPath stringByAppendingString:@"-tmp.mp4"];
+            [fm removeItemAtPath:rename error:nil];
+            [fm moveItemAtPath:_videoOutputPath toPath:rename error:nil];
+            
+            TCVideoCutViewController *vc = [[TCVideoCutViewController alloc]init];
+            vc.videoAsset = [AVAsset assetWithURL:[NSURL fileURLWithPath:rename]];
+            [self.navigationController pushViewController:vc animated:YES];
+        } else {
+            TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
+            vc.videoPath = _videoOutputPath;
+            vc.isFromCut = YES;
+            [self.navigationController pushViewController:vc animated:YES];
+            //销毁掉编辑器，减少内存占用
+            _ugcEdit = nil;
+        }
     }else{
         //系统剪切如果失败，这里使用SDK正常剪切，设置高码率，保留图像更多的细节
         if (_hasQuickGenerate && !_hasNomalGenerate) {
@@ -429,10 +453,10 @@ typedef  NS_ENUM(NSInteger,VideoType)
             [_ugcEdit generateVideo:VIDEO_COMPRESSED_720P videoOutputPath:_videoOutputPath];
             _hasNomalGenerate = YES;
         }else{
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频生成失败"
-                                                                message:[NSString stringWithFormat:@"错误码：%ld 错误信息：%@",(long)result.retCode,result.descMsg]
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoCutView.HintVideoGeneratingFailed", nil)
+                                                                message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCodeMessage", nil),(long)result.retCode,result.descMsg]
                                                                delegate:self
-                                                      cancelButtonTitle:@"知道了"
+                                                      cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                       otherButtonTitles:nil, nil];
             [alertView show];
         }
