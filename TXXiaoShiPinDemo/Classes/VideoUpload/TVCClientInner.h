@@ -8,9 +8,6 @@
 
 #import "TVCHeader.h"
 
-//#define UCG_HTTP_URL    @"http://112.90.82.173/v3/index.php"
-//#define UCG_HTTPS_URL   @"http://112.90.82.173/v3/index.php"
-
 #define UCG_HTTP_URL    @"http://vod2.qcloud.com/v3/index.php"
 #define UCG_HTTPS_URL   @"https://vod2.qcloud.com/v3/index.php"
 

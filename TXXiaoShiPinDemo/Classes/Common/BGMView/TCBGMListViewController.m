@@ -26,7 +26,7 @@
 
 @implementation TCBGMListViewController
 {
-    TCBGMCell *_BGMCell;
+    NSIndexPath *_BGMCellPath;
     BOOL      _useLocalMusic;
 }
 
@@ -52,7 +52,7 @@
 
 -(void)viewDidLoad{
     [super viewDidLoad];
-    self.title = @"选择背景音乐";
+    self.title = NSLocalizedString(@"TCBGMListView.TitileChooseBGM", nil);
     UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"back"] style:UIBarButtonItemStylePlain target:self action:@selector(goBack)];
     self.navigationItem.leftBarButtonItem = customBackButton;
 
@@ -104,19 +104,27 @@
     TCBGMElement* ele =  _bgmDict[_bgmKeys[indexPath.row]];
     if (ele.localUrl) {
         [cell setDownloadProgress:1.0];
-        cell.progressView.hidden = NO;
+        cell.progressView.hidden = YES;
     }else{
         cell.progressView.hidden = YES;
-        [cell.downLoadBtn setTitle:@"下载" forState:UIControlStateNormal];
+        [cell.downLoadBtn setTitle:NSLocalizedString(@"Common.Download", nil) forState:UIControlStateNormal];
     }
+    cell.downLoadBtn.hidden = [_BGMCellPath isEqual:indexPath];
     cell.musicLabel.text = ele.name;
     return cell;
 }
 
 - (void)onBGMDownLoad:(TCBGMCell *)cell;
 {
-    _BGMCell = cell;
-    NSIndexPath *indexPath = [self.tableView indexPathForCell:_BGMCell];
+    if (_BGMCellPath) {
+        TCBGMCell *cell = (TCBGMCell*)[self.tableView cellForRowAtIndexPath:_BGMCellPath];
+        cell.progressView.hidden = YES;
+        cell.downLoadBtn.hidden  = NO;
+    }
+    NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
+    _BGMCellPath = indexPath;
+    cell.downLoadBtn.hidden = YES;
+    cell.progressView.hidden = NO;
     TCBGMElement* ele =  _bgmDict[_bgmKeys[indexPath.row]];
     if([ele isValid] && [[NSFileManager defaultManager] fileExistsAtPath:[NSHomeDirectory() stringByAppendingPathComponent:[ele localUrl]]]){
         [_bgmListener onBGMControllerPlay: [NSHomeDirectory() stringByAppendingPathComponent:[ele localUrl]]];
@@ -138,7 +146,7 @@
             if([[ele isValid] boolValue]){
                 [_progressList setObject :[NSNumber numberWithFloat:1.f] forKey:url];
             }
-            NSRange range = [ele.name rangeOfString:@"青花瓷"];
+            NSRange range = [ele.name rangeOfString:@"青花瓷"]; //AppStore审核用
             if (range.location != NSNotFound) {
                 findKeyBGM = YES;
             }
@@ -157,7 +165,12 @@
 
 -(void) onBGMDownloading:(TCBGMElement*)current percent:(float)percent{
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_BGMCell setDownloadProgress:percent];
+        if ([[self.tableView indexPathsForVisibleRows] containsObject:_BGMCellPath]) {
+            TCBGMCell *cell = [self.tableView cellForRowAtIndexPath:_BGMCellPath];
+            cell.progressView.hidden = NO;
+            cell.downLoadBtn.hidden = YES;
+            [cell setDownloadProgress:percent];
+        }
     });
 }
 
@@ -166,6 +179,10 @@
         BGMLog(@"Download \"%@\" success!", [element name]);
         [_progressList setObject :[NSNumber numberWithFloat:1.f] forKey:[element netUrl]];
         dispatch_async(dispatch_get_main_queue(), ^{
+            TCBGMCell *cell = [self.tableView cellForRowAtIndexPath:_BGMCellPath];
+            cell.progressView.hidden = YES;
+            cell.downLoadBtn.hidden = NO;
+            _BGMCellPath = nil;
             [self.navigationController dismissViewControllerAnimated:YES completion:nil];
         });
         [_bgmListener onBGMControllerPlay: [NSHomeDirectory() stringByAppendingPathComponent:[element localUrl]]];

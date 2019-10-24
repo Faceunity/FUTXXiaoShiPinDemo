@@ -10,7 +10,6 @@
 #import "UIView+Additions.h"
 #import "ColorMacro.h"
 
-#define kDefaultText @"点击修改文字"
 
 @interface VideoPasterView () <UITextViewDelegate, UITextFieldDelegate>
 {

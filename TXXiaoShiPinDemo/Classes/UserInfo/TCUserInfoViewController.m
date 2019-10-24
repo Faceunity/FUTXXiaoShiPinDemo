@@ -16,8 +16,13 @@
 #import <mach/mach.h>
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import "TCWebViewController.h"
 
 #import "SDKHeader.h"
+
+static NSString * const HomePageURL = @"https://cloud.tencent.com/product/ugsv";
+#define L(X) NSLocalizedString((X), nil)
+
 
 extern BOOL g_bNeedEnterPushSettingView;
 
@@ -42,6 +47,7 @@ extern BOOL g_bNeedEnterPushSettingView;
     [[TCLoginModel sharedInstance] logout:^{
         [[TCLoginParam shareInstance] clearLocal];
         [app enterLoginUI];
+        [self.dataTable reloadData];
     }];
 }
 
@@ -72,22 +78,27 @@ extern BOOL g_bNeedEnterPushSettingView;
     //    TCUserInfoCellItem *setItem = [[TCUserInfoCellItem alloc] initWith:@"编辑个人信息" value:nil type:TCUserInfo_Edit action:^(TCUserInfoCellItem *menu, TCUserInfoTableViewCell *cell) {
     //        [ws onEditUserInfo:menu cell:cell]; } ];
     
-    TCUserInfoCellItem *aboutItem = [[TCUserInfoCellItem alloc] initWith:@"关于小视频" value:nil type:TCUserInfo_About action:^(TCUserInfoCellItem *menu, TCUserInfoTableViewCell *cell) { [ws onShowAppVersion:menu cell:cell]; } ];
+    TCUserInfoCellItem *aboutItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"TCUserInfoView.HintAboutApp", nil) value:nil type:TCUserInfo_About action:^(TCUserInfoCellItem *menu, TCUserInfoTableViewCell *cell) { [ws onShowAppVersion:menu cell:cell]; } ];
     
-    CGFloat tableHeight = 320;
-    CGFloat quitBtnYSpace = 340;
+    TCUserInfoCellItem *getSupportItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"获取技术支持服务", nil) value:nil type:TCUserInfo_About action:^(TCUserInfoCellItem *menu, TCUserInfoTableViewCell *cell) { [ws onShowAppSupport:menu cell:cell]; } ];
+    
+    TCUserInfoCellItem *aboutSDKItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"TCUserInfoView.ProductIntroduction", nil) value:nil type:TCUserInfo_About action:^(TCUserInfoCellItem *menu, TCUserInfoTableViewCell *cell) { [ws onShowSDKInfo:menu cell:cell]; } ];
+
+    
+    CGFloat tableHeight = self.view.height;// 365;
+    CGFloat quitBtnYSpace = tableHeight + 20;
     //    _userInfoUISetArry = [NSMutableArray arrayWithArray:@[backFaceItem,setItem, aboutItem]];
     
-    _userInfoUISetArry = [NSMutableArray arrayWithArray:@[backFaceItem,aboutItem]];
+    _userInfoUISetArry = [NSMutableArray arrayWithArray:@[backFaceItem,aboutItem,getSupportItem,aboutSDKItem]];
     
     //设置tableview属性
     CGRect frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y, self.view.frame.size.width, tableHeight);
     _dataTable = [[UITableView alloc] initWithFrame:frame style:UITableViewStylePlain];
+    _dataTable.backgroundColor = UIColor.clearColor;
     [_dataTable setDelegate:self];
     [_dataTable setDataSource:self];
     [_dataTable setScrollEnabled:NO];
     [_dataTable setSeparatorColor:[UIColor clearColor]];
-    [self setExtraCellLineHidden:_dataTable];
     [self.view addSubview:_dataTable];
     
     //计算退出登录按钮的位置和显示
@@ -95,11 +106,16 @@ extern BOOL g_bNeedEnterPushSettingView;
     _loginBtn.frame = CGRectMake(0, quitBtnYSpace, self.view.frame.size.width, 45);
     _loginBtn.backgroundColor = [UIColor whiteColor];
     _loginBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-    [_loginBtn setTitle:@"登录" forState: UIControlStateNormal];
+    [_loginBtn setTitle:NSLocalizedString(@"TCLoginView.Login", nil) forState: UIControlStateNormal];
     [_loginBtn setTitleColor:RGB(0xFF,0x58,0x4C) forState:UIControlStateNormal];
     [_loginBtn setBackgroundColor:RGB(0x1F,0x25,0x31)];
     [_loginBtn addTarget:self action:@selector(logout:) forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:_loginBtn];
+    
+    UIView *wrapper = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.width, 75)];
+    wrapper.backgroundColor = UIColor.clearColor;
+    [wrapper addSubview:_loginBtn];
+    _loginBtn.bottom = wrapper.height;
+    _dataTable.tableFooterView = wrapper;
 }
 
 #pragma mark 与view界面相关
@@ -115,9 +131,9 @@ extern BOOL g_bNeedEnterPushSettingView;
     [self.navigationController setNavigationBarHidden:YES];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent animated:NO];
     if([TCLoginParam shareInstance].isExpired){
-        [_loginBtn setTitle:@"登录" forState: UIControlStateNormal];
+        [_loginBtn setTitle:NSLocalizedString(@"TCLoginView.Login", nil) forState: UIControlStateNormal];
     }else{
-        [_loginBtn setTitle:@"退出登录" forState: UIControlStateNormal];
+        [_loginBtn setTitle:NSLocalizedString(@"TCUserInfoView.Logout", nil) forState: UIControlStateNormal];
     }
     [_dataTable reloadData];
 }
@@ -133,17 +149,6 @@ extern BOOL g_bNeedEnterPushSettingView;
     [_dataTable reloadData];
 }
 
-/**
- *  用于去掉界面上多余的横线
- *
- *  @param tableView 无意义
- */
--(void)setExtraCellLineHidden: (UITableView *)tableView
-{
-    UIView *view = [UIView new];
-    view.backgroundColor = [UIColor clearColor];
-    [_dataTable setTableFooterView:view];
-}
 #pragma mark 绘制用户信息页面上的tableview
 //获取需要绘制的cell数目
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -201,6 +206,15 @@ extern BOOL g_bNeedEnterPushSettingView;
 //    TCEditUserInfoViewController *vc = [[TCEditUserInfoViewController alloc] init];
 //    [self.navigationController pushViewController:vc animated:true];
 }
+
+/// 获取技术支持按钮事件
+- (void)onShowAppSupport:(id)menu cell:(id)cell
+{
+    NSString *message = [@[L(@"关注公众号“腾讯云视频”"), L(@"给公众号发送“小视频”")] componentsJoinedByString:@"\n"];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"获取技术支持服务", nil) message:message delegate:nil cancelButtonTitle:NSLocalizedString(@"Common.Close", nil) otherButtonTitles:nil, nil];
+    [alert show];
+}
+
 /**
  *  用户显示小直播的版本号信息
  *
@@ -209,12 +223,27 @@ extern BOOL g_bNeedEnterPushSettingView;
  */
 - (void)onShowAppVersion:(TCUserInfoCellItem *)menu cell:(TCUserInfoTableViewCell *)cell
 {
-    NSString* rtmpSDKVersion = [NSString stringWithFormat:@"RTMP SDK版本号: %@",[TXLiveBase getSDKVersionStr]];
+    NSString* rtmpSDKVersion = [NSString stringWithFormat:NSLocalizedString(@"TCUserInfoView.InfoRTMPFmt", nil),[TXLiveBase getSDKVersionStr]];
     NSString* appVersion = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
     
-    NSString *info = [NSString stringWithFormat:@"App版本号：%@\n%@", appVersion, rtmpSDKVersion];
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"关于小视频" message:info delegate:nil cancelButtonTitle:@"关闭" otherButtonTitles:nil, nil];
+    NSString *info = [NSString stringWithFormat:NSLocalizedString(@"TCUserInfoView.InfoAppFmt", nil), appVersion, rtmpSDKVersion];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCUserInfoView.HintAboutApp", nil) message:info delegate:nil cancelButtonTitle:NSLocalizedString(@"Common.Close", nil) otherButtonTitles:nil, nil];
     [alert show];
+}
+
+/**
+ *  用户显示SDK信息
+ *
+ *  @param menu 无意义
+ *  @param cell 无意义
+ */
+- (void)onShowSDKInfo:(TCUserInfoCellItem *)menu cell:(TCUserInfoTableViewCell *)cell
+{
+    [TCUtil report:xiaoshipin_about_sdk userName:nil code:0 msg:@"点击关于SDK"];
+    TCWebViewController *next = [[TCWebViewController alloc] initWithURL:HomePageURL];
+    next.hidesBottomBarWhenPushed = YES;
+    [self.navigationController pushViewController:next animated:YES];
+//    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"https://cloud.tencent.com/product/UGSV"]];
 }
 
 @end

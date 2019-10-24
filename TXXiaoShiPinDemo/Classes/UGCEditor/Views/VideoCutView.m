@@ -12,6 +12,7 @@
 #import "ColorMacro.h"
 #import "UIView+Additions.h"
 #import "SDKHeader.h"
+#import <CoreImage/CoreImage.h>
 
 @interface VideoCutView ()<VideoRangeSliderDelegate>
 
@@ -21,22 +22,26 @@
 {
     CGFloat         _duration;          //视频时长
     NSString*       _videoPath;         //视频路径
-    AVAsset*        _videoAssert;
+    AVAsset*        _videoAsset;
     BOOL            _isContinue;
 }
 
-- (id)initWithFrame:(CGRect)frame videoPath:(NSString *)videoPath  videoAssert:(AVAsset *)videoAssert config:(RangeContentConfig *)config
+- (id)initWithFrame:(CGRect)frame videoPath:(NSString *)videoPath  videoAsset:(AVAsset *)videoAsset config:(RangeContentConfig *)config
 {
     if (self = [super initWithFrame:frame]) {
         _videoPath = videoPath;
-        _videoAssert = videoAssert;
+        _videoAsset = videoAsset;
+        if (videoAsset == nil) {
+            _videoAsset = [AVAsset assetWithURL:[NSURL fileURLWithPath:videoPath]];
+        }
         
         _videoRangeSlider = [[VideoRangeSlider alloc] initWithFrame:self.bounds];
         [_videoRangeSlider setAppearanceConfig:config];
         [self addSubview:_videoRangeSlider];
         
-        TXVideoInfo *videoMsg = [TXVideoInfoReader getVideoInfoWithAsset:_videoAssert];
+        TXVideoInfo *videoMsg = [TXVideoInfoReader getVideoInfoWithAsset:_videoAsset];
         _duration   = videoMsg.duration;
+        _videoRangeSlider.fps = videoMsg.fps;
         
         //显示微缩图列表
         _imageList = [NSMutableArray new];
@@ -47,16 +52,19 @@
         UIGraphicsBeginImageContext(CGSizeMake(1, 1));
         UIImage *placeholder = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
-        
-        [TXVideoInfoReader getSampleImages:imageNum videoAsset:_videoAssert progress:^BOOL(int number, UIImage *image) {
+
+        CGFloat size = round(frame.size.height * [UIScreen mainScreen].scale);
+
+        [TXVideoInfoReader getSampleImages:imageNum maxSize:CGSizeMake(size, size) videoAsset:_videoAsset progress:^BOOL(int number, UIImage *image) {
             if (!_isContinue) {
                 return NO;
             }else{
-                dispatch_async(dispatch_get_main_queue(), ^{
+                dispatch_async(dispatch_get_main_queue(), ^{@autoreleasepool {
                     if (!_isContinue) {
                         return;
                     }
                     UIImage *img = image ?: placeholder;
+                    
                     if (number == 1) {
                         _videoRangeSlider.delegate = self;
                         for (int i = 0; i < imageNum; i++) {
@@ -65,18 +73,19 @@
                         [_videoRangeSlider setImageList:_imageList];
                         [_videoRangeSlider setDurationMs:_duration];
                     } else {
-                        _imageList[number-1] = image;
-                        [_videoRangeSlider updateImage:image atIndex:number-1];
+                        _imageList[number-1] = img;
+                        [_videoRangeSlider updateImage:img atIndex:number-1];
                     }
-                });
+                }});
                 return YES;
             }
         }];
+      
     }
     return self;
 }
 
-- (id)initWithFrame:(CGRect)frame pictureList:(NSArray *)pictureList  duration:(CGFloat)duration config:(RangeContentConfig *)config
+- (id)initWithFrame:(CGRect)frame pictureList:(NSArray *)pictureList  duration:(CGFloat)duration fps:(float)fps config:(RangeContentConfig *)config
 {
     if (self = [super initWithFrame:frame]) {
         _duration   = duration;
@@ -84,6 +93,7 @@
         
         _videoRangeSlider = [[VideoRangeSlider alloc] initWithFrame:self.bounds];
         [_videoRangeSlider setAppearanceConfig:config];
+        _videoRangeSlider.fps = fps;
         [self addSubview:_videoRangeSlider];
         _videoRangeSlider.delegate = self;
         

@@ -8,54 +8,78 @@
 
 #import "TCBGMCell.h"
 #import "UIView+Additions.h"
+#import "TCBGMProgressView.h"
 
 @implementation TCBGMCell
 {
-    UIView *_progressView;
-    UIImageView *_imageView;
-    UILabel *_label;
     CGFloat _progress;
+    TCBGMProgressView *_progressView;
 }
 
 - (void)awakeFromNib {
     [super awakeFromNib];
     [self setSelectionStyle:UITableViewCellSelectionStyleNone];
+    [self.downLoadBtn setTitle:NSLocalizedString(@"Common.Download", nil) forState:UIControlStateNormal];
 }
 
 -(void) setDownloadProgress:(CGFloat)progress
 {
+    UIImage *image = [UIImage imageNamed:@"music_select_normal"];
+
     if (_progressView == nil) {
-        _imageView = [[UIImageView alloc] initWithFrame:_downLoadBtn.bounds];
-        _imageView.image = [UIImage imageNamed:@"music_select_normal"];
-        _imageView.userInteractionEnabled = NO;
-        _label = [[UILabel alloc] initWithFrame:_downLoadBtn.bounds];
-        _label.text = @"下载中";
-        _label.textAlignment = NSTextAlignmentCenter;
-        _label.font = [UIFont systemFontOfSize:15];
-        _label.alpha = 0.5;
-        _label.userInteractionEnabled = NO;
-        _progressView = [[UIView alloc] initWithFrame:CGRectZero];
+        _progressView = [[TCBGMProgressView alloc] initWithFrame:_downLoadBtn.bounds];
+        _progressView.label.text = NSLocalizedString(@"Common.Downloading", nil);
+        _progressView.label.textColor = [UIColor whiteColor];
         _progressView.backgroundColor = [UIColor clearColor];
-        _progressView.contentMode = UIViewContentModeLeft;
-        [_progressView addSubview:_imageView];
-        [_progressView addSubview:_label];
-        _progressView.layer.masksToBounds = YES;
-        _progressView.userInteractionEnabled = NO;
-        [self addSubview:_progressView];
-        [self bringSubviewToFront:_progressView];
+        _progressView.progressBackgroundColor = [UIColor colorWithRed:0.21 green:0.22 blue:0.27 alpha:1.00];
+        _progressView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.contentView addSubview:_progressView];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_progressView
+                                                                     attribute:NSLayoutAttributeCenterY
+                                                                     relatedBy:NSLayoutRelationEqual
+                                                                        toItem:self.contentView
+                                                                     attribute:NSLayoutAttributeCenterY 
+                                                                    multiplier:1
+                                                                      constant:0]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_progressView
+                                                                     attribute:NSLayoutAttributeHeight
+                                                                     relatedBy:NSLayoutRelationEqual
+                                                                        toItem:_downLoadBtn
+                                                                     attribute:NSLayoutAttributeHeight 
+                                                                    multiplier:1
+                                                                      constant:0]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:_progressView
+                                                                     attribute:NSLayoutAttributeRight
+                                                                     relatedBy:NSLayoutRelationEqual
+                                                                        toItem:self.contentView
+                                                                     attribute:NSLayoutAttributeRight
+                                                                    multiplier:1
+                                                                      constant:-8]];
     }
     _progress = progress;
-     CGSize size = [UIScreen mainScreen].bounds.size;
-    _progressView.frame = CGRectMake(size.width - 85, _downLoadBtn.y, _downLoadBtn.width * _progress, _downLoadBtn.height);
+    _progressView.progress = progress;
     if (progress == 1.0) {
-        _label.text = @"使用";
-        _label.alpha = 1.0;
+        [self.downLoadBtn setTitle:NSLocalizedString(@"Common.Apply", nil) forState:UIControlStateNormal];
+        [self.downLoadBtn setBackgroundImage:image forState:UIControlStateNormal];
+        
+        _progressView.hidden = YES;
+    } else {
+        [self.downLoadBtn setTitle:NSLocalizedString(@"Common.Download", nil) forState:UIControlStateNormal];
+        [self.downLoadBtn setBackgroundImage:[UIImage imageNamed:@"musicDownload"] forState:UIControlStateNormal];
+        _progressView.hidden = NO;
     }
+}
+
+- (void)prepareForReuse
+{
+    [super prepareForReuse];
+    [self.downLoadBtn setTitle:NSLocalizedString(@"Common.Download", nil) forState:UIControlStateNormal];
+    [self.downLoadBtn setBackgroundImage:[UIImage imageNamed:@"musicDownload"] forState:UIControlStateNormal];
 }
 
 - (IBAction)download:(id)sender {
     [self.delegate onBGMDownLoad:self];
-    [_downLoadBtn setTitle:@"下载中" forState:UIControlStateNormal];
+    [_downLoadBtn setTitle:NSLocalizedString(@"Common.Downloading", nil) forState:UIControlStateNormal];
     _downLoadBtn.titleLabel.alpha = 0.5;
 }
 

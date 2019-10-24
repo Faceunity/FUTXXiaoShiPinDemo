@@ -36,7 +36,7 @@
 
 -(void)viewDidLoad{
     [super viewDidLoad];
-    self.navigationItem.title = @"用户协议";
+    self.navigationItem.title = NSLocalizedString(@"TCUserAgreement.TitleUserProtocol", nil);
     CGFloat bottom = self.view.height;
 
     BOOL hasBottomInsets = NO;
@@ -74,7 +74,7 @@
     //同意
     UIButton *unAgreeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     unAgreeBtn.frame = CGRectMake(0,lineView1.bottom, self.view.width/2, 49);
-    [unAgreeBtn setTitle:@"不同意" forState:UIControlStateNormal];
+    [unAgreeBtn setTitle:NSLocalizedString(@"TCUserAgreement.TitleDisagree", nil) forState:UIControlStateNormal];
     [unAgreeBtn setTitleColor:RGB(237, 100, 85) forState:UIControlStateNormal];
     [unAgreeBtn addTarget:self action:@selector(unAgreeClick) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:unAgreeBtn];
@@ -82,7 +82,7 @@
     //不同意
     UIButton *agreeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     agreeBtn.frame = CGRectMake(self.view.width/2 + 1, lineView1.bottom, self.view.width/2, 49);
-    [agreeBtn setTitle:@"同意" forState:UIControlStateNormal];
+    [agreeBtn setTitle:NSLocalizedString(@"TCUserAgreement.TitleAgree", nil) forState:UIControlStateNormal];
     [agreeBtn setTitleColor:RGB(237, 100, 85) forState:UIControlStateNormal];
     [agreeBtn addTarget:self action:@selector(agreeClick) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:agreeBtn];

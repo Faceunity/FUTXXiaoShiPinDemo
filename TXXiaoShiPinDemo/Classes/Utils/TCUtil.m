@@ -19,7 +19,18 @@
 #import "TCLoginParam.h"
 #import "AFNetworking.h"
 
+static BOOL ShouldReport = YES;
+
 @implementation TCUtil
+
+#ifndef DEBUG
++ (void)load {
+    NSString *bundleID = [[NSBundle mainBundle] bundleIdentifier];
+    if ([bundleID isEqualToString:@"com.tencent.liteav.ugc"]) {
+        ShouldReport = YES;
+    }
+}
+#endif
 
 + (NSData *)dictionary2JsonData:(NSDictionary *)dict
 {
@@ -173,7 +184,7 @@
     });
 }
 
-+ (void)downloadVideo:(NSString *)videoUrl process:(void(^)(CGFloat process))processHandler complete:(void(^)(NSString *videoPath))completeHandler
++ (void)downloadVideo:(NSString *)videoUrl cachePath:(NSString *)cachePath process:(void(^)(CGFloat process))processHandler complete:(void(^)(NSString *videoPath))completeHandler
 {
     //初始化manager对象：
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
@@ -187,8 +198,12 @@
             processHandler((float)downloadProgress.completedUnitCount / (float)downloadProgress.totalUnitCount);
         });
     } destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        NSURL *documentDirectoryURL = [[NSFileManager defaultManager]URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:url create:NO error:nil];
-        return [documentDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
+        if (cachePath == nil){
+            NSURL *documentDirectoryURL = [[NSFileManager defaultManager]URLForDirectory:NSDocumentDirectory inDomain:NSUserDomainMask appropriateForURL:url create:NO error:nil];
+            return [documentDirectoryURL URLByAppendingPathComponent:[response suggestedFilename]];
+        }else{
+            return [NSURL fileURLWithPath:cachePath];
+        }
     } completionHandler:^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
         dispatch_async(dispatch_get_main_queue(), ^{
             completeHandler(filePath.path);
@@ -276,19 +291,24 @@
         userName = [TCLoginParam shareInstance].identifier;
     }
     NSMutableDictionary *param = [NSMutableDictionary dictionary];
+    // 过渡期间同时上报type和business保证报表数据可以连续展示
     [param setObject:@"xiaoshipin" forKey:@"type"];
+    [param setObject:@"xiaoshipin" forKey:@"bussiness"];
     [param setObject:@"ios" forKey:@"platform"];
     [param setObject:userName == nil ? @"" : userName forKey:@"userName"];
     [param setObject:type == nil ? @"" : type forKey:@"action"];
     [param setObject:@(code) forKey:@"action_result_code"];
     [param setObject:msg == nil ? @"" : msg forKey:@"action_result_msg"];
-//    [self report:param handler:^(int resultCode, NSString *message) {
-//        //to do
-//    }];
+    [self report:param handler:^(int resultCode, NSString *message) {
+        //to do
+    }];
 }
 
 + (void)report:(NSMutableDictionary *)param handler:(void (^)(int resultCode, NSString *message))handler;
 {
+    if (!ShouldReport) {
+        return;
+    }
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         NSData* data = [TCUtil dictionary2JsonData:param];
         if (data == nil)

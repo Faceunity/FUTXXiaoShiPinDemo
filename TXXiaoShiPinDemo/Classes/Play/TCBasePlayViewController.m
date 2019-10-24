@@ -192,12 +192,12 @@ NSString *const kTCLivePlayError = @"kTCLivePlayError";
                      [NSString stringWithFormat:@"%d", self.liveInfo.timestamp],
                      [[TCUserInfoModel sharedInstance] getUserProfile].appid,
                      [[TCUserInfoModel sharedInstance] getUserProfile].accountType];
-    NSString *text = [NSString stringWithFormat:@"%@ 正在直播", self.liveInfo.userinfo.nickname ? self.liveInfo.userinfo.nickname : self.liveInfo.userid];
+    NSString *text = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.LiveBroadcast", nil), self.liveInfo.userinfo.nickname ? self.liveInfo.userinfo.nickname : self.liveInfo.userid];
     
     
     /* 以下分享类型，开发者可根据需求调用 */
     // 1、纯文本分享
-    messageObject.text = @"开播啦，小伙伴火速围观～～～";
+    messageObject.text = NSLocalizedString(@"TCBasePlayView.LiveBroadcastNotify", nil);
     
     
     
@@ -221,21 +221,21 @@ NSString *const kTCLivePlayError = @"kTCLivePlayError";
         
         NSString *message = nil;
         if (!error) {
-            message = [NSString stringWithFormat:@"分享成功"];
+            message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareSucceeded", nil)];
         } else {
             if (error.code == UMSocialPlatformErrorType_Cancel) {
-                message = [NSString stringWithFormat:@"分享取消"];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareCanceled", nil)];
             } else if (error.code == UMSocialPlatformErrorType_NotInstall) {
-                message = [NSString stringWithFormat:@"应用未安装"];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.AppNotInstalled", nil)];
             } else {
-                message = [NSString stringWithFormat:@"分享失败，失败原因(Code＝%d)\n",(int)error.code];
+                message = [NSString stringWithFormat:NSLocalizedString(@"TCBasePlayView.ShareFailed", nil),(int)error.code];
             }
             
         }
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@""
                                                         message:message
                                                        delegate:nil
-                                              cancelButtonTitle:NSLocalizedString(@"确定", nil)
+                                              cancelButtonTitle:NSLocalizedString(@"Common.OK", nil)
                                               otherButtonTitles:nil];
         [alert show];
     }];

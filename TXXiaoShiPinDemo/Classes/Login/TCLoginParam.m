@@ -51,6 +51,13 @@
             self.identifier = [dic objectForKey:@"identifier"];
             self.hashedPwd = [dic objectForKey:@"hashedPwd"];
             self.isLastAppExt = [[dic objectForKey:@"isLastAppExt"] intValue];
+        } else {
+            self.token = nil;
+            self.tokenTime = 0;
+            self.expires = 0;
+            self.identifier = nil;
+            self.hashedPwd = nil;
+            self.isLastAppExt = 0;
         }
     }
 }
@@ -71,18 +78,18 @@
 #else
     [dic setObject:@(0) forKey:@"isLastAppExt"];
 #endif
-    
+
     NSData *data = [TCUtil dictionary2JsonData: dic];
     NSString *strLoginParam = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     NSString *useridKey = [NSString stringWithFormat:@"%@_LoginParam", self.identifier];
-    
+
     NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:APP_GROUP];
     if (defaults == nil) {
         defaults = [NSUserDefaults standardUserDefaults];
     }
-    
+
     [defaults setObject:useridKey forKey:kLoginParamKey];
-    
+
     // save login param
     [defaults setObject:strLoginParam forKey:useridKey];
     [defaults synchronize];
@@ -96,7 +103,21 @@
     NSString *useridKey = [defaults objectForKey:kLoginParamKey];
     if(useridKey != nil){
         [defaults removeObjectForKey:useridKey];
+        [defaults synchronize];
     }
+    [self loadFromLocal];
+}
+
++ (NSString *)storedUserID {
+    NSUserDefaults *defaults = [[NSUserDefaults alloc] initWithSuiteName:APP_GROUP];
+    if (defaults == nil) {
+        defaults = [NSUserDefaults standardUserDefaults];
+    }
+    NSString *useridKey = [defaults objectForKey:kLoginParamKey];
+    if(useridKey == nil){
+        return nil;
+    }
+    return [defaults objectForKey:useridKey];
 }
 
 - (BOOL)isExpired {
@@ -111,12 +132,19 @@
             return YES;
         }
     }
-    
+
     time_t curTime = [[NSDate date] timeIntervalSince1970];
     if (curTime - self.tokenTime > self.expires) {
         return YES;
     }
     return NO;
+}
+
+- (NSDate *)expireDate {
+    if ([TCLoginParam storedUserID] == nil) {
+        return nil;
+    }
+    return [NSDate dateWithTimeIntervalSince1970: self.tokenTime + self.expires];
 }
 
 - (BOOL)isValid {

@@ -29,22 +29,22 @@ PODS:
   - BlocksKit/UIKit (2.2.5):
     - BlocksKit/Core
     - BlocksKit/DynamicDelegate
+  - Masonry (1.1.0)
   - MBProgressHUD (1.1.0)
-  - MJExtension (3.0.15)
+  - MJExtension (3.0.15.1)
   - MJRefresh (3.1.15.3)
-  - QBImagePickerController (3.4.0)
-  - SDWebImage (4.4.0):
-    - SDWebImage/Core (= 4.4.0)
-  - SDWebImage/Core (4.4.0)
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
   - ZipArchive (1.4.0)
 
 DEPENDENCIES:
   - AFNetworking (~> 3.1)
   - BlocksKit (~> 2.2.5)
+  - Masonry (~> 1.1.0)
   - MBProgressHUD (~> 1.1.0)
   - MJExtension (~> 3.0.10)
   - MJRefresh (~> 3.1.1)
-  - QBImagePickerController
   - SDWebImage (~> 4.4.0)
   - ZipArchive
 
@@ -52,23 +52,23 @@ SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
     - BlocksKit
+    - Masonry
     - MBProgressHUD
     - MJExtension
     - MJRefresh
-    - QBImagePickerController
     - SDWebImage
     - ZipArchive
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   BlocksKit: 7f422b971407001178d181a43b99014ea2591fe6
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
   MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
-  MJExtension: 3f039575db1b135a20699ad298713b26acec1528
+  MJExtension: 19bc33ce2eee2d319760f5622562cf581a6ff756
   MJRefresh: b48380ae2b927b46c4ef000de9adb8dc748e1df7
-  QBImagePickerController: d54cf93db6decf26baf6ed3472f336ef35cae022
-  SDWebImage: b534502786e43dde36dfcaee89356fe6df30e203
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
   ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
 
-PODFILE CHECKSUM: 35e20f1f253ad22156087db4588825031f2fb4fb
+PODFILE CHECKSUM: f0822f82f56479f394904c86d8ed70362b01bddf
 
 COCOAPODS: 1.5.3

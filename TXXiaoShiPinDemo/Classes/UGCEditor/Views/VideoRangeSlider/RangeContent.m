@@ -74,8 +74,9 @@
                                      [self imageWidth],
                                      _appearanceConfig.thumbHeight);
         UIImageView *imgView = [[UIImageView alloc] initWithFrame:imgFrame];
+        imgView.clipsToBounds = YES;
         imgView.image = _imageList[i];
-        imgView.contentMode = (_imageList.count > 1 ? UIViewContentModeScaleToFill : UIViewContentModeScaleAspectFit);
+        imgView.contentMode = (_imageList.count > 1 ? UIViewContentModeScaleAspectFill : UIViewContentModeScaleAspectFit);
         [self addSubview:imgView];
         [tmpList addObject:imgView];
     }

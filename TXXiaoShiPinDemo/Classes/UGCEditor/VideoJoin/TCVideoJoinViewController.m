@@ -9,6 +9,7 @@
 #import "TCVideoJoinViewController.h"
 #import "TCVideoEditPrevViewController.h"
 #import "TCVideoEditViewController.h"
+#import "TCVideoCutViewController.h"
 #import "SDKHeader.h"
 #import "TCVideoJoinCell.h"
 #import "SDKHeader.h"
@@ -17,6 +18,7 @@ static NSString *indetifer = @"TCVideoJoinCell";
 
 @interface TCVideoJoinViewController ()<UITableViewDelegate, UITableViewDataSource , TXVideoJoinerListener>
 @property (weak) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIButton *confirmButton;
 @end
 
 @implementation TCVideoJoinViewController
@@ -30,6 +32,9 @@ static NSString *indetifer = @"TCVideoJoinCell";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    [self.confirmButton setTitle:NSLocalizedString(@"Common.OK", nil) forState:UIControlStateNormal];
+    
     // 视频列表
     [_tableView registerNib:[UINib nibWithNibName:@"TCVideoJoinCell" bundle:nil] forCellReuseIdentifier:indetifer];
     _tableView.dataSource = self;
@@ -57,13 +62,13 @@ static NSString *indetifer = @"TCVideoJoinCell";
     param.videoView = [UIView new];
     _videoJoiner = [[TXVideoJoiner alloc] initWithPreview:param];
     _videoJoiner.joinerDelegate = self;
-    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:@"取消"
+    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Common.Cancel", nil)
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self
                                                                         action:@selector(goBack)];
     customBackButton.tintColor = RGB(238, 100, 85);
     self.navigationItem.leftBarButtonItem = customBackButton;
-    self.navigationItem.title = @"拼接视频";
+    self.navigationItem.title = NSLocalizedString(@"TCVideoJoinView.StitchVideo", nil);
     
     //监听后台事件
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -105,7 +110,7 @@ static NSString *indetifer = @"TCVideoJoinCell";
     
     UILabel *generationTitleLabel = [UILabel new];
     generationTitleLabel.font = [UIFont systemFontOfSize:14];
-    generationTitleLabel.text = @"视频合成中";
+    generationTitleLabel.text = NSLocalizedString(@"TCVideoEditPrevView.VideoSynthesizing", nil);
     generationTitleLabel.textColor = UIColor.whiteColor;
     generationTitleLabel.textAlignment = NSTextAlignmentCenter;
     generationTitleLabel.frame = CGRectMake(0, _generateProgressView.y - 34, _generationView.width, 14);
@@ -184,17 +189,17 @@ static NSString *indetifer = @"TCVideoJoinCell";
         _generateProgressView.progress = 0.f;
         _generationView.hidden = YES;
         [_videoJoiner cancelJoin];
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频合成失败"
-                                                            message:@"中途切后台导致,请重新合成"
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoEditPrevView.HintVideoSynthesizeFailed", nil)
+                                                            message:NSLocalizedString(@"TCVideoEditPrevView.ErrorSwitchBackend", nil)
                                                            delegate:self
-                                                  cancelButtonTitle:@"知道了"
+                                                  cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                   otherButtonTitles:nil, nil];
         [alertView show];
     }
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
-    return @"视频将按照列表顺序进行合成，您可以拖动进行片段顺序调整。";
+    return NSLocalizedString(@"TCVideoJoinView.TitleVideoOrder", nil);
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath;
@@ -263,8 +268,8 @@ static NSString *indetifer = @"TCVideoJoinCell";
 -(void) onJoinComplete:(TXJoinerResult *)result
 {
     if (result.retCode == JOINER_RESULT_OK) {
-        TCVideoEditViewController *vc = [[TCVideoEditViewController alloc] init];
-        vc.videoPath = _videoOutputPath;
+        TCVideoCutViewController *vc = [[TCVideoCutViewController alloc] init];
+        vc.videoAsset = [AVAsset assetWithURL:[NSURL fileURLWithPath:_videoOutputPath]];
         [self.navigationController pushViewController:vc animated:YES];
         _generationView.hidden = YES;
     }

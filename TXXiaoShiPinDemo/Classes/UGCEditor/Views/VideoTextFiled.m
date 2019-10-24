@@ -10,7 +10,6 @@
 #import "UIView+Additions.h"
 #import "ColorMacro.h"
 
-#define kDefaultText @"点击修改文字"
 
 @interface VideoTextFiled () <UITextViewDelegate, UITextFieldDelegate>
 {
@@ -64,7 +63,7 @@
         [_borderView addSubview:_bubbleView];
         
         _textLabel = [UILabel new];
-        _textLabel.text = kDefaultText;
+        _textLabel.text = NSLocalizedString(@"VideoTextFiled.ClickEditText", nil);
         _textLabel.textColor = UIColor.blackColor;
         _textLabel.shadowOffset = CGSizeMake(2, 2);
         _textLabel.font = [UIFont systemFontOfSize:18];

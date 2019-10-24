@@ -32,9 +32,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view from its nib.
-    self.title = @"选择视频";
+    self.title = NSLocalizedString(@"TCVideoLoading.ChoosingVideo", nil);
     self.view.backgroundColor = UIColor.blackColor;
-    
+    self.loadingLabel.text = NSLocalizedString(@"VideoLoading.Decoding",nil);
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -183,8 +183,8 @@
 
 - (void)exportAssetError
 {
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:@"视频导出失败，原因可能是在导出的过程中，程序进后台，或则被闹钟，电话等打断" preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"好" style:0 handler:^(UIAlertAction * _Nonnull action) {
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Error" message:NSLocalizedString(@"TCVideoLoading.HintVideoExportingFailed", nil) preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:NSLocalizedString(@"Common.OK", nil) style:0 handler:^(UIAlertAction * _Nonnull action) {
         [self.navigationController dismissViewControllerAnimated:YES completion:nil];
     }];
     [alert addAction:ok];
@@ -194,7 +194,7 @@
 - (void)loadingCloudVideoProgress:(float)progress
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        _loadingLabel.text =  [NSString stringWithFormat:@"视频 %@ 正在从icloud下载，请稍等...",@(_exportIndex + 1)];
+        _loadingLabel.text =  [NSString stringWithFormat:NSLocalizedString(@"TCVideoLoading.VideoDownloadingFromiCloud", nil),@(_exportIndex + 1)];
         self.loadingImageView.image = [UIImage imageNamed:[NSString stringWithFormat:@"video_record_share_loading_%d", (int)(progress * 8)]];
     });
 }

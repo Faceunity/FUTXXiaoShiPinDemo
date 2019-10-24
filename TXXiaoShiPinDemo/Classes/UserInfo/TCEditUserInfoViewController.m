@@ -29,20 +29,20 @@
     [super viewDidLoad];
     UIColor *textColour = [UIColor colorWithRed:36/255.0 green:203/255.0 blue:173/255.0 alpha:1];
     self.navigationController.navigationBar.tintColor    = textColour;
-    self.navigationItem.title = @"编辑个人信息";
+    self.navigationItem.title = NSLocalizedString(@"TCEditUserInfoView.EditProfile", nil);
     [self.navigationController.navigationBar setTitleTextAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:18],NSForegroundColorAttributeName:[UIColor blackColor]}] ;
     
     self.view.backgroundColor = RGB(0xF3,0xF3,0xF3);
     
     __weak typeof(self) ws = self;
     TCUserInfoData  *_profile = [[TCUserInfoModel sharedInstance] getUserProfile ];
-    TCUserInfoCellItem *faceItem = [[TCUserInfoCellItem alloc] initWith:@"头像" value:nil type:TCUserInfo_EditFace action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
+    TCUserInfoCellItem *faceItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"TCEditUserInfoView.ItemFace", nil) value:nil type:TCUserInfo_EditFace action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
         [ws modifyUserInfoFaceImage:menu cell:cell]; } ];
     
-    TCUserInfoCellItem *nickItem = [[TCUserInfoCellItem alloc] initWith:@"昵称" value:_profile.nickName type:TCUserInfo_EditNick action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
+    TCUserInfoCellItem *nickItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"TCEditUserInfoView.ItemNick", nil) value:_profile.nickName type:TCUserInfo_EditNick action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
         nil; }];
     
-    TCUserInfoCellItem *genderItem = [[TCUserInfoCellItem alloc] initWith:@"性别" value:(USERINFO_MALE == _profile.gender ? @"男":@"女") type:TCUserInfo_EditGender action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
+    TCUserInfoCellItem *genderItem = [[TCUserInfoCellItem alloc] initWith:NSLocalizedString(@"TCEditUserInfoView.ItemSex", nil) value:(USERINFO_MALE == _profile.gender ? NSLocalizedString(@"TCEditUserInfoView.SexMale", nil):NSLocalizedString(@"TCEditUserInfoView.SexFemale", nil)) type:TCUserInfo_EditGender action:^(TCUserInfoCellItem *menu, TCEditUserInfoTableViewCell *cell) {
         [ws modifyUserInfoGender:menu cell:cell]; }];
     
     _userInfoArry = [NSMutableArray arrayWithArray:@[faceItem, nickItem, genderItem]];
@@ -187,9 +187,9 @@
 {
     __weak typeof(self) ws = self;
     UIActionSheet *testSheet = [[UIActionSheet alloc] init];
-    [testSheet bk_addButtonWithTitle:@"拍照" handler:^{[ws openCameraPhoto:OPEN_CAMERA];}];
-    [testSheet bk_addButtonWithTitle:@"相册" handler:^{[ws openCameraPhoto:OPEN_PHOTO];}];
-    [testSheet bk_setCancelButtonWithTitle:@"取消" handler:nil];
+    [testSheet bk_addButtonWithTitle:NSLocalizedString(@"TCEditUserInfoView.FaceCamera", nil) handler:^{[ws openCameraPhoto:OPEN_CAMERA];}];
+    [testSheet bk_addButtonWithTitle:NSLocalizedString(@"TCEditUserInfoView.FaceAlbum", nil) handler:^{[ws openCameraPhoto:OPEN_PHOTO];}];
+    [testSheet bk_setCancelButtonWithTitle:NSLocalizedString(@"Common.Cancel", nil) handler:nil];
     [testSheet showInView:self.view];
 }
 
@@ -203,15 +203,15 @@
 {
     __weak typeof(self) ws = self;
     UIActionSheet *testSheet = [[UIActionSheet alloc] init];
-    [testSheet bk_addButtonWithTitle:@"男" handler:^{
-        cell->genderText.text = @"男";
+    [testSheet bk_addButtonWithTitle:NSLocalizedString(@"TCEditUserInfoView.SexMale", nil) handler:^{
+        cell->genderText.text = NSLocalizedString(@"TCEditUserInfoView.SexMale", nil);
         [ws uploadUserGenderInfo:cell->genderText.text];
     }];
-    [testSheet bk_addButtonWithTitle:@"女" handler:^{
-        cell->genderText.text = @"女";
+    [testSheet bk_addButtonWithTitle:NSLocalizedString(@"TCEditUserInfoView.SexFemale", nil) handler:^{
+        cell->genderText.text = NSLocalizedString(@"TCEditUserInfoView.SexFemale", nil);
         [ws uploadUserGenderInfo:cell->genderText.text];
     }];
-    [testSheet bk_setCancelButtonWithTitle:@"取消" handler:nil];
+    [testSheet bk_setCancelButtonWithTitle:NSLocalizedString(@"Common.Cancel", nil) handler:nil];
     [testSheet showInView:self.view];
 }
 
@@ -224,7 +224,7 @@
 - (void)uploadUserGenderInfo:(NSString*)strSexText
 {
     int gender = USERINFO_FEMALE;
-    if ([strSexText isEqualToString:@"男"])
+    if ([strSexText isEqualToString:NSLocalizedString(@"TCEditUserInfoView.SexMale", nil)])
     {
         gender = USERINFO_MALE;
     }
@@ -236,7 +236,7 @@
          {
              if (ERROR_SUCESS != code)
              {
-                 [[HUDHelper sharedInstance] tipMessage:@"上传用户性别信息失败"];
+                 [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCEditUserInfoView.ErrorUploadingSex", nil)];
              }
          }];
     }
@@ -260,7 +260,7 @@
               {
                   if (ERROR_SUCESS != errCode)
                   {
-                      [[HUDHelper sharedInstance] tipMessage:@"上传头像失败"];
+                      [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCEditUserInfoView.ErrorUploadingFace", nil)];
                   }
                   else
                   {
@@ -275,7 +275,7 @@
          }
          else
          {
-             [[HUDHelper sharedInstance] tipMessage:@"上传头像失败"];
+             [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCEditUserInfoView.ErrorUploadingFace", nil)];
          }
      }];
 }
@@ -290,7 +290,7 @@
     TCUserInfoData  *_profile = [[TCUserInfoModel sharedInstance] getUserProfile ];
     if (0 == cell->nickText.text.length)
     {
-        [[HUDHelper sharedInstance] tipMessage:@"昵称不能为空"];
+        [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCEditUserInfoView.ErrorNickEmpty", nil)];
         cell->nickText.text = _profile.nickName;
         return;
     }
@@ -302,7 +302,7 @@
          {
              if (ERROR_SUCESS != code)
              {
-                 [[HUDHelper sharedInstance] tipMessage:@"上传用户昵称信息失败"];
+                 [[HUDHelper sharedInstance] tipMessage:NSLocalizedString(@"TCEditUserInfoView.ErrorUploadingNick", nil)];
              }
              else
              {

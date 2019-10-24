@@ -10,6 +10,5 @@
 #define SDKHeader_h
 
 @import TXLiteAVSDK_UGC_IJK;
-//@import TXLiteAVSDK_UGC;
 
 #endif /* SDKHeader_h */

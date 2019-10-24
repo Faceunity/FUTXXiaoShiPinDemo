@@ -110,9 +110,9 @@
     barTitleLabel.font = [UIFont boldSystemFontOfSize:17];
     barTitleLabel.textColor = [UIColor whiteColor];
     barTitleLabel.textAlignment = NSTextAlignmentCenter;
-    barTitleLabel.text = @"编辑视频";
+    barTitleLabel.text = NSLocalizedString(@"TCVideoCutView.VideoEdit", nil);
     self.navigationItem.titleView = barTitleLabel;;
-    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:@"返回"
+    UIBarButtonItem *customBackButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Common.Back", nil)
                                                                          style:UIBarButtonItemStylePlain
                                                                         target:self
                                                                         action:@selector(goBack)];

@@ -7,7 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <TXLiteAVSDK_UGC_IJK/TXVideoEditerListener.h>
+#import "SDKHeader.h"
 
 @protocol VideoPreviewDelegate <NSObject>
 @optional

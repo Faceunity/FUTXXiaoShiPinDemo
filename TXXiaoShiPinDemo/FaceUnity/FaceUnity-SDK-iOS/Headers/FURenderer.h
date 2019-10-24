@@ -37,11 +37,13 @@ typedef enum {
      - 使用该接口进行初始化的话，需要在代码中配置 EAGLContext 环境，并且保证我们的接口是在同一个 EAGLContext 下调用的
  
  @param data v3.bundle 对应的二进制数据地址
+ @param dataSize v3.bundle 数据的字节数
  @param ardata 该参数已舍弃，传 NULL 即可
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
+ @return 初始化结果，为0则初始化失败，大于0则初始化成功
  */
-- (void)setupWithData:(void *)data ardata:(void *)ardata authPackage:(void *)package authSize:(int)size;
+- (int)setupWithData:(void *)data dataSize:(int)dataSize ardata:(void *)ardata authPackage:(void *)package authSize:(int)size;
 
 /**
  初始化接口2：
@@ -49,12 +51,14 @@ typedef enum {
      - 与 初始化接口1 相比此接口新增 shouldCreate 参数，如果传入YES我们将在内部创建并持有一个 EAGLContext，无需外部再创建 EAGLContext 环境。
  
  @param data v3.bundle 对应的二进制数据地址
+ @param dataSize v3.bundle 数据的字节数
  @param ardata 该参数已废弃，传 NULL 即可
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
  @param shouldCreate 如果设置为 YES，我们会在内部创建并持有一个 EAGLContext，此时必须使用OC层接口
+ @return 初始化结果，为0则初始化失败，大于0则初始化成功
  */
-- (void)setupWithData:(void *)data ardata:(void *)ardata authPackage:(void *)package authSize:(int)size shouldCreateContext:(BOOL)shouldCreate;
+- (int)setupWithData:(void *)data dataSize:(int)dataSize ardata:(void *)ardata authPackage:(void *)package authSize:(int)size shouldCreateContext:(BOOL)shouldCreate;
 
 /**
  初始化接口3：
@@ -65,8 +69,9 @@ typedef enum {
  @param package 密钥数组，必须配置好密钥，SDK 才能正常工作
  @param size 密钥数组大小
  @param shouldCreate  如果设置为 YES，我们会在内部创建并持有一个 EAGLContext，此时必须使用OC层接口
+ @return 初始化结果，为0则初始化失败，大于0则初始化成功
  */
-- (void)setupWithDataPath:(NSString *)v3path authPackage:(void *)package authSize:(int)size shouldCreateContext:(BOOL)shouldCreate;
+- (int)setupWithDataPath:(NSString *)v3path authPackage:(void *)package authSize:(int)size shouldCreateContext:(BOOL)shouldCreate;
 
 /**
  视频处理接口1：
@@ -372,6 +377,8 @@ typedef enum {
  */
 + (int)trackFace:(int)inputFormat inputData:(void*)inputData width:(int)width height:(int)height;
 
++ (int)trackFaceWithTongue:(int)inputFormat inputData:(void*)inputData width:(int)width height:(int)height;
+
 /**
  获取人脸信息：
      - 在程序中需要先运行过视频处理接口( 视频处理接口8 除外)或 人脸信息跟踪接口 后才能使用该接口来获取人脸信息；
@@ -430,7 +437,7 @@ typedef enum {
  @param contractsCount contracts 数组中 contract 道具句柄的个数
  @return 被绑定到 avatar 道具上的普通道具个数
  */
-+ (int)avatarBindItems:(int)avatarItem items:(int *)items itemsCount:(int)itemsCount contracts:(int *)contracts contractsCount:(int)contractsCount;
++ (int)avatarBindItems:(int)avatarItem items:(int *)items itemsCount:(int)itemsCount contracts:(int *)contracts contractsCount:(int)contractsCount DEPRECATED_MSG_ATTRIBUTE("use bindItems:items:itemsCount: instead");
 
 /**
  将普通道具从avatar道具上解绑：
@@ -441,7 +448,7 @@ typedef enum {
  @param itemsCount 句柄数组包含的道具句柄个数
  @return 从 avatar 道具上解除绑定的普通道具个数
  */
-+ (int)avatarUnbindItems:(int)avatarItem items:(int *)items itemsCount:(int)itemsCount;
++ (int)avatarUnbindItems:(int)avatarItem items:(int *)items itemsCount:(int)itemsCount DEPRECATED_MSG_ATTRIBUTE("use unBindItems:items:itemsCount: instead");
 
 /**
  绑定道具：
@@ -453,6 +460,17 @@ typedef enum {
  @return 被绑定到目标道具上的普通道具个数
  */
 + (int)bindItems:(int)item items:(int*)items itemsCount:(int)itemsCount;
+
+/**
+ 解绑道具：
+ -  该接口可以将一些普通道具从某个目标道具上解绑
+ 
+ @param item 目标道具句柄
+ @param items 需要从目标道具上解除绑定的普通道具的句柄数组
+ @param itemsCount 句柄数组包含的道具句柄个数
+ @return 被绑定到目标道具上的普通道具个数
+ */
++ (int)unBindItems:(int)item items:(int *)items itemsCount:(int)itemsCount;
 
 /**
  解绑所有道具：
@@ -485,4 +503,14 @@ typedef enum {
 + (void)setDefaultRotationMode:(float)mode;
 
 + (void)setAsyncTrackFaceEnable:(int)enable;
+
++ (void)setTongueTrackingEnable:(int)enable;
+ 
++ (int)loadTongueModel:(void*)model size:(int)size;
+
+
+/**
+ 释放nama资源
+ */
++(void)namaLibDestroy;
 @end

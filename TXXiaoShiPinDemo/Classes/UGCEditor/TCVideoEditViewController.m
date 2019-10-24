@@ -8,7 +8,7 @@
 
 #import "TCVideoEditViewController.h"
 #import "TCBGMListViewController.h"
-#import <TXLiteAVSDK_UGC_IJK/TXVideoEditer.h>
+#import "SDKHeader.h"
 #import <MediaPlayer/MPMediaPickerController.h>
 #import "VideoPreview.h"
 #import "VideoRangeSlider.h"
@@ -36,6 +36,11 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import "TXCVEFColorPalette.h"
 
+
+/**       FaceUnity       **/
+#import "FUManager.h"
+#import <FUAPIDemoBar/FUAPIDemoBar.h>
+
 typedef  NS_ENUM(NSInteger,ActionType)
 {
     ActionType_Save,
@@ -62,6 +67,14 @@ typedef NS_ENUM(NSInteger,EffectSelectType)
 
 typedef NS_ENUM(NSInteger,TCLVFilterType) {
     FilterType_None         = 0,
+    FilterType_biaozhun     ,   //标准滤镜
+    FilterType_yinghong     ,   //樱红滤镜
+    FilterType_yunshang     ,   //云裳滤镜
+    FilterType_chunzhen     ,   //纯真滤镜
+    FilterType_bailan       ,   //白兰滤镜
+    FilterType_yuanqi       ,   //元气滤镜
+    FilterType_chaotuo      ,   //超脱滤镜
+    FilterType_xiangfen     ,   //香氛滤镜
     FilterType_white        ,   //美白滤镜
     FilterType_langman         ,   //浪漫滤镜
     FilterType_qingxin         ,   //清新滤镜
@@ -74,8 +87,9 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
 };
 
 
-@interface TCVideoEditViewController ()<TXVideoGenerateListener,VideoPreviewDelegate, BottomTabBarDelegate, VideoCutViewDelegate,EffectSelectViewDelegate, PasterAddViewDelegate, VideoPasterViewDelegate ,VideoTextFieldDelegate ,TXVideoPublishListener,TCBGMControllerListener,VideoRecordMusicViewDelegate,UIActionSheetDelegate, UITabBarDelegate , UIPickerViewDelegate ,UIPickerViewDelegate ,UIAlertViewDelegate>
+@interface TCVideoEditViewController ()<TXVideoGenerateListener,VideoPreviewDelegate, BottomTabBarDelegate, VideoCutViewDelegate,EffectSelectViewDelegate, PasterAddViewDelegate, VideoPasterViewDelegate ,VideoTextFieldDelegate ,TXVideoPublishListener,TCBGMControllerListener,VideoRecordMusicViewDelegate,UIActionSheetDelegate, UITabBarDelegate , UIPickerViewDelegate ,UIPickerViewDelegate ,UIAlertViewDelegate, TXVideoCustomProcessListener, FUAPIDemoBarDelegate>
 
+@property (nonatomic, strong) FUAPIDemoBar *demoBar ;
 @end
 
 @implementation TCVideoEditViewController
@@ -141,6 +155,84 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     BOOL          _navigationBarHidden;
     dispatch_queue_t _imageLoadingQueue;
     NSArray<EffectInfo*> *_effectList;
+    
+    // 选中的滤镜与速度，用于恢复状态
+    NSInteger _filterIndex;
+    NSInteger _timeIndex;
+}
+
+/**       FaceUnity       **/
+-(GLuint)onPreProcessTexture:(GLuint)texture width:(CGFloat)width height:(CGFloat)height timestamp:(UInt64)timestamp {
+    
+    return [[FUManager shareManager] renderItemWithTexture:texture Width:width Height:height] ; ;
+}
+
+/**       FaceUnity       **/
+-(FUAPIDemoBar *)demoBar {
+    if (!_demoBar) {
+        
+        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, [UIScreen mainScreen].bounds.size.height - 164 - 200, [UIScreen mainScreen].bounds.size.width, 164)];
+        
+        _demoBar.itemsDataSource = [FUManager shareManager].itemsDataSource;
+        _demoBar.selectedItem = [FUManager shareManager].selectedItem ;
+        
+        _demoBar.filtersDataSource = [FUManager shareManager].filtersDataSource ;
+        _demoBar.beautyFiltersDataSource = [FUManager shareManager].beautyFiltersDataSource ;
+        _demoBar.filtersCHName = [FUManager shareManager].filtersCHName ;
+        _demoBar.selectedFilter = [FUManager shareManager].selectedFilter ;
+        [_demoBar setFilterLevel:[FUManager shareManager].selectedFilterLevel forFilter:[FUManager shareManager].selectedFilter] ;
+        
+        _demoBar.skinDetectEnable = [FUManager shareManager].skinDetectEnable;
+        _demoBar.blurShape = [FUManager shareManager].blurShape ;
+        _demoBar.blurLevel = [FUManager shareManager].blurLevel ;
+        _demoBar.whiteLevel = [FUManager shareManager].whiteLevel ;
+        _demoBar.redLevel = [FUManager shareManager].redLevel;
+        _demoBar.eyelightingLevel = [FUManager shareManager].eyelightingLevel ;
+        _demoBar.beautyToothLevel = [FUManager shareManager].beautyToothLevel ;
+        _demoBar.faceShape = [FUManager shareManager].faceShape ;
+        
+        _demoBar.enlargingLevel = [FUManager shareManager].enlargingLevel ;
+        _demoBar.thinningLevel = [FUManager shareManager].thinningLevel ;
+        _demoBar.enlargingLevel_new = [FUManager shareManager].enlargingLevel_new ;
+        _demoBar.thinningLevel_new = [FUManager shareManager].thinningLevel_new ;
+        _demoBar.jewLevel = [FUManager shareManager].jewLevel ;
+        _demoBar.foreheadLevel = [FUManager shareManager].foreheadLevel ;
+        _demoBar.noseLevel = [FUManager shareManager].noseLevel ;
+        _demoBar.mouthLevel = [FUManager shareManager].mouthLevel ;
+        
+        _demoBar.delegate = self;
+    }
+    return _demoBar ;
+}
+
+/**      FUAPIDemoBarDelegate       **/
+
+- (void)demoBarDidSelectedItem:(NSString *)itemName {
+    
+    [[FUManager shareManager] loadItem:itemName];
+}
+
+- (void)demoBarBeautyParamChanged {
+    
+    [FUManager shareManager].skinDetectEnable = _demoBar.skinDetectEnable;
+    [FUManager shareManager].blurShape = _demoBar.blurShape;
+    [FUManager shareManager].blurLevel = _demoBar.blurLevel ;
+    [FUManager shareManager].whiteLevel = _demoBar.whiteLevel;
+    [FUManager shareManager].redLevel = _demoBar.redLevel;
+    [FUManager shareManager].eyelightingLevel = _demoBar.eyelightingLevel;
+    [FUManager shareManager].beautyToothLevel = _demoBar.beautyToothLevel;
+    [FUManager shareManager].faceShape = _demoBar.faceShape;
+    [FUManager shareManager].enlargingLevel = _demoBar.enlargingLevel;
+    [FUManager shareManager].thinningLevel = _demoBar.thinningLevel;
+    [FUManager shareManager].enlargingLevel_new = _demoBar.enlargingLevel_new;
+    [FUManager shareManager].thinningLevel_new = _demoBar.thinningLevel_new;
+    [FUManager shareManager].jewLevel = _demoBar.jewLevel;
+    [FUManager shareManager].foreheadLevel = _demoBar.foreheadLevel;
+    [FUManager shareManager].noseLevel = _demoBar.noseLevel;
+    [FUManager shareManager].mouthLevel = _demoBar.mouthLevel;
+    
+    [FUManager shareManager].selectedFilter = _demoBar.selectedFilter ;
+    [FUManager shareManager].selectedFilterLevel = _demoBar.selectedFilterLevel;
 }
 
 -(instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -154,7 +246,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         _pasterEffectArray = [NSMutableArray array];
         [_pasterEffectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"新增";
+            v.name = NSLocalizedString(@"Common.AddNew", nil);
             v.icon = [UIImage imageNamed:@"addPaster_normal"];
             v;
         })];
@@ -162,7 +254,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
          _textEffectArray = [NSMutableArray array];
         [_textEffectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"新增";
+            v.name = NSLocalizedString(@"Common.AddNew", nil);
             v.icon = [UIImage imageNamed:@"addPaster_normal"];
             v;
         })];
@@ -186,6 +278,10 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     if ([self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)]){
         self.navigationController.interactivePopGestureRecognizer.enabled = NO;
     }
+    
+    /**       FaceUnity       **/
+    [[FUManager shareManager] loadItems];
+    [self.view addSubview:self.demoBar];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -231,37 +327,43 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
 
     __weak __typeof(self) wself = self;
     dispatch_async(_imageLoadingQueue, ^{
+        CFTimeInterval start = CFAbsoluteTimeGetCurrent();
         EffectInfo *(^CreateEffect)(NSString *name, NSString *animPrefix)=^(NSString *name, NSString *animPrefix){
             EffectInfo * v= [EffectInfo new];
             v.name = name;
             v.animateIcons = [NSMutableArray array];
-            NSString *imageName = [NSString stringWithFormat: @"%@_select", animPrefix];
-            NSString *path = [[NSBundle mainBundle] pathForResource:imageName ofType:@"png"];
-            v.selectIcon = [UIImage imageWithContentsOfFile:path];
+//            NSString *imageName = [NSString stringWithFormat: @"%@_select", animPrefix];
+//            NSString *path = [[NSBundle mainBundle] pathForResource:imageName ofType:@"png"];
+//            v.selectIcon = [UIImage imageWithContentsOfFile:path];
             for (int i = 0; i < 24; i ++) {
-                imageName = [NSString stringWithFormat: @"%@%d", animPrefix, i];
-                path = [[NSBundle mainBundle] pathForResource:imageName ofType:@"png"];
+                NSString *imageName = [NSString stringWithFormat: @"%@%d", animPrefix, i];
+                NSString *path = [[NSBundle mainBundle] pathForResource:imageName ofType:@"png"];
+                if (path == nil) {
+                    break;
+                }
                 [v.animateIcons addObject:[UIImage imageWithContentsOfFile:path]];
             }
             return v;
         };
 
-        NSArray <EffectInfo *> *effectList = @[ CreateEffect(@"动感光波", @"donggan"),
-                                                CreateEffect(@"暗黑幻境", @"anhei"),
-                                                CreateEffect(@"灵魂出窍", @"linghun"),
-                                                CreateEffect(@"画面分裂", @"fenlie"),
-                                                CreateEffect(@"百叶窗", @"donggan"),
-                                                CreateEffect(@"鬼影", @"donggan"),
-                                                CreateEffect(@"幻影", @"donggan"),
-                                                CreateEffect(@"幽灵", @"donggan"),
-                                                CreateEffect(@"闪电", @"donggan"),
-                                                CreateEffect(@"镜像", @"donggan"),
-                                                CreateEffect(@"幻觉", @"donggan"),
+        NSArray <EffectInfo *> *effectList = @[ CreateEffect(NSLocalizedString(@"TCVideoEditView.DynamicLightWave", nil), @"donggan"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.DarkFantasy", nil), @"anhei"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.SoulOut", nil), @"linghun"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.ScreenSplit", nil), @"fenlie"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Shutter", nil), @"shutter-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.GhostShadow", nil), @"ghostshadow-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Phantom", nil), @"phantom-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Ghost", nil), @"ghost-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Lightning", nil), @"lightning-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Mirror", nil), @"mirror-"),
+                                                CreateEffect(NSLocalizedString(@"TCVideoEditView.Illusion", nil), @"illusion-"),
                                                 ];
         __strong __typeof(wself) self = wself;
         if (self) {
             self->_effectList = effectList;
         }
+        CFTimeInterval end = CFAbsoluteTimeGetCurrent();
+        NSLog(@"effect load time: %g", end - start);
     });
 
     if (_videoAsset == nil && _videoPath != nil) {
@@ -295,7 +397,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     CGFloat btnConfirmWidth = 70;
     CGFloat btnConfirmHeight = 30;
     _effectConfirmBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [_effectConfirmBtn setTitle:@"完成" forState:UIControlStateNormal];
+    [_effectConfirmBtn setTitle:NSLocalizedString(@"Common.Done", nil) forState:UIControlStateNormal];
     _effectConfirmBtn.titleLabel.font = [UIFont systemFontOfSize:14];
     [_effectConfirmBtn setBackgroundImage:[UIImage imageNamed:@"next_normal"] forState:UIControlStateNormal];
     [_effectConfirmBtn setBackgroundImage:[UIImage imageNamed:@"next_press"] forState:UIControlStateHighlighted];
@@ -338,7 +440,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     config.thumbHeight = cutViewHeight;
     config.borderHeight = 0;
     config.imageCount = 20;
-    _videoCutView = [[VideoCutView alloc] initWithFrame:CGRectMake(0,_timeLabel.bottom + 3, _effectView.width,cutViewHeight) videoPath:_videoPath videoAssert:_videoAsset config:config];
+    _videoCutView = [[VideoCutView alloc] initWithFrame:CGRectMake(0,_timeLabel.bottom + 3, _effectView.width,cutViewHeight) videoPath:_videoPath videoAsset:_videoAsset config:config];
     _videoCutView.delegate = self;
     [_videoCutView setCenterPanHidden:YES];
     [_effectView addSubview:_videoCutView];
@@ -380,10 +482,12 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     _ugcEdit = [[TXVideoEditer alloc] initWithPreview:param];
     _ugcEdit.generateDelegate = self;
     _ugcEdit.previewDelegate = _videoPreview;
+    /**       FaceUnity       **/
+    _ugcEdit.videoProcessDelegate = self ;
     
     //[_ugcEdit setVideoPath:_videoPath];
     [_ugcEdit setVideoAsset:_videoAsset];
-    
+    [_ugcEdit setRenderRotation:self.renderRotation];
 //    UIImage *waterimage = [UIImage imageNamed:@"watermark"];
 //    [_ugcEdit setWaterMark:waterimage normalizationFrame:CGRectMake(0.01, 0.01, 0.3 , 0)];
 
@@ -421,7 +525,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         
         _generationTitleLabel = [UILabel new];
         _generationTitleLabel.font = [UIFont systemFontOfSize:14];
-        _generationTitleLabel.text = @"视频生成中";
+        _generationTitleLabel.text = NSLocalizedString(@"TCVideoCutView.VideoGenerating", nil);
         _generationTitleLabel.textColor = UIColor.whiteColor;
         _generationTitleLabel.textAlignment = NSTextAlignmentCenter;
         _generationTitleLabel.frame = CGRectMake(0, _generateProgressView.y - 34, _generationView.width, 14);
@@ -439,6 +543,12 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     
     _generateProgressView.progress = 0.f;
     return _generationView;
+}
+
+- (void)setRenderRotation:(int)renderRotation
+{
+    _renderRotation = renderRotation;
+    [_ugcEdit setRenderRotation: renderRotation];
 }
 
 -(void)onPlayVideo
@@ -531,7 +641,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         [_effectConfirmBtn setBackgroundImage:[UIImage imageNamed:@"cofirm_press"] forState:UIControlStateHighlighted];
         _effectConfirmBtn.frame = CGRectMake(self.view.width - 15 * kScaleX - 44, 20 * kScaleY, 44, 30);
     }else{
-        [_effectConfirmBtn setTitle:@"完成" forState:UIControlStateNormal];
+        [_effectConfirmBtn setTitle:NSLocalizedString(@"Common.Done", nil) forState:UIControlStateNormal];
         _effectConfirmBtn.titleLabel.font = [UIFont systemFontOfSize:14];
         [_effectConfirmBtn setBackgroundImage:[UIImage imageNamed:@"next_normal"] forState:UIControlStateNormal];
         [_effectConfirmBtn setBackgroundImage:[UIImage imageNamed:@"next_press"] forState:UIControlStateHighlighted];
@@ -543,7 +653,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
 - (void)goBack
 {
     if (_bottomBar.hidden) {
-        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"您确定要放弃当前添加的特效？" message:nil cancelButtonTitle:@"取消" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"TCVideoEditView.AbandonEffect", nil) message:nil cancelButtonTitle:NSLocalizedString(@"Common.Cancel", nil) otherButtonTitles:@[NSLocalizedString(@"Common.OK", nil)] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
             if (buttonIndex == 1) {
                 _musicView.hidden = YES;
                 [self clearEffect];
@@ -553,7 +663,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         }];
         [alert show];
     }else{
-        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"您确定要放弃当前编辑？" message:nil cancelButtonTitle:@"取消" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+        UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:NSLocalizedString(@"TCVideoEditView.AbandonEdit", nil) message:nil cancelButtonTitle:NSLocalizedString(@"Common.Cancel", nil) otherButtonTitles:@[NSLocalizedString(@"Common.OK", nil)] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
             if (buttonIndex == 1) {
                 [_ugcEdit stopPlay];
                 [self setPlayBtn:NO];
@@ -587,13 +697,13 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     }else{
         __weak __typeof(self) ws = self;
         UIActionSheet *testSheet = [[UIActionSheet alloc] init];
-        [testSheet bk_addButtonWithTitle:@"保存" handler:^{
+        [testSheet bk_addButtonWithTitle:NSLocalizedString(@"Common.Save", nil) handler:^{
             [ws goSave];
         }];
-        [testSheet bk_addButtonWithTitle:@"发布" handler:^{
+        [testSheet bk_addButtonWithTitle:NSLocalizedString(@"Common.Release", nil) handler:^{
             [ws goPublish];
         }];
-        [testSheet bk_setCancelButtonWithTitle:@"取消" handler:nil];
+        [testSheet bk_setCancelButtonWithTitle:NSLocalizedString(@"Common.Cancel", nil) handler:nil];
         [testSheet showInView:self.view];
     }
 }
@@ -813,11 +923,13 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
             [_ugcEdit setReverse:NO];
             [_ugcEdit setRepeatPlay:nil];
             [_videoCutView setCenterPanHidden:YES];
+            _timeIndex = 0;
         }
             break;
         case EffectSelectType_Filter:
         {
             [_ugcEdit setFilter:nil];
+            _filterIndex = 0;
         }
             break;
         case EffectSelectType_Paster:
@@ -880,6 +992,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     }
 }
 
+// onPreProcessTexture
 -(void)startPlayFromTime:(CGFloat)startTime toTime:(CGFloat)endTime
 {
     [_ugcEdit startPlayFromTime:startTime toTime:endTime];
@@ -904,7 +1017,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
 //                [weakSelf.navigationController dismissViewControllerAnimated:YES completion:nil];
 //                [weakSelf confirmGenerateVideo];
 //            }else{
-//                UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"不同意用户协议将无法发布视频" message:nil cancelButtonTitle:@"确定" otherButtonTitles:nil handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+//                UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"不同意用户协议将无法发布视频" message:nil cancelButtonTitle:NSLocalizedString(@"Common.OK", nil) otherButtonTitles:nil handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
 //                    [[NSUserDefaults standardUserDefaults] setObject:@NO forKey:hasAgreeUserAgreement];
 //                    [self.navigationController dismissViewControllerAnimated:YES completion:nil];
 //                }];
@@ -940,10 +1053,10 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
             }
         }else{
             _generationView.hidden = YES;
-            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频上传失败"
-                                                                message:[NSString stringWithFormat:@"错误码：%d",errCode]
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoEditView.VideoUploadingFailed", nil)
+                                                                message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCodeMessage", nil),errCode]
                                                                delegate:self
-                                                      cancelButtonTitle:@"知道了"
+                                                      cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                       otherButtonTitles:nil, nil];
             [alertView show];
         }
@@ -1008,9 +1121,34 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
 
 - (void)setFilter:(NSInteger)index
 {
+    _filterIndex = index;
     NSString* lookupFileName = @"";
     switch (index) {
         case FilterType_None:
+            break;
+        case FilterType_biaozhun:
+            lookupFileName = @"biaozhun.png";
+            break;
+        case FilterType_yinghong:
+            lookupFileName = @"yinghong.png";
+            break;
+        case FilterType_yunshang:
+            lookupFileName = @"yunshang.png";
+            break;
+        case FilterType_chunzhen:
+            lookupFileName = @"chunzhen.png";
+            break;
+        case FilterType_bailan:
+            lookupFileName = @"bailan.png";
+            break;
+        case FilterType_yuanqi:
+            lookupFileName = @"yuanqi.png";
+            break;
+        case FilterType_chaotuo:
+            lookupFileName = @"chaotuo.png";
+            break;
+        case FilterType_xiangfen:
+            lookupFileName = @"xiangfen.png";
             break;
         case FilterType_white:
             lookupFileName = @"white.png";
@@ -1089,7 +1227,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     [TCUtil report:xiaoshipin_videoedit userName:nil code:result.retCode msg:result.descMsg];
     if (result.retCode == 0) {
         if (_actionType == ActionType_Publish) {
-            _generationTitleLabel.text = @"视频发布中";
+            _generationTitleLabel.text = NSLocalizedString(@"TCVideoEditView.VideoReleasing", nil);
             _generateProgressView.progress = 0;
             _generateCannelBtn.hidden = YES;
             [self publishVideo];
@@ -1098,20 +1236,20 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
             ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
             [library writeVideoAtPathToSavedPhotosAlbum:[NSURL fileURLWithPath:_videoOutputPath] completionBlock:^(NSURL *assetURL, NSError *error) {
                 if (error != nil) {
-                    [self toastTip:@"视频保存失败！"];
+                    [self toastTip:NSLocalizedString(@"TCVideoEditView.VideoSavingFailed", nil)];
                 }else{
-                    [self toastTip:@"视频保存成功啦！"];
+                    [self toastTip:NSLocalizedString(@"TCVideoEditView.VideoSavingSucceeded", nil)];
                 }
                 [self performSelector:@selector(dismissViewController) withObject:nil afterDelay:1];
             }];
         }
-        
+
     }else{
         _generationView.hidden = YES;
-        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"视频生成失败"
-                                                            message:[NSString stringWithFormat:@"错误码：%ld 错误信息：%@",(long)result.retCode,result.descMsg]
+        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"TCVideoCutView.HintVideoGeneratingFailed", nil)
+                                                            message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCodeMessage", nil),(long)result.retCode,result.descMsg]
                                                            delegate:self
-                                                  cancelButtonTitle:@"知道了"
+                                                  cancelButtonTitle:NSLocalizedString(@"Common.GotIt", nil)
                                                   otherButtonTitles:nil, nil];
         [alertView show];
     }
@@ -1128,7 +1266,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     [TCUtil report:xiaoshipin_videouploadvod userName:nil code:result.retCode msg:result.descMsg];
     _generationView.hidden = YES;
     if (result.retCode != 0) {
-        [self toastTip:@"发布失败！"];
+        [self toastTip:NSLocalizedString(@"TCVideoEditView.VideoReleasingFailed", nil)];
     }else{
         NSString *title = @"小视频";
         NSDictionary* dictParam = @{@"userid" :[TCLoginParam shareInstance].identifier,
@@ -1140,7 +1278,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         [[TCLoginModel sharedInstance] uploadUGC:dictParam completion:^(int errCode, NSString *msg, NSDictionary *resultDict) {
             [TCUtil report:xiaoshipin_videouploadserver userName:nil code:errCode msg:msg];
             if (200 == errCode) {
-                [self toastTip:@"发布成功了！"];
+                [self toastTip:NSLocalizedString(@"TCVideoEditView.VideoReleasingSucceeded", nil)];
             } else {
                 [self toastTip:[NSString stringWithFormat:@"UploadUGCVideo Failed[%d]", errCode]];
             }
@@ -1159,6 +1297,8 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
             [[NSNotificationCenter defaultCenter] postNotificationName:kTCLiveListUpdated object:nil];
         }];
     }
+    //缓存视频状态置nil
+    [[NSUserDefaults standardUserDefaults] setObject:nil forKey:CACHE_PATH_LIST];
 }
 
 #pragma mark - BottomTabBarDelegate
@@ -1206,7 +1346,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         NSMutableArray <EffectInfo *> *effectArray = [NSMutableArray array];
         [effectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"无";
+            v.name = NSLocalizedString(@"Common.None", nil);
             v.animateIcons = [NSMutableArray array];
             for (int i = 0; i < 20; i ++) {
                 [v.animateIcons addObject:[UIImage imageNamed:[NSString stringWithFormat:@"jump_%d",i]]];
@@ -1215,7 +1355,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         })];
         [effectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"时光倒流";
+            v.name = NSLocalizedString(@"TCVideoEditView.EffectArray1Object1", nil);
             v.animateIcons = [NSMutableArray array];
             v.selectIcon = [UIImage imageNamed:@"timeBack_select"];
             for (int i = 19; i >= 0; i --) {
@@ -1225,7 +1365,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         })];
         [effectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"反复";
+            v.name = NSLocalizedString(@"TCVideoEditView.EffectArray1Object2", nil);
             v.animateIcons = [NSMutableArray array];
             v.selectIcon = [UIImage imageNamed:@"repeat_select"];
             NSMutableArray *repeatIcons = [NSMutableArray array];
@@ -1244,7 +1384,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         })];
         [effectArray addObject:({
             EffectInfo * v= [EffectInfo new];
-            v.name = @"慢动作";
+            v.name = NSLocalizedString(@"TCVideoEditView.EffectArray1Object3", nil);
             v.animateIcons = [NSMutableArray array];
             v.selectIcon = [UIImage imageNamed:@"slow_select"];
             v.isSlow = YES;
@@ -1255,6 +1395,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
         })];
         dispatch_async(dispatch_get_main_queue(), ^{
             [_effectSelectView setEffectList:effectArray];
+            _effectSelectView.selectedIndex = _timeIndex;
         });
     });
 }
@@ -1270,15 +1411,71 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     NSMutableArray <EffectInfo *> *effectArray = [NSMutableArray array];
     [effectArray addObject:({
         EffectInfo * v= [EffectInfo new];
-        v.name = @"原图";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object1", nil);
         v.icon = [UIImage imageNamed:@"orginal"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object2", nil);
+        v.icon = [UIImage imageNamed:@"biaozhun"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object3", nil);
+        v.icon = [UIImage imageNamed:@"yinghong"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object4", nil);
+        v.icon = [UIImage imageNamed:@"yunshang"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object5", nil);
+        v.icon = [UIImage imageNamed:@"chunzhen"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object6", nil);
+        v.icon = [UIImage imageNamed:@"bailan"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object7", nil);
+        v.icon = [UIImage imageNamed:@"yuanqi"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object8", nil);
+        v.icon = [UIImage imageNamed:@"chaotuo"];
+        v.selectIcon = [UIImage imageNamed:@"orginal_select"];
+        v;
+    })];
+    [effectArray addObject:({
+        EffectInfo * v= [EffectInfo new];
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object9", nil);
+        v.icon = [UIImage imageNamed:@"xiangfen"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"美白";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object10", nil);
         v.icon = [UIImage imageNamed:@"fwhite"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
@@ -1286,62 +1483,63 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"浪漫";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object11", nil);
         v.icon = [UIImage imageNamed:@"langman"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"清新";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object12", nil);
         v.icon = [UIImage imageNamed:@"qingxin"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"唯美";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object13", nil);
         v.icon = [UIImage imageNamed:@"weimei"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"粉嫩";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object14", nil);
         v.icon = [UIImage imageNamed:@"fennen"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"怀旧";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object15", nil);
         v.icon = [UIImage imageNamed:@"huaijiu"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"蓝调";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object16", nil);
         v.icon = [UIImage imageNamed:@"landiao"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"清凉";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object17", nil);
         v.icon = [UIImage imageNamed:@"qingliang"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [effectArray addObject:({
         EffectInfo *v = [EffectInfo new];
-        v.name = @"日系";
+        v.name = NSLocalizedString(@"TCVideoEditView.EffectArray2Object18", nil);
         v.icon = [UIImage imageNamed:@"rixi"];
         v.selectIcon = [UIImage imageNamed:@"orginal_select"];
         v;
     })];
     [_effectSelectView setEffectList:effectArray];
     _effectSelectType = EffectSelectType_Filter;
+    _effectSelectView.selectedIndex = _filterIndex;
     [_videoCutView setColorType:ColorType_Filter];
     [_videoCutView setCenterPanHidden:YES];
     [self removeAllTextFieldFromSuperView];
@@ -1430,6 +1628,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
                 default:
                     break;
             }
+            _timeIndex = _effectSelectIndex;
         }
             break;
         case EffectSelectType_Filter:
@@ -1580,7 +1779,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     
     [_textEffectArray insertObject:({
         EffectInfo * v= [EffectInfo new];
-        v.name = @"气泡字幕";
+        v.name = NSLocalizedString(@"TCVideoEditView.BubbleSubtitle", nil);
         v.icon = info.iconImage;
         v;
     }) atIndex:_textEffectArray.count - 1];
@@ -1622,7 +1821,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     
     [_pasterEffectArray insertObject:({
         EffectInfo * v= [EffectInfo new];
-        v.name = @"动态贴纸";
+        v.name = NSLocalizedString(@"PasterAddView.PasterDynamic", nil);
         v.icon = info.iconImage;
         v;
     }) atIndex:_pasterEffectArray.count - 1];
@@ -1664,7 +1863,7 @@ typedef NS_ENUM(NSInteger,TCLVFilterType) {
     
     [_pasterEffectArray insertObject:({
         EffectInfo * v= [EffectInfo new];
-        v.name = @"静态贴纸";
+        v.name = NSLocalizedString(@"PasterAddView.PasterStatic", nil);
         v.icon = info.iconImage;
         v;
     }) atIndex:_pasterEffectArray.count - 1];

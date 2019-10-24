@@ -16,6 +16,7 @@
 #import "TCRegisterViewController.h"
 #import "TCUserInfoModel.h"
 #import "SmallButton.h"
+#import "TXWechatInfoView.h"
 
 @interface TCLoginViewController ()<UITextFieldDelegate,TCLoginListener, UIGestureRecognizerDelegate>
 {
@@ -25,7 +26,7 @@
     UITextField    *_pwdTextField;      // 密码/验证码
     UIButton       *_loginBtn;          // 登录
     UIButton       *_regBtn;            // 注册
-    
+    TXWechatInfoView *_wechatInfoView;    // 公众号信息
     UIView         *_lineView1;
     UIView         *_lineView2;
     
@@ -64,7 +65,7 @@
     if ([_loginParam isExpired]) {
         // 刷新票据
         __weak typeof(self) weakSelf = self;
-        [[HUDHelper sharedInstance] syncLoading:@"自动登录中..."];
+        [[HUDHelper sharedInstance] syncLoading:NSLocalizedString(@"TCLoginView.AutoLoggingIn", nil)];
         [[TCLoginModel sharedInstance] login:_loginParam.identifier hashPwd:_loginParam.hashedPwd succ:^(NSString* userName, NSString* md5pwd ,NSString *token,NSString *refreshToken,NSInteger expires) {
             [weakSelf loginOK:userName hashedPwd:md5pwd token:token refreshToken:refreshToken expires:expires];
             [[HUDHelper sharedInstance] syncStopLoading];
@@ -73,7 +74,7 @@
         } fail:^(NSString *userName, int errCode, NSString *errMsg) {
             [[HUDHelper sharedInstance] syncStopLoading];
             [weakSelf loginFail:userName code:errCode message:errMsg];
-            [[HUDHelper sharedInstance] syncLoading:@"自动登录中..."];
+            [[HUDHelper sharedInstance] syncLoading:NSLocalizedString(@"TCLoginView.AutoLoggingIn", nil)];
             [self pullLoginUI];
         }];
     }
@@ -83,7 +84,11 @@
 }
 
 - (void)pullLoginUI {
-    [self setupUI];
+    if (_accountTextField == nil) {
+        [self setupUI];
+    } else {
+        [self relayout];
+    }
 }
 
 - (void)setupUI {
@@ -125,7 +130,7 @@
     
     _loginBtn = [[UIButton alloc] init];
     _loginBtn.titleLabel.font = [UIFont systemFontOfSize:16];
-    [_loginBtn setTitle:@"登录" forState:UIControlStateNormal];
+    [_loginBtn setTitle:NSLocalizedString(@"TCLoginView.Login", nil) forState:UIControlStateNormal];
     [_loginBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
     [_loginBtn setBackgroundImage:[UIImage imageNamed:@"button"] forState:UIControlStateNormal];
     [_loginBtn setBackgroundImage:[UIImage imageNamed:@"button_pressed"] forState:UIControlStateSelected];
@@ -135,8 +140,11 @@
     _regBtn.titleLabel.font = [UIFont systemFontOfSize:14];
     [_regBtn setTitleColor:[UIColor colorWithWhite:1 alpha:0.5] forState:UIControlStateNormal];
     [_regBtn setContentHorizontalAlignment:UIControlContentHorizontalAlignmentRight];
-    [_regBtn setTitle:@"注册新用户" forState:UIControlStateNormal];
+    [_regBtn setTitle:NSLocalizedString(@"TCLoginView.Register", nil) forState:UIControlStateNormal];
     [_regBtn addTarget:self action:@selector(reg:) forControlEvents:UIControlEventTouchUpInside];
+    
+    TXWechatInfoView *infoView = [[TXWechatInfoView alloc] initWithFrame:CGRectMake(10, _regBtn.bottom+20, self.view.width - 20, 100)];
+    _wechatInfoView = infoView;
     
     [self.view addSubview:_accountTextField];
     [self.view addSubview:_lineView1];
@@ -144,11 +152,12 @@
     [self.view addSubview:_lineView2];
     [self.view addSubview:_loginBtn];
     [self.view addSubview:_regBtn];
+    [self.view addSubview:infoView];
     
     UISwipeGestureRecognizer *gesture = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(onGoBack:)];
     gesture.delegate = self;
     gesture.direction = UISwipeGestureRecognizerDirectionRight;
-    [self.view addGestureRecognizer:gesture];    
+    [self.view addGestureRecognizer:gesture];
     
     [self relayout];
 }
@@ -180,15 +189,17 @@
     [_loginBtn layoutBelow:_lineView2 margin:36];
     [_loginBtn alignParentLeftWithMargin:22];
     
-    [_regBtn sizeWith:CGSizeMake(100, 15)];
+    [_regBtn sizeToFit];
+    [_regBtn sizeWith:CGSizeMake(_regBtn.frame.size.width, 15)];
     [_regBtn layoutBelow:_loginBtn margin:25];
     [_regBtn alignParentRightWithMargin:25];
 
-
-    [_accountTextField setPlaceholder:@"输入用户名"];
+    _wechatInfoView.top = _regBtn.bottom + 30;
+    
+    [_accountTextField setPlaceholder:NSLocalizedString(@"TCLoginView.PlaceholderEnterUserName", nil)];
     [_accountTextField setText:@""];
     _accountTextField.keyboardType = UIKeyboardTypeDefault;
-    [_pwdTextField setPlaceholder:@"输入密码"];
+    [_pwdTextField setPlaceholder:NSLocalizedString(@"TCLoginView.PlaceholderEnterPassword", nil)];
     [_pwdTextField setText:@""];
     
     _pwdTextField.secureTextEntry = YES;
@@ -223,13 +234,14 @@
     NSString *userName = _accountTextField.text;
     NSString *failedReason = nil;
     if (![[TCLoginModel sharedInstance] validateUserName:userName failedReason:&failedReason]) {
-        [HUDHelper alertTitle:@"用户名错误" message:failedReason cancel:@"确定"];
+        [HUDHelper alertTitle:NSLocalizedString(@"TCLoginView.HintUserNameError", nil)
+                      message:failedReason cancel:NSLocalizedString(@"Common.OK", nil)];
         return;
     }
 
     NSString *pwd = _pwdTextField.text;
     if (![[TCLoginModel sharedInstance] validatePassword:pwd failedReason:&failedReason]) {
-        [HUDHelper alertTitle:@"密码错误" message:failedReason cancel:@"确定"];
+        [HUDHelper alertTitle:NSLocalizedString(@"TCLoginView.HintPasswordError", nil) message:failedReason cancel:NSLocalizedString(@"Common.OK", nil)];
         return;
     }
 
@@ -254,16 +266,22 @@
     [param setObject:userName forKey:@"userName"];
     [param setObject:@"login" forKey:@"action"];
     
+    NSString *loginFailedTitle = NSLocalizedString(@"TCLoginView.HintLoginFailed", nil);
     if(errCode == 620){
-        [HUDHelper alertTitle:@"登录失败" message:@"账号未注册" cancel:@"确定"];
+        [HUDHelper alertTitle:loginFailedTitle
+                      message:NSLocalizedString(@"TCLoginView.ErrorAccountNotExists", nil)
+                       cancel:NSLocalizedString(@"Common.OK", nil)];
         [TCUtil report:xiaoshipin_login userName:userName code:errCode msg:@"账号未注册"];
     }
     else if(errCode == 621){
-        [HUDHelper alertTitle:@"登录失败" message:@"密码错误" cancel:@"确定"];
+        [HUDHelper alertTitle:loginFailedTitle
+                      message:NSLocalizedString(@"TCLoginView.ErrorPasswordWrong", nil)
+                       cancel:NSLocalizedString(@"Common.OK", nil)];
         [TCUtil report:xiaoshipin_login userName:userName code:errCode msg:@"密码错误"];
+
     }
     else{
-        [HUDHelper alertTitle:@"登录失败" message:[NSString stringWithFormat:@"错误码: %d", errCode] cancel:@"确定"];
+        [HUDHelper alertTitle:loginFailedTitle message:[NSString stringWithFormat:NSLocalizedString(@"Common.HintErrorCode", nil), errCode] cancel:NSLocalizedString(@"Common.OK", nil)];
         [TCUtil report:xiaoshipin_login userName:userName code:errCode msg:errMsg];
     }
 }
@@ -278,6 +296,7 @@
     _loginParam.refreshToken = refreshToken;
     _loginParam.expires = expires;
     [_loginParam saveToLocal];
+    [[TCLoginModel sharedInstance] scheduleRefreshLoginForExpireDate:_loginParam.expireDate];
     //[[AppDelegate sharedAppDelegate] enterMainUI];
     [TCUtil report:xiaoshipin_login userName:userName code:200 msg:@"登录成功"];
     [self dismissViewControllerAnimated:YES completion:nil];
@@ -292,7 +311,7 @@
         if (index < chain.count - 1) {
             [chain[index + 1] becomeFirstResponder];
         } else {
-    [textField resignFirstResponder];
+            [textField resignFirstResponder];
             [self login:nil];
         }
     }

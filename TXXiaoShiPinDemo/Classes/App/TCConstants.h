@@ -52,6 +52,12 @@
 //播放端错误信息
 #define kErrorMsgRtmpPlayFailed @"视频流播放失败，Error:"
 
+//默认合唱视频地址
+#define DEFAULT_CHORUS_URL @"http://1400100725.vod2.myqcloud.com/8b7d5993vodgzp1400100725/d864a3545285890780576877210/ss2W2I8oIn4A.mp4"
+
+//缓存视频地址
+#define CACHE_PATH_LIST  @"CACHE_PATH_LIST"
+
 //是否展示log按钮，测试的时候打开，正式发布的时候关闭
 #define ENABLE_LOG 0
 

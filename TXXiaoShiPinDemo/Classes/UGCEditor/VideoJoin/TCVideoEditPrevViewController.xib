@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Aspect ratio constraints" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -33,7 +33,7 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="40" id="bwX-jh-IIy"/>
                     </constraints>
-                    <state key="normal" title="仅发布" backgroundImage="button_white.png">
+                    <state key="normal" title="仅发布" backgroundImage="button_white">
                         <color key="titleColor" red="0.0" green="0.80356335639999998" blue="0.67384082079999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </state>
                     <connections>
@@ -45,7 +45,7 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="40" id="asg-tm-KRm"/>
                     </constraints>
-                    <state key="normal" title="保存并发布" backgroundImage="button_green.png"/>
+                    <state key="normal" title="保存并发布" backgroundImage="button_green"/>
                     <connections>
                         <action selector="saveAndPublish:" destination="-1" eventType="touchUpInside" id="Z0f-cy-PZb"/>
                     </connections>
@@ -55,7 +55,7 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="40" id="jE8-Fr-pkf"/>
                     </constraints>
-                    <state key="normal" title="仅保存" backgroundImage="button_white.png">
+                    <state key="normal" title="仅保存" backgroundImage="button_white">
                         <color key="titleColor" red="0.0" green="0.80356335639999998" blue="0.67384082079999996" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </state>
                     <connections>
@@ -80,7 +80,7 @@
         </view>
     </objects>
     <resources>
-        <image name="button_green.png" width="345" height="40"/>
-        <image name="button_white.png" width="345" height="40"/>
+        <image name="button_green" width="345" height="40"/>
+        <image name="button_white" width="345" height="40"/>
     </resources>
 </document>

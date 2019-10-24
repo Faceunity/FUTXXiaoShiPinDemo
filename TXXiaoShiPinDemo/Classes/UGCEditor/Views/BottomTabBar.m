@@ -44,7 +44,7 @@
         [_contentView addSubview:_btnMusic];
         
         _labelMusic = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelMusic.text = @"音乐";
+        _labelMusic.text = NSLocalizedString(@"BottomTabBar.TabMusic", nil);
         _labelMusic.font = [UIFont systemFontOfSize:10];
         _labelMusic.textColor = [UIColor whiteColor];
         _labelMusic.textAlignment = NSTextAlignmentCenter;
@@ -57,7 +57,7 @@
         [_contentView addSubview:_btnEffect];
         
         _labelEffect = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelEffect.text = @"滤镜";
+        _labelEffect.text = NSLocalizedString(@"BottomTabBar.TabEffect", nil);
         _labelEffect.font = [UIFont systemFontOfSize:10];
         _labelEffect.textColor = [UIColor whiteColor];
         _labelEffect.textAlignment = NSTextAlignmentCenter;
@@ -70,7 +70,7 @@
         [_contentView addSubview:_btnTime];
         
         _labelTime = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelTime.text = @"速度";
+        _labelTime.text = NSLocalizedString(@"BottomTabBar.TabSpeed", nil);
         _labelTime.font = [UIFont systemFontOfSize:10];
         _labelTime.textColor = [UIColor whiteColor];
         _labelTime.textAlignment = NSTextAlignmentCenter;
@@ -83,7 +83,7 @@
         [_contentView addSubview:_btnFilter];
         
         _labelFilter = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelFilter.text = @"色调";
+        _labelFilter.text = NSLocalizedString(@"BottomTabBar.TabFilter", nil);
         _labelFilter.font = [UIFont systemFontOfSize:10];
         _labelFilter.textColor = [UIColor whiteColor];
         _labelFilter.textAlignment = NSTextAlignmentCenter;
@@ -96,7 +96,7 @@
         [_contentView addSubview:_btnPaster];
         
         _labelPaster = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelPaster.text = @"贴纸";
+        _labelPaster.text = NSLocalizedString(@"BottomTabBar.TabPaster", nil);
         _labelPaster.font = [UIFont systemFontOfSize:10];
         _labelPaster.textColor = [UIColor whiteColor];
         _labelPaster.textAlignment = NSTextAlignmentCenter;
@@ -109,7 +109,7 @@
         [_contentView addSubview:_btnText];
         
         _labelText = [[UILabel alloc] initWithFrame:CGRectZero];
-        _labelText.text = @"字幕";
+        _labelText.text =NSLocalizedString(@"BottomTabBar.TabSubtitle", nil);
         _labelText.font = [UIFont systemFontOfSize:10];
         _labelText.textColor = [UIColor whiteColor];
         _labelText.textAlignment = NSTextAlignmentCenter;

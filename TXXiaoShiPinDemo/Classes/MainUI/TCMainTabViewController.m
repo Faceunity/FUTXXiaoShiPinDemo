@@ -14,10 +14,12 @@
 #import "TCUserInfoViewController.h"
 #import "UIAlertView+BlocksKit.h"
 #import "TCVideoRecordViewController.h"
-#import <QBImagePickerController/QBImagePickerController.h>
+#import "QBImagePickerController.h"
 #import "TCVideoLoadingController.h"
 #import "TCLoginModel.h"
 #import "TCLoginParam.h"
+#import "VerticalButton.h"
+#import "UIAlertView+BlocksKit.h"
 
 #define BOTTOM_VIEW_HEIGHT              225
 
@@ -32,6 +34,7 @@
 {
     TCLiveListViewController *_showVC;
     UIView *                 _botttomView;
+    MBProgressHUD *          _hub;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -56,6 +59,30 @@
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     [self addChildViewMiddleBtn];
+    
+    //检查有没缓存的视频
+    NSArray *cachePathList = [[NSUserDefaults standardUserDefaults] objectForKey:CACHE_PATH_LIST];
+    if (cachePathList && cachePathList.count > 0) {
+        [UIAlertView bk_showAlertViewWithTitle:@"温馨提示" message:@"你有未录制完成的视频，是否继续？" cancelButtonTitle:@"取消" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+            if (buttonIndex == 1){
+                //继续录制
+                TCVideoRecordViewController *videoRecord = [[TCVideoRecordViewController alloc] initWithNibName:nil bundle:nil];
+                videoRecord.preloadingVideos = YES;
+                TCNavigationController *nav = [[TCNavigationController alloc] initWithRootViewController:videoRecord];
+                [self presentViewController:nav animated:YES completion:nil];
+                _botttomView.hidden = YES;
+            }else{
+                //移除缓存数据
+                NSArray *cachePathList = [[NSUserDefaults standardUserDefaults] objectForKey:CACHE_PATH_LIST];
+                NSString *cacheFolder = [[[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"TXUGC"] stringByAppendingPathComponent:@"TXUGCParts"];
+                for (NSInteger i = 0; i < cachePathList.count; i ++) {
+                    NSString *videoPath = [cacheFolder stringByAppendingPathComponent:cachePathList[i]];
+                    [TCUtil removeCacheFile:videoPath];
+                }
+                [[NSUserDefaults standardUserDefaults] setObject:nil forKey:CACHE_PATH_LIST];
+            }
+        }];
+    }
 }
 
 - (void)viewDidLayoutSubviews {
@@ -131,59 +158,42 @@
     imageHidden.center = CGPointMake(self.view.width / 2, btnBkgViewHeight / 2);
     [btnBkgView addSubview:imageHidden];
 
+    UIButton *(^createButton)(NSString *title, NSString *imageName, SEL action) = ^(NSString *title, NSString *imageName, SEL action) {
+        UIButton * button = [[VerticalButton alloc] initWithFrame:CGRectMake(0, 0, btnSize, btnSize)];
+        [button setImage:[UIImage imageNamed:imageName] forState:UIControlStateNormal];
+        [button setImage:[UIImage imageNamed:[imageName stringByAppendingString:@"_press"]] forState:UIControlStateSelected];
+        [button addTarget:self action:action forControlEvents:UIControlEventTouchUpInside];
+        button.titleLabel.font = [UIFont systemFontOfSize:13];
+        [button setTitle:NSLocalizedString(title, nil) forState:UIControlStateNormal];
+        [button sizeToFit];
+        button.height = 80;
+        return button;
+    };
 
-    UIButton * btnVideo = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnSize, btnSize)];
-    [btnVideo setImage:[UIImage imageNamed:@"videoex"] forState:UIControlStateNormal];
-    [btnVideo setImage:[UIImage imageNamed:@"videoex_press"] forState:UIControlStateSelected];
-    [btnVideo addTarget:self action:@selector(onVideoBtnClicked) forControlEvents:UIControlEventTouchUpInside];
+    UIButton * btnVideo = createButton(@"TCMainTabView.Record", @"videoex", @selector(onVideoBtnClicked));
+    UIButton * btnChorus = createButton(@"TCMainTabView.Chorus", @"composite", @selector(onVideoChorusSelectClicked));
+    UIButton * btnComp = createButton(@"TCMainTabView.EditVideo", @"composite", @selector(onVideoSelectClicked));
+    UIButton * btnPic = createButton(@"TCMainTabView.EditImage", @"composite", @selector(onPictureSelectClicked));
 
-    UILabel* labelVideo = [[UILabel alloc]init];
-    labelVideo.frame = CGRectMake(0, topInset, 150, 150);
-    [labelVideo setText:@"录制"];
-    [labelVideo setTextColor:[UIColor whiteColor]];
-    [labelVideo setFont:[UIFont fontWithName:@"" size:14]];
-    [labelVideo sizeToFit];
+    CGFloat centerDiff = self.view.width / 4;
+    CGFloat centerX = centerDiff / 2;
+    CGFloat centerY = _botttomView.height / 2 - 20;
 
-
-    UIButton * btnComp = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnSize, btnSize)];
-    [btnComp setImage:[UIImage imageNamed:@"composite"] forState:UIControlStateNormal];
-    [btnComp setImage:[UIImage imageNamed:@"composite_press"] forState:UIControlStateSelected];
-    [btnComp addTarget:self action:@selector(onVideoSelectClicked) forControlEvents:UIControlEventTouchUpInside];
-
-    UILabel* labelComp = [[UILabel alloc]init];
-    labelComp.frame = CGRectMake(0, topInset, 150, 150);
-    [labelComp setText:@"视频编辑"];
-    [labelComp setTextColor:[UIColor whiteColor]];
-    [labelComp setFont:[UIFont fontWithName:@"" size:14]];
-    [labelComp sizeToFit];
-
-    UIButton * btnPic = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, btnSize, btnSize)];
-    [btnPic setImage:[UIImage imageNamed:@"composite"] forState:UIControlStateNormal];
-    [btnPic setImage:[UIImage imageNamed:@"composite_press"] forState:UIControlStateSelected];
-    [btnPic addTarget:self action:@selector(onPictureSelectClicked) forControlEvents:UIControlEventTouchUpInside];
+    btnVideo.center  = CGPointMake(centerX, centerY);
+    centerX += centerDiff;
     
-    UILabel* labelPic = [[UILabel alloc]init];
-    labelPic.frame = CGRectMake(0, topInset, 150, 150);
-    [labelPic setText:@"图片编辑"];
-    [labelPic setTextColor:[UIColor whiteColor]];
-    [labelPic setFont:[UIFont fontWithName:@"" size:14]];
-    [labelPic sizeToFit];
+    btnChorus.center = CGPointMake(centerX, centerY);
+    centerX += centerDiff;
     
-    int height = btnSize + labelVideo.frame.size.height + 5;
-    int totalHeight = bottomViewHeight - btnBkgViewHeight;
-    btnVideo.center = CGPointMake(self.view.width / 4, (totalHeight - height) / 2 + btnSize / 2);
-    labelVideo.center = CGPointMake(btnVideo.center.x, totalHeight - (totalHeight - height ) / 2 - labelVideo.frame.size.height / 2);
-    btnComp.center = CGPointMake(self.view.width * 2/ 4, (totalHeight - height) / 2 + btnSize / 2);
-    labelComp.center = CGPointMake(btnComp.center.x, totalHeight - (totalHeight - height ) / 2 - labelVideo.frame.size.height / 2);
-    btnPic.center = CGPointMake(self.view.width * 3/ 4, (totalHeight - height) / 2 + btnSize / 2);
-    labelPic.center = CGPointMake(btnPic.center.x, totalHeight - (totalHeight - height ) / 2 - labelVideo.frame.size.height / 2);
+    btnComp.center = CGPointMake(centerX, centerY);
+    centerX += centerDiff;
+
+    btnPic.center = CGPointMake(centerX, centerY);
 
     [_botttomView addSubview:btnVideo];
-    [_botttomView addSubview:labelVideo];
     [_botttomView addSubview:btnComp];
-    [_botttomView addSubview:labelComp];
     [_botttomView addSubview:btnPic];
-    [_botttomView addSubview:labelPic];
+    [_botttomView addSubview:btnChorus];
 }
 
 //添加推流按钮
@@ -250,8 +260,7 @@
 
 -(void)onVideoBtnClicked
 {
-    TCVideoRecordViewController *videoRecord = [TCVideoRecordViewController new];
-//    [self.navigationController pushViewController:videoRecord animated:YES];
+    TCVideoRecordViewController *videoRecord = [[TCVideoRecordViewController alloc] initWithNibName:nil bundle:nil];
     TCNavigationController *nav = [[TCNavigationController alloc] initWithRootViewController:videoRecord];
     [self presentViewController:nav animated:YES completion:nil];
     _botttomView.hidden = YES;
@@ -288,6 +297,49 @@
     imagePickerController.minimumNumberOfSelection = 3;
     [self presentViewController:imagePickerController animated:YES completion:NULL];
     _botttomView.hidden = YES;
+}
+
+-(void)onVideoChorusSelectClicked
+{
+    if([TCLoginParam shareInstance].isExpired){
+        [[AppDelegate sharedAppDelegate] enterLoginUI];
+        return;
+    }
+    [TCUtil report:xiaoshipin_videochorus userName:nil code:0 msg:@"合唱事件"];
+    _hub = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    _hub.mode = MBProgressHUDModeText;
+    _hub.label.text = NSLocalizedString(@"TCVodPlay.VideoLoading", nil);
+    
+    __weak __typeof(self) weakSelf = self;
+    NSString *ducumentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *cachePath = [ducumentPath stringByAppendingPathComponent: @"Chorus.mp4"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:cachePath]){
+        [self onloadVideoComplete:cachePath];
+    }else{
+        [TCUtil downloadVideo:DEFAULT_CHORUS_URL cachePath:cachePath  process:^(CGFloat process) {
+            [weakSelf onloadVideoProcess:process];
+        } complete:^(NSString *videoPath) {
+            [weakSelf onloadVideoComplete:videoPath];
+        }];
+    }
+    _botttomView.hidden = YES;
+}
+
+-(void)onloadVideoProcess:(CGFloat)process {
+    _hub.label.text = [NSString stringWithFormat:NSLocalizedString(@"TCVodPlay.VideoLoadingFmt", nil),(int)(process * 100)];
+}
+
+-(void)onloadVideoComplete:(NSString *)videoPath {
+    if (videoPath) {
+        TCVideoRecordViewController *vc = [[TCVideoRecordViewController alloc] init];
+        vc.videoPath = videoPath;
+        vc.savePath = YES;
+        [[TCBaseAppDelegate sharedAppDelegate] pushViewController:vc animated:YES];
+        [_hub hideAnimated:YES];
+    }else{
+        _hub.label.text = NSLocalizedString(@"TCVodPlay.VideoLoadFailed", nil);
+        [_hub hideAnimated:YES afterDelay:1.0];
+    }
 }
 
 #pragma mark - QBImagePickerControllerDelegate

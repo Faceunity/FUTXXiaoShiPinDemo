@@ -15,7 +15,9 @@
 -(void)onBGMRangeChange:(CGFloat)startPercent endPercent:(CGFloat)endPercent;
 
 @optional
+///混响
 -(void)selectAudioEffect:(NSInteger)index;
+/// 变声类型
 -(void)selectAudioEffect2:(NSInteger)index;
 @end
 

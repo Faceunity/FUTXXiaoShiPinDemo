@@ -44,18 +44,6 @@ static FUManager *shareManager = NULL;
          还有设置为YES,则需要调用FURenderer.h中的接口，不能再调用funama.h中的接口。*/
         [[FURenderer shareRenderer] setupWithDataPath:path authPackage:&g_auth_package authSize:sizeof(g_auth_package) shouldCreateContext:NO];
         
-        // 开启表情跟踪优化功能
-        NSData *animModelData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"anim_model.bundle" ofType:nil]];
-        int res0 = fuLoadAnimModel((void *)animModelData.bytes, (int)animModelData.length);
-        NSLog(@"fuLoadAnimModel %@",res0 == 0 ? @"failure":@"success" );
-
-        NSData *arModelData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"ardata_ex.bundle" ofType:nil]];
-        
-        
-        int res1 = fuLoadExtendedARData((void *)arModelData.bytes, (int)arModelData.length);
-        
-        NSLog(@"fuLoadAnimModel %@",res1 == 0 ? @"failure":@"success" );
-        
        [self setDefaultParameters];
         
         NSLog(@"faceunitySDK version:%@",[FURenderer getVersion]);
@@ -243,7 +231,9 @@ static FUManager *shareManager = NULL;
     
     [self prepareToRender];
     
-    fuRenderItemsEx(FU_FORMAT_RGBA_TEXTURE, &texture, FU_FORMAT_RGBA_TEXTURE, &texture, width, height, frameID, items, sizeof(items)/sizeof(int)) ;
+//    fuRenderItemsEx(FU_FORMAT_RGBA_TEXTURE, &texture, FU_FORMAT_RGBA_TEXTURE, &texture, width, height, frameID, items, sizeof(items)/sizeof(int));
+    
+    fuRenderItemsEx2(FU_FORMAT_RGBA_TEXTURE,&texture, FU_FORMAT_RGBA_TEXTURE, &texture, width, height, frameID, items, sizeof(items)/sizeof(int), NAMA_RENDER_OPTION_FLIP_X | NAMA_RENDER_FEATURE_FULL, NULL);
     
     [self renderFlush];
     

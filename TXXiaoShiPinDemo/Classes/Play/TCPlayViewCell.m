@@ -73,14 +73,14 @@
         case ReviewStatus_NotReivew:
         {
             [_videoCoverView setImage:[UIImage imageNamed:@"bg.jpg"]];
-            _reviewLabel.text = @"视频未审核";
+            _reviewLabel.text = NSLocalizedString(@"TCPlayViewCell.UncensoredVideo", nil);
             _logicView.btnChorus.hidden = YES;
         }
             break;
         case ReviewStatus_Porn:
         {
             [_videoCoverView setImage:[UIImage imageNamed:@"bg.jpg"]];
-            _reviewLabel.text = @"视频涉黄";
+            _reviewLabel.text = NSLocalizedString(@"TCPlayViewCell.AdultVideo", nil);
             _logicView.btnChorus.hidden = YES;
         }
             break;

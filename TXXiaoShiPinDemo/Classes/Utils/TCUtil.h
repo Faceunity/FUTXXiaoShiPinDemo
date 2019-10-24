@@ -45,6 +45,7 @@ static NSString * const xiaoshipin_videoedit = @"videoedit";
 static NSString * const xiaoshipin_pictureedit = @"pictureedit";
 static NSString * const xiaoshipin_videojoiner = @"videojoiner";
 static NSString * const xiaoshipin_videochorus = @"videochorus";
+static NSString * const xiaoshipin_about_sdk = @"about_sdk";
 
 #ifndef NSStringCheck
 #define NSStringCheck(x)\
@@ -61,7 +62,7 @@ x = @"";}\
 
 + (void)asyncSendHttpRequest:(NSString*)command token:(NSString*)token params:(NSDictionary*)params handler:(void (^)(int resultCode, NSString* message, NSDictionary* resultDict))handler;
 
-+ (void)downloadVideo:(NSString *)videoUrl process:(void(^)(CGFloat process))processHandler complete:(void(^)(NSString *videoPath))completeHandler;
++ (void)downloadVideo:(NSString *)videoUrl cachePath:(NSString *)cachePath process:(void(^)(CGFloat process))processHandler complete:(void(^)(NSString *videoPath))completeHandler;
 
 + (void)report:(NSString *)type userName:(NSString *)userName code:(UInt64)code  msg:(NSString *)msg;
 

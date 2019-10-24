@@ -43,6 +43,7 @@ typedef NS_ENUM(NSInteger,ColorType){
 @property (readonly)  CGFloat        leftPos;
 @property (readonly)  CGFloat        rightPos;
 @property (readonly)  CGFloat        centerPos;
+@property (nonatomic) float          fps;
 
 - (void)setAppearanceConfig:(RangeContentConfig *)appearanceConfig;
 - (void)setImageList:(NSArray *)images;
