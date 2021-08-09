@@ -24,10 +24,8 @@
 
 
 /**faceU */
-#import "FUManager.h"
-#import "FUAPIDemoBar.h"
-
-#import "FUTestRecorder.h"
+#import "UIViewController+FaceUnityUIExtension.h"
+#import <FURenderKit/FUGLContext.h>
 
 static const CGFloat BUTTON_CONTROL_SIZE = 40;
 static const CGFloat AudioEffectViewHeight = 150;
@@ -85,7 +83,7 @@ typedef NS_ENUM(NSInteger, RecordState) {
 @interface UGCKitRecordViewController()
 <TXUGCRecordListener, UIGestureRecognizerDelegate,
 MPMediaPickerControllerDelegate,TCBGMControllerListener,TXVideoJoinerListener,
-UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustomProcessDelegate, FUAPIDemoBarDelegate, BeautyLoadPituDelegate
+UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustomProcessDelegate, BeautyLoadPituDelegate
 #if POD_PITU
 , MCCameraDynamicDelegate
 #endif
@@ -167,9 +165,6 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
 
 @property (strong, nonatomic) UGCKitRecordPreviewController *previewController;
 
-/**faceU */
-@property (nonatomic, strong) FUAPIDemoBar *demoBar;
-
 @end
 
 
@@ -194,7 +189,7 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     if (self)
     {
         _config = [[UGCKitRecordConfig alloc] init];
-        _config.fps = 30;
+        _config.fps = 24;
         _config.autoComplete = NO;
         _theme = [UGCKitTheme sharedTheme];
         [self _commonInit];
@@ -250,14 +245,7 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     
     [[TXUGCRecord shareInstance] setVideoProcessDelegate:self];
     
-    [[FUTestRecorder shareRecorder] setupRecord];
-    
-    /**       FaceUnity       **/
-    [[FUManager shareManager] loadFilter];
-    [FUManager shareManager].isRender = YES;
-    [FUManager shareManager].flipx = YES;
-    [FUManager shareManager].trackFlipx = YES;
-    [self.view addSubview:self.demoBar];
+    [self setupFaceUnity];
     
 }
 
@@ -271,52 +259,28 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
 */
 - (GLuint)onPreProcessTexture:(GLuint)texture width:(CGFloat)width height:(CGFloat)height {
     
-    [[FUTestRecorder shareRecorder] processFrameWithLog];
+    if ([FUGLContext shareGLContext].currentGLContext != [EAGLContext currentContext]) {
+        [[FUGLContext shareGLContext] setCustomGLContext:[EAGLContext currentContext]];
+    }
     
-    return [[FUManager shareManager] renderItemWithTexture:texture Width:width Height:height] ;
-}
-
-
-#pragma mark - FaceUnity
-
--(FUAPIDemoBar *)demoBar {
-    if (!_demoBar) {
+    if ([FUManager shareManager].isRender) {
+        FURenderInput *input = [[FURenderInput alloc] init];
+        input.renderConfig.imageOrientation = FUImageOrientationUP;
+        input.renderConfig.stickerFlipH = YES;
+        FUTexture tex = {texture, CGSizeMake(width, height)};
+        input.texture = tex;
         
-        _demoBar = [[FUAPIDemoBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 164 - 231, self.view.frame.size.width,194)];
+        //开启重力感应，内部会自动计算正确方向，设置fuSetDefaultRotationMode，无须外面设置
+        input.renderConfig.gravityEnable = YES;
+        input.renderConfig.textureTransform = CCROT0_FLIPVERTICAL;
         
-        _demoBar.mDelegate = self;
+        FURenderOutput *output = [[FURenderKit shareRenderKit] renderWithInput:input];
+        if (output) {
+            return output.texture.ID;
+        }
     }
-    return _demoBar ;
+    return 0;
 }
-
-#pragma -FUAPIDemoBarDelegate
--(void)filterValueChange:(FUBeautyParam *)param{
-    [[FUManager shareManager] filterValueChange:param];
-   
-}
-
--(void)switchRenderState:(BOOL)state{
-    
-    [FUManager shareManager].isRender = state;
-}
-
--(void)bottomDidChange:(int)index{
-    if (index < 3) {
-        [[FUManager shareManager] setRenderType:FUDataTypeBeautify];
-    }
-    if (index == 3) {
-        [[FUManager shareManager] setRenderType:FUDataTypeStrick];
-    }
-    
-    if (index == 4) {
-        [[FUManager shareManager] setRenderType:FUDataTypeMakeup];
-    }
-    if (index == 5) {
-        [[FUManager shareManager] setRenderType:FUDataTypebody];
-    }
-}
-
-
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
@@ -809,8 +773,8 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
 {
     _isFrontCamera = !_isFrontCamera;
     
-    [[FUManager shareManager] onCameraChange];
     [[TXUGCRecord shareInstance] switchCamera:_isFrontCamera];
+    [[FUManager shareManager] onCameraChange];
     _controlView.isFrontCamera = _isFrontCamera;
     if (_isFrontCamera) {
         _isFlash = NO;
@@ -1816,7 +1780,7 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
         _minDuration = 2;
         _maxDuration = 16.0;
         _audioSampleRate = AUDIO_SAMPLERATE_48000;
-        _fps = 30;
+        _fps = 24;
         _gop = 3;
         _AECEnabled = YES;
         _autoComplete = YES;
