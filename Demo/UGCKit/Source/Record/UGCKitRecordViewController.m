@@ -24,8 +24,9 @@
 
 
 /**faceU */
-#import "UIViewController+FaceUnityUIExtension.h"
+#import "FUDemoManager.h"
 #import <FURenderKit/FUGLContext.h>
+#import "FUTestRecorder.h"
 
 static const CGFloat BUTTON_CONTROL_SIZE = 40;
 static const CGFloat AudioEffectViewHeight = 150;
@@ -245,7 +246,12 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     
     [[TXUGCRecord shareInstance] setVideoProcessDelegate:self];
     
-    [self setupFaceUnity];
+    // FaceUnity UI
+    CGFloat safeAreaBottom = 0;
+    if (@available(iOS 11.0, *)) {
+        safeAreaBottom = [UIApplication sharedApplication].delegate.window.safeAreaInsets.bottom;
+    }
+    [FUDemoManager setupFaceUnityDemoInController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 160];
     
 }
 
@@ -264,9 +270,11 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     }
     
     if ([FUManager shareManager].isRender) {
+        [[FUTestRecorder shareRecorder] processFrameWithLog];
         FURenderInput *input = [[FURenderInput alloc] init];
-        input.renderConfig.imageOrientation = FUImageOrientationUP;
-        input.renderConfig.stickerFlipH = YES;
+        input.renderConfig.imageOrientation = FUImageOrientationDown;
+        input.renderConfig.isFromFrontCamera = [FUManager shareManager].flipx;
+        input.renderConfig.stickerFlipH = [FUManager shareManager].flipx;
         FUTexture tex = {texture, CGSizeMake(width, height)};
         input.texture = tex;
         
