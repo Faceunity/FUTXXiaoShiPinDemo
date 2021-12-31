@@ -271,6 +271,7 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     
     if ([FUManager shareManager].isRender) {
         [[FUTestRecorder shareRecorder] processFrameWithLog];
+        [[FUManager shareManager] updateBeautyBlurEffect];
         FURenderInput *input = [[FURenderInput alloc] init];
         input.renderConfig.imageOrientation = FUImageOrientationDown;
         input.renderConfig.isFromFrontCamera = [FUManager shareManager].flipx;
