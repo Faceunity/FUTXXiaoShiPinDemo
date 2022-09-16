@@ -22,20 +22,18 @@ FUTXXiaoShiPinDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveD
 
 ```C
 /**faceU */
-#import "FUDemoManager.h"
+#import "UIViewController+FaceUnityUIExtension.h"
 #import <FURenderKit/FUGLContext.h>
+
+// 使用纹理渲染时,记录当前glcontext
+@property(nonatomic, strong) EAGLContext *mContext;
 
 ```
 
-#### 2.2 FaceUnity界面工具和SDK都放在FUDemoManager中初始化了，也可以自行调用FUAPIDemoBar和FUManager初始化
+#### 2.2 FaceUnity界面工具和SDK都放在UIViewController+FaceUnityUIExtension中初始化了，也可以自行调用FUAPIDemoBar和FUManager初始化
 
 ```objc
-    // FaceUnity UI
-    CGFloat safeAreaBottom = 0;
-    if (@available(iOS 11.0, *)) {
-        safeAreaBottom = [UIApplication sharedApplication].delegate.window.safeAreaInsets.bottom;
-    }
-    [FUDemoManager setupFaceUnityDemoInController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 160];
+[self setupFaceUnity];
 ```
 
 #### 2.3  底部栏切换功能：使用不同的ViewModel控制
@@ -82,17 +80,15 @@ FUTXXiaoShiPinDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveD
 * 说明：SDK回调出来的纹理类型是GL_TEXTURE_2D，接口返回给SDK的纹理类型也必须是GL_TEXTURE_2D; 该回调在SDK美颜之后. 纹理格式为GL_RGBA
 */
 - (GLuint)onPreProcessTexture:(GLuint)texture width:(CGFloat)width height:(CGFloat)height {
-    
+
     if ([FUGLContext shareGLContext].currentGLContext != [EAGLContext currentContext]) {
         [[FUGLContext shareGLContext] setCustomGLContext:[EAGLContext currentContext]];
     }
-    
+
     if ([FUManager shareManager].isRender) {
-        [[FUTestRecorder shareRecorder] processFrameWithLog];
         FURenderInput *input = [[FURenderInput alloc] init];
-        input.renderConfig.imageOrientation = FUImageOrientationDown;
-        input.renderConfig.isFromFrontCamera = [FUManager shareManager].flipx;
-        input.renderConfig.stickerFlipH = [FUManager shareManager].flipx;
+        input.renderConfig.imageOrientation = FUImageOrientationUP;
+        input.renderConfig.stickerFlipH = YES;
         FUTexture tex = {texture, CGSizeMake(width, height)};
         input.texture = tex;
         
@@ -106,6 +102,7 @@ FUTXXiaoShiPinDemo 是集成了 [Faceunity](https://github.com/Faceunity/FULiveD
         }
     }
     return 0;
+
 }
 
 ```

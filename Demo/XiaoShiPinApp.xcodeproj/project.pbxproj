@@ -12,35 +12,44 @@
 		2D47547D24F38ABF00310AFB /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D47547C24F38ABF00310AFB /* CoreMedia.framework */; };
 		2D47547F24F38AC900310AFB /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D47547E24F38AC900310AFB /* AVFoundation.framework */; };
 		2D47548124F38AD000310AFB /* CoreML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2D47548024F38AD000310AFB /* CoreML.framework */; };
-		2DD74E0B2744FF8200B50BBC /* FaceUnity.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF02744FF1600B50BBC /* FaceUnity.strings */; };
-		2DD74E0C2744FFA800B50BBC /* oumei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF12744FF1600B50BBC /* oumei.bundle */; };
-		2DD74E0D2744FFA800B50BBC /* Rose.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF22744FF1600B50BBC /* Rose.bundle */; };
-		2DD74E0E2744FFA800B50BBC /* linjia.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF32744FF1600B50BBC /* linjia.bundle */; };
-		2DD74E0F2744FFA900B50BBC /* yanshimao.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF42744FF1600B50BBC /* yanshimao.bundle */; };
-		2DD74E102744FFA900B50BBC /* tianmei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF52744FF1600B50BBC /* tianmei.bundle */; };
-		2DD74E112744FFA900B50BBC /* ziyun.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF62744FF1600B50BBC /* ziyun.bundle */; };
-		2DD74E122744FFA900B50BBC /* chaomo.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF72744FF1600B50BBC /* chaomo.bundle */; };
-		2DD74E132744FFA900B50BBC /* hongfeng.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF82744FF1600B50BBC /* hongfeng.bundle */; };
-		2DD74E142744FFA900B50BBC /* jianling.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DF92744FF1600B50BBC /* jianling.bundle */; };
-		2DD74E152744FFA900B50BBC /* gangfeng.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFA2744FF1600B50BBC /* gangfeng.bundle */; };
-		2DD74E162744FFA900B50BBC /* chuju.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFB2744FF1600B50BBC /* chuju.bundle */; };
-		2DD74E172744FFA900B50BBC /* renyu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFC2744FF1600B50BBC /* renyu.bundle */; };
-		2DD74E182744FFA900B50BBC /* qianzhihe.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFD2744FF1600B50BBC /* qianzhihe.bundle */; };
-		2DD74E192744FFA900B50BBC /* wumei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFE2744FF1600B50BBC /* wumei.bundle */; };
-		2DD74E1A2744FFA900B50BBC /* shaonv.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DFF2744FF1600B50BBC /* shaonv.bundle */; };
-		2DD74E1B2744FFA900B50BBC /* chuqiu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E002744FF1600B50BBC /* chuqiu.bundle */; };
-		2DD74E1C2744FFA900B50BBC /* nuandong.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E012744FF1600B50BBC /* nuandong.bundle */; };
-		2DD74E1D2744FFA900B50BBC /* xinggan.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E022744FF1600B50BBC /* xinggan.bundle */; };
-		2DD74E1E2744FFA900B50BBC /* fashi.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E052744FF1600B50BBC /* fashi.bundle */; };
-		2DD74E1F2744FFA900B50BBC /* sdlu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E062744FF1600B50BBC /* sdlu.bundle */; };
-		2DD74E202744FFA900B50BBC /* xueqiu_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E072744FF1600B50BBC /* xueqiu_lm_fu.bundle */; };
-		2DD74E212744FFA900B50BBC /* DaisyPig.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E082744FF1600B50BBC /* DaisyPig.bundle */; };
-		2DD74E222744FFA900B50BBC /* ai_face_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DDF2744FF0E00B50BBC /* ai_face_processor.bundle */; };
-		2DD74E232744FFA900B50BBC /* ai_human_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DE32744FF0E00B50BBC /* ai_human_processor.bundle */; };
-		2DD74E242744FFA900B50BBC /* face_makeup.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DE72744FF0E00B50BBC /* face_makeup.bundle */; };
-		2DD74E252744FFA900B50BBC /* body_slim.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DE92744FF0E00B50BBC /* body_slim.bundle */; };
-		2DD74E262744FFA900B50BBC /* face_beautification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74DEB2744FF0E00B50BBC /* face_beautification.bundle */; };
-		2DD74E272744FFFB00B50BBC /* FaceUnity.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DD74E042744FF1600B50BBC /* FaceUnity.xcassets */; };
+		2DBB3DD6288E89BC00F244FF /* ai_face_recognizer.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DC7288E89BC00F244FF /* ai_face_recognizer.bundle */; };
+		2DBB3DD7288E89BC00F244FF /* ai_hand_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DC8288E89BC00F244FF /* ai_hand_processor.bundle */; };
+		2DBB3DD8288E89BC00F244FF /* ai_face_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DC9288E89BC00F244FF /* ai_face_processor.bundle */; };
+		2DBB3DD9288E89BC00F244FF /* ai_bgseg_green.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DCA288E89BC00F244FF /* ai_bgseg_green.bundle */; };
+		2DBB3DDA288E89BC00F244FF /* ai_face_processor_lite.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DCB288E89BC00F244FF /* ai_face_processor_lite.bundle */; };
+		2DBB3DDB288E89BC00F244FF /* ai_human_processor.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DCC288E89BC00F244FF /* ai_human_processor.bundle */; };
+		2DBB3DDC288E89BC00F244FF /* ai_human_processor_gpu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DCD288E89BC00F244FF /* ai_human_processor_gpu.bundle */; };
+		2DBB3DDD288E89BC00F244FF /* tongue.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DCF288E89BC00F244FF /* tongue.bundle */; };
+		2DBB3DDE288E89BC00F244FF /* fxaa.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD0288E89BC00F244FF /* fxaa.bundle */; };
+		2DBB3DDF288E89BC00F244FF /* face_makeup.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD1288E89BC00F244FF /* face_makeup.bundle */; };
+		2DBB3DE0288E89BC00F244FF /* controller_cpp.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD2288E89BC00F244FF /* controller_cpp.bundle */; };
+		2DBB3DE1288E89BC00F244FF /* body_slim.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD3288E89BC00F244FF /* body_slim.bundle */; };
+		2DBB3DE2288E89BC00F244FF /* fuzzytoonfilter.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD4288E89BC00F244FF /* fuzzytoonfilter.bundle */; };
+		2DBB3DE3288E89BC00F244FF /* face_beautification.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3DD5288E89BC00F244FF /* face_beautification.bundle */; };
+		2DBB3E1E288E8A0200F244FF /* FaceUnity.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E02288E8A0200F244FF /* FaceUnity.strings */; };
+		2DBB3E1F288E8A0200F244FF /* oumei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E05288E8A0200F244FF /* oumei.bundle */; };
+		2DBB3E20288E8A0200F244FF /* Rose.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E06288E8A0200F244FF /* Rose.bundle */; };
+		2DBB3E21288E8A0200F244FF /* linjia.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E07288E8A0200F244FF /* linjia.bundle */; };
+		2DBB3E22288E8A0200F244FF /* yanshimao.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E08288E8A0200F244FF /* yanshimao.bundle */; };
+		2DBB3E23288E8A0200F244FF /* tianmei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E09288E8A0200F244FF /* tianmei.bundle */; };
+		2DBB3E24288E8A0200F244FF /* ziyun.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0A288E8A0200F244FF /* ziyun.bundle */; };
+		2DBB3E25288E8A0200F244FF /* chaomo.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0B288E8A0200F244FF /* chaomo.bundle */; };
+		2DBB3E26288E8A0200F244FF /* hongfeng.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0C288E8A0200F244FF /* hongfeng.bundle */; };
+		2DBB3E27288E8A0200F244FF /* jianling.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0D288E8A0200F244FF /* jianling.bundle */; };
+		2DBB3E28288E8A0200F244FF /* gangfeng.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0E288E8A0200F244FF /* gangfeng.bundle */; };
+		2DBB3E29288E8A0200F244FF /* chuju.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E0F288E8A0200F244FF /* chuju.bundle */; };
+		2DBB3E2A288E8A0200F244FF /* renyu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E10288E8A0200F244FF /* renyu.bundle */; };
+		2DBB3E2B288E8A0200F244FF /* qianzhihe.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E11288E8A0200F244FF /* qianzhihe.bundle */; };
+		2DBB3E2C288E8A0200F244FF /* wumei.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E12288E8A0200F244FF /* wumei.bundle */; };
+		2DBB3E2D288E8A0200F244FF /* shaonv.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E13288E8A0200F244FF /* shaonv.bundle */; };
+		2DBB3E2E288E8A0200F244FF /* chuqiu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E14288E8A0200F244FF /* chuqiu.bundle */; };
+		2DBB3E2F288E8A0200F244FF /* nuandong.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E15288E8A0200F244FF /* nuandong.bundle */; };
+		2DBB3E30288E8A0200F244FF /* xinggan.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E16288E8A0200F244FF /* xinggan.bundle */; };
+		2DBB3E31288E8A0200F244FF /* FaceUnity.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E18288E8A0200F244FF /* FaceUnity.xcassets */; };
+		2DBB3E32288E8A0200F244FF /* fashi.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E1A288E8A0200F244FF /* fashi.bundle */; };
+		2DBB3E33288E8A0200F244FF /* sdlu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E1B288E8A0200F244FF /* sdlu.bundle */; };
+		2DBB3E34288E8A0200F244FF /* xueqiu_lm_fu.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E1C288E8A0200F244FF /* xueqiu_lm_fu.bundle */; };
+		2DBB3E35288E8A0200F244FF /* DaisyPig.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 2DBB3E1D288E8A0200F244FF /* DaisyPig.bundle */; };
 		2DFDCC3D27799BEC005FD7A7 /* FURenderKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2DD74DD92744FEBE00B50BBC /* FURenderKit.framework */; platformFilter = ios; };
 		2DFDCC3E27799BED005FD7A7 /* FURenderKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2DD74DD92744FEBE00B50BBC /* FURenderKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		406436D024BDA86D0032FF93 /* UGCKitResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 4011E1AB24BDA80F007F636A /* UGCKitResources.bundle */; };
@@ -281,47 +290,46 @@
 		2D47547C24F38ABF00310AFB /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		2D47547E24F38AC900310AFB /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		2D47548024F38AD000310AFB /* CoreML.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreML.framework; path = System/Library/Frameworks/CoreML.framework; sourceTree = SDKROOT; };
+		2DBB3DC7288E89BC00F244FF /* ai_face_recognizer.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_recognizer.bundle; sourceTree = "<group>"; };
+		2DBB3DC8288E89BC00F244FF /* ai_hand_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_hand_processor.bundle; sourceTree = "<group>"; };
+		2DBB3DC9288E89BC00F244FF /* ai_face_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_processor.bundle; sourceTree = "<group>"; };
+		2DBB3DCA288E89BC00F244FF /* ai_bgseg_green.bundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ai_bgseg_green.bundle; sourceTree = "<group>"; };
+		2DBB3DCB288E89BC00F244FF /* ai_face_processor_lite.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_processor_lite.bundle; sourceTree = "<group>"; };
+		2DBB3DCC288E89BC00F244FF /* ai_human_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_human_processor.bundle; sourceTree = "<group>"; };
+		2DBB3DCD288E89BC00F244FF /* ai_human_processor_gpu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_human_processor_gpu.bundle; sourceTree = "<group>"; };
+		2DBB3DCF288E89BC00F244FF /* tongue.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = tongue.bundle; sourceTree = "<group>"; };
+		2DBB3DD0288E89BC00F244FF /* fxaa.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fxaa.bundle; sourceTree = "<group>"; };
+		2DBB3DD1288E89BC00F244FF /* face_makeup.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_makeup.bundle; sourceTree = "<group>"; };
+		2DBB3DD2288E89BC00F244FF /* controller_cpp.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = controller_cpp.bundle; sourceTree = "<group>"; };
+		2DBB3DD3288E89BC00F244FF /* body_slim.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = body_slim.bundle; sourceTree = "<group>"; };
+		2DBB3DD4288E89BC00F244FF /* fuzzytoonfilter.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fuzzytoonfilter.bundle; sourceTree = "<group>"; };
+		2DBB3DD5288E89BC00F244FF /* face_beautification.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_beautification.bundle; sourceTree = "<group>"; };
+		2DBB3E03288E8A0200F244FF /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/FaceUnity.strings"; sourceTree = "<group>"; };
+		2DBB3E05288E8A0200F244FF /* oumei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = oumei.bundle; sourceTree = "<group>"; };
+		2DBB3E06288E8A0200F244FF /* Rose.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = Rose.bundle; sourceTree = "<group>"; };
+		2DBB3E07288E8A0200F244FF /* linjia.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = linjia.bundle; sourceTree = "<group>"; };
+		2DBB3E08288E8A0200F244FF /* yanshimao.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yanshimao.bundle; sourceTree = "<group>"; };
+		2DBB3E09288E8A0200F244FF /* tianmei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = tianmei.bundle; sourceTree = "<group>"; };
+		2DBB3E0A288E8A0200F244FF /* ziyun.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ziyun.bundle; sourceTree = "<group>"; };
+		2DBB3E0B288E8A0200F244FF /* chaomo.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chaomo.bundle; sourceTree = "<group>"; };
+		2DBB3E0C288E8A0200F244FF /* hongfeng.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = hongfeng.bundle; sourceTree = "<group>"; };
+		2DBB3E0D288E8A0200F244FF /* jianling.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = jianling.bundle; sourceTree = "<group>"; };
+		2DBB3E0E288E8A0200F244FF /* gangfeng.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = gangfeng.bundle; sourceTree = "<group>"; };
+		2DBB3E0F288E8A0200F244FF /* chuju.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chuju.bundle; sourceTree = "<group>"; };
+		2DBB3E10288E8A0200F244FF /* renyu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = renyu.bundle; sourceTree = "<group>"; };
+		2DBB3E11288E8A0200F244FF /* qianzhihe.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = qianzhihe.bundle; sourceTree = "<group>"; };
+		2DBB3E12288E8A0200F244FF /* wumei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = wumei.bundle; sourceTree = "<group>"; };
+		2DBB3E13288E8A0200F244FF /* shaonv.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = shaonv.bundle; sourceTree = "<group>"; };
+		2DBB3E14288E8A0200F244FF /* chuqiu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chuqiu.bundle; sourceTree = "<group>"; };
+		2DBB3E15288E8A0200F244FF /* nuandong.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = nuandong.bundle; sourceTree = "<group>"; };
+		2DBB3E16288E8A0200F244FF /* xinggan.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = xinggan.bundle; sourceTree = "<group>"; };
+		2DBB3E17288E8A0200F244FF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/FaceUnity.strings; sourceTree = "<group>"; };
+		2DBB3E18288E8A0200F244FF /* FaceUnity.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = FaceUnity.xcassets; sourceTree = "<group>"; };
+		2DBB3E1A288E8A0200F244FF /* fashi.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fashi.bundle; sourceTree = "<group>"; };
+		2DBB3E1B288E8A0200F244FF /* sdlu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = sdlu.bundle; sourceTree = "<group>"; };
+		2DBB3E1C288E8A0200F244FF /* xueqiu_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = xueqiu_lm_fu.bundle; sourceTree = "<group>"; };
+		2DBB3E1D288E8A0200F244FF /* DaisyPig.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = DaisyPig.bundle; sourceTree = "<group>"; };
 		2DD74DD92744FEBE00B50BBC /* FURenderKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FURenderKit.framework; path = UGCKit/FaceUnity/Lib/FURenderKit.framework; sourceTree = "<group>"; };
-		2DD74DDC2744FF0E00B50BBC /* ai_human_processor_mb_fast.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_human_processor_mb_fast.bundle; sourceTree = "<group>"; };
-		2DD74DDD2744FF0E00B50BBC /* ai_face_recognizer.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_recognizer.bundle; sourceTree = "<group>"; };
-		2DD74DDE2744FF0E00B50BBC /* ai_hand_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_hand_processor.bundle; sourceTree = "<group>"; };
-		2DD74DDF2744FF0E00B50BBC /* ai_face_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_processor.bundle; sourceTree = "<group>"; };
-		2DD74DE02744FF0E00B50BBC /* ai_bgseg_green.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_bgseg_green.bundle; sourceTree = "<group>"; };
-		2DD74DE12744FF0E00B50BBC /* ai_face_processor_lite.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_face_processor_lite.bundle; sourceTree = "<group>"; };
-		2DD74DE22744FF0E00B50BBC /* ai_hairseg.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_hairseg.bundle; sourceTree = "<group>"; };
-		2DD74DE32744FF0E00B50BBC /* ai_human_processor.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ai_human_processor.bundle; sourceTree = "<group>"; };
-		2DD74DE52744FF0E00B50BBC /* tongue.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = tongue.bundle; sourceTree = "<group>"; };
-		2DD74DE62744FF0E00B50BBC /* fxaa.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fxaa.bundle; sourceTree = "<group>"; };
-		2DD74DE72744FF0E00B50BBC /* face_makeup.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_makeup.bundle; sourceTree = "<group>"; };
-		2DD74DE82744FF0E00B50BBC /* controller_cpp.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = controller_cpp.bundle; sourceTree = "<group>"; };
-		2DD74DE92744FF0E00B50BBC /* body_slim.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = body_slim.bundle; sourceTree = "<group>"; };
-		2DD74DEA2744FF0E00B50BBC /* fuzzytoonfilter.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fuzzytoonfilter.bundle; sourceTree = "<group>"; };
-		2DD74DEB2744FF0E00B50BBC /* face_beautification.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = face_beautification.bundle; sourceTree = "<group>"; };
-		2DD74DEE2744FF1600B50BBC /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/FaceUnity.strings"; sourceTree = "<group>"; };
-		2DD74DEF2744FF1600B50BBC /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/FaceUnity.strings; sourceTree = "<group>"; };
-		2DD74DF12744FF1600B50BBC /* oumei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = oumei.bundle; sourceTree = "<group>"; };
-		2DD74DF22744FF1600B50BBC /* Rose.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = Rose.bundle; sourceTree = "<group>"; };
-		2DD74DF32744FF1600B50BBC /* linjia.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = linjia.bundle; sourceTree = "<group>"; };
-		2DD74DF42744FF1600B50BBC /* yanshimao.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = yanshimao.bundle; sourceTree = "<group>"; };
-		2DD74DF52744FF1600B50BBC /* tianmei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = tianmei.bundle; sourceTree = "<group>"; };
-		2DD74DF62744FF1600B50BBC /* ziyun.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = ziyun.bundle; sourceTree = "<group>"; };
-		2DD74DF72744FF1600B50BBC /* chaomo.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chaomo.bundle; sourceTree = "<group>"; };
-		2DD74DF82744FF1600B50BBC /* hongfeng.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = hongfeng.bundle; sourceTree = "<group>"; };
-		2DD74DF92744FF1600B50BBC /* jianling.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = jianling.bundle; sourceTree = "<group>"; };
-		2DD74DFA2744FF1600B50BBC /* gangfeng.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = gangfeng.bundle; sourceTree = "<group>"; };
-		2DD74DFB2744FF1600B50BBC /* chuju.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chuju.bundle; sourceTree = "<group>"; };
-		2DD74DFC2744FF1600B50BBC /* renyu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = renyu.bundle; sourceTree = "<group>"; };
-		2DD74DFD2744FF1600B50BBC /* qianzhihe.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = qianzhihe.bundle; sourceTree = "<group>"; };
-		2DD74DFE2744FF1600B50BBC /* wumei.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = wumei.bundle; sourceTree = "<group>"; };
-		2DD74DFF2744FF1600B50BBC /* shaonv.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = shaonv.bundle; sourceTree = "<group>"; };
-		2DD74E002744FF1600B50BBC /* chuqiu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = chuqiu.bundle; sourceTree = "<group>"; };
-		2DD74E012744FF1600B50BBC /* nuandong.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = nuandong.bundle; sourceTree = "<group>"; };
-		2DD74E022744FF1600B50BBC /* xinggan.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = xinggan.bundle; sourceTree = "<group>"; };
-		2DD74E042744FF1600B50BBC /* FaceUnity.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = FaceUnity.xcassets; sourceTree = "<group>"; };
-		2DD74E052744FF1600B50BBC /* fashi.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = fashi.bundle; sourceTree = "<group>"; };
-		2DD74E062744FF1600B50BBC /* sdlu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = sdlu.bundle; sourceTree = "<group>"; };
-		2DD74E072744FF1600B50BBC /* xueqiu_lm_fu.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = xueqiu_lm_fu.bundle; sourceTree = "<group>"; };
-		2DD74E082744FF1600B50BBC /* DaisyPig.bundle */ = {isa = PBXFileReference; lastKnownFileType = file; path = DaisyPig.bundle; sourceTree = "<group>"; };
 		4011E1A324BDA80F007F636A /* UGCKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = UGCKit.xcodeproj; path = ./UGCKit/UGCKit.xcodeproj; sourceTree = "<group>"; };
 		4011E1AC24BDA824007F636A /* TCBeautyPanel.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TCBeautyPanel.xcodeproj; path = ./BeautySettingKit/TCBeautyPanel.xcodeproj; sourceTree = "<group>"; };
 		40A37344246A3916004E3FC7 /* Bugly.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bugly.framework; path = XiaoShiPin/Frameworks/Bugly.framework; sourceTree = "<group>"; };
@@ -658,89 +666,88 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		2DD74DE42744FF0E00B50BBC /* model */ = {
+		2DBB3DC5288E89BC00F244FF /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				2DD74DDC2744FF0E00B50BBC /* ai_human_processor_mb_fast.bundle */,
-				2DD74DDD2744FF0E00B50BBC /* ai_face_recognizer.bundle */,
-				2DD74DDE2744FF0E00B50BBC /* ai_hand_processor.bundle */,
-				2DD74DDF2744FF0E00B50BBC /* ai_face_processor.bundle */,
-				2DD74DE02744FF0E00B50BBC /* ai_bgseg_green.bundle */,
-				2DD74DE12744FF0E00B50BBC /* ai_face_processor_lite.bundle */,
-				2DD74DE22744FF0E00B50BBC /* ai_hairseg.bundle */,
-				2DD74DE32744FF0E00B50BBC /* ai_human_processor.bundle */,
-			);
-			path = model;
-			sourceTree = "<group>";
-		};
-		2DD74DEC2744FF0E00B50BBC /* graphics */ = {
-			isa = PBXGroup;
-			children = (
-				2DD74DE52744FF0E00B50BBC /* tongue.bundle */,
-				2DD74DE62744FF0E00B50BBC /* fxaa.bundle */,
-				2DD74DE72744FF0E00B50BBC /* face_makeup.bundle */,
-				2DD74DE82744FF0E00B50BBC /* controller_cpp.bundle */,
-				2DD74DE92744FF0E00B50BBC /* body_slim.bundle */,
-				2DD74DEA2744FF0E00B50BBC /* fuzzytoonfilter.bundle */,
-				2DD74DEB2744FF0E00B50BBC /* face_beautification.bundle */,
-			);
-			path = graphics;
-			sourceTree = "<group>";
-		};
-		2DD74DED2744FF0E00B50BBC /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				2DD74DE42744FF0E00B50BBC /* model */,
-				2DD74DEC2744FF0E00B50BBC /* graphics */,
+				2DBB3DC6288E89BC00F244FF /* model */,
+				2DBB3DCE288E89BC00F244FF /* graphics */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		2DD74E032744FF1600B50BBC /* 美妆 */ = {
+		2DBB3DC6288E89BC00F244FF /* model */ = {
 			isa = PBXGroup;
 			children = (
-				2DD74DF12744FF1600B50BBC /* oumei.bundle */,
-				2DD74DF22744FF1600B50BBC /* Rose.bundle */,
-				2DD74DF32744FF1600B50BBC /* linjia.bundle */,
-				2DD74DF42744FF1600B50BBC /* yanshimao.bundle */,
-				2DD74DF52744FF1600B50BBC /* tianmei.bundle */,
-				2DD74DF62744FF1600B50BBC /* ziyun.bundle */,
-				2DD74DF72744FF1600B50BBC /* chaomo.bundle */,
-				2DD74DF82744FF1600B50BBC /* hongfeng.bundle */,
-				2DD74DF92744FF1600B50BBC /* jianling.bundle */,
-				2DD74DFA2744FF1600B50BBC /* gangfeng.bundle */,
-				2DD74DFB2744FF1600B50BBC /* chuju.bundle */,
-				2DD74DFC2744FF1600B50BBC /* renyu.bundle */,
-				2DD74DFD2744FF1600B50BBC /* qianzhihe.bundle */,
-				2DD74DFE2744FF1600B50BBC /* wumei.bundle */,
-				2DD74DFF2744FF1600B50BBC /* shaonv.bundle */,
-				2DD74E002744FF1600B50BBC /* chuqiu.bundle */,
-				2DD74E012744FF1600B50BBC /* nuandong.bundle */,
-				2DD74E022744FF1600B50BBC /* xinggan.bundle */,
+				2DBB3DC7288E89BC00F244FF /* ai_face_recognizer.bundle */,
+				2DBB3DC8288E89BC00F244FF /* ai_hand_processor.bundle */,
+				2DBB3DC9288E89BC00F244FF /* ai_face_processor.bundle */,
+				2DBB3DCA288E89BC00F244FF /* ai_bgseg_green.bundle */,
+				2DBB3DCB288E89BC00F244FF /* ai_face_processor_lite.bundle */,
+				2DBB3DCC288E89BC00F244FF /* ai_human_processor.bundle */,
+				2DBB3DCD288E89BC00F244FF /* ai_human_processor_gpu.bundle */,
+			);
+			path = model;
+			sourceTree = "<group>";
+		};
+		2DBB3DCE288E89BC00F244FF /* graphics */ = {
+			isa = PBXGroup;
+			children = (
+				2DBB3DCF288E89BC00F244FF /* tongue.bundle */,
+				2DBB3DD0288E89BC00F244FF /* fxaa.bundle */,
+				2DBB3DD1288E89BC00F244FF /* face_makeup.bundle */,
+				2DBB3DD2288E89BC00F244FF /* controller_cpp.bundle */,
+				2DBB3DD3288E89BC00F244FF /* body_slim.bundle */,
+				2DBB3DD4288E89BC00F244FF /* fuzzytoonfilter.bundle */,
+				2DBB3DD5288E89BC00F244FF /* face_beautification.bundle */,
+			);
+			path = graphics;
+			sourceTree = "<group>";
+		};
+		2DBB3E01288E8A0200F244FF /* Resource */ = {
+			isa = PBXGroup;
+			children = (
+				2DBB3E02288E8A0200F244FF /* FaceUnity.strings */,
+				2DBB3E04288E8A0200F244FF /* 美妆 */,
+				2DBB3E18288E8A0200F244FF /* FaceUnity.xcassets */,
+				2DBB3E19288E8A0200F244FF /* 贴纸 */,
+			);
+			path = Resource;
+			sourceTree = "<group>";
+		};
+		2DBB3E04288E8A0200F244FF /* 美妆 */ = {
+			isa = PBXGroup;
+			children = (
+				2DBB3E05288E8A0200F244FF /* oumei.bundle */,
+				2DBB3E06288E8A0200F244FF /* Rose.bundle */,
+				2DBB3E07288E8A0200F244FF /* linjia.bundle */,
+				2DBB3E08288E8A0200F244FF /* yanshimao.bundle */,
+				2DBB3E09288E8A0200F244FF /* tianmei.bundle */,
+				2DBB3E0A288E8A0200F244FF /* ziyun.bundle */,
+				2DBB3E0B288E8A0200F244FF /* chaomo.bundle */,
+				2DBB3E0C288E8A0200F244FF /* hongfeng.bundle */,
+				2DBB3E0D288E8A0200F244FF /* jianling.bundle */,
+				2DBB3E0E288E8A0200F244FF /* gangfeng.bundle */,
+				2DBB3E0F288E8A0200F244FF /* chuju.bundle */,
+				2DBB3E10288E8A0200F244FF /* renyu.bundle */,
+				2DBB3E11288E8A0200F244FF /* qianzhihe.bundle */,
+				2DBB3E12288E8A0200F244FF /* wumei.bundle */,
+				2DBB3E13288E8A0200F244FF /* shaonv.bundle */,
+				2DBB3E14288E8A0200F244FF /* chuqiu.bundle */,
+				2DBB3E15288E8A0200F244FF /* nuandong.bundle */,
+				2DBB3E16288E8A0200F244FF /* xinggan.bundle */,
 			);
 			path = "美妆";
 			sourceTree = "<group>";
 		};
-		2DD74E092744FF1600B50BBC /* 贴纸 */ = {
+		2DBB3E19288E8A0200F244FF /* 贴纸 */ = {
 			isa = PBXGroup;
 			children = (
-				2DD74E052744FF1600B50BBC /* fashi.bundle */,
-				2DD74E062744FF1600B50BBC /* sdlu.bundle */,
-				2DD74E072744FF1600B50BBC /* xueqiu_lm_fu.bundle */,
-				2DD74E082744FF1600B50BBC /* DaisyPig.bundle */,
+				2DBB3E1A288E8A0200F244FF /* fashi.bundle */,
+				2DBB3E1B288E8A0200F244FF /* sdlu.bundle */,
+				2DBB3E1C288E8A0200F244FF /* xueqiu_lm_fu.bundle */,
+				2DBB3E1D288E8A0200F244FF /* DaisyPig.bundle */,
 			);
 			path = "贴纸";
-			sourceTree = "<group>";
-		};
-		2DD74E0A2744FF1600B50BBC /* Resource */ = {
-			isa = PBXGroup;
-			children = (
-				2DD74DF02744FF1600B50BBC /* FaceUnity.strings */,
-				2DD74E032744FF1600B50BBC /* 美妆 */,
-				2DD74E042744FF1600B50BBC /* FaceUnity.xcassets */,
-				2DD74E092744FF1600B50BBC /* 贴纸 */,
-			);
-			path = Resource;
 			sourceTree = "<group>";
 		};
 		4011E1A424BDA80F007F636A /* Products */ = {
@@ -866,8 +873,8 @@
 		453DE2B22379458A0083E759 /* XiaoShiPin */ = {
 			isa = PBXGroup;
 			children = (
-				2DD74E0A2744FF1600B50BBC /* Resource */,
-				2DD74DED2744FF0E00B50BBC /* Resources */,
+				2DBB3E01288E8A0200F244FF /* Resource */,
+				2DBB3DC5288E89BC00F244FF /* Resources */,
 				4500A69D2382513900147B05 /* Assets */,
 				454616F223797E00009CDF83 /* TCConstants.h */,
 				454616DC23797D91009CDF83 /* SDKHeader.h */,
@@ -1447,47 +1454,56 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2DD74E272744FFFB00B50BBC /* FaceUnity.xcassets in Resources */,
-				2DD74E0C2744FFA800B50BBC /* oumei.bundle in Resources */,
-				2DD74E0D2744FFA800B50BBC /* Rose.bundle in Resources */,
-				2DD74E0E2744FFA800B50BBC /* linjia.bundle in Resources */,
-				2DD74E0F2744FFA900B50BBC /* yanshimao.bundle in Resources */,
-				2DD74E102744FFA900B50BBC /* tianmei.bundle in Resources */,
-				2DD74E112744FFA900B50BBC /* ziyun.bundle in Resources */,
-				2DD74E122744FFA900B50BBC /* chaomo.bundle in Resources */,
-				2DD74E132744FFA900B50BBC /* hongfeng.bundle in Resources */,
-				2DD74E142744FFA900B50BBC /* jianling.bundle in Resources */,
-				2DD74E152744FFA900B50BBC /* gangfeng.bundle in Resources */,
-				2DD74E162744FFA900B50BBC /* chuju.bundle in Resources */,
-				2DD74E172744FFA900B50BBC /* renyu.bundle in Resources */,
-				2DD74E182744FFA900B50BBC /* qianzhihe.bundle in Resources */,
-				2DD74E192744FFA900B50BBC /* wumei.bundle in Resources */,
-				2DD74E1A2744FFA900B50BBC /* shaonv.bundle in Resources */,
-				2DD74E1B2744FFA900B50BBC /* chuqiu.bundle in Resources */,
-				2DD74E1C2744FFA900B50BBC /* nuandong.bundle in Resources */,
-				2DD74E1D2744FFA900B50BBC /* xinggan.bundle in Resources */,
-				2DD74E1E2744FFA900B50BBC /* fashi.bundle in Resources */,
-				2DD74E1F2744FFA900B50BBC /* sdlu.bundle in Resources */,
-				2DD74E202744FFA900B50BBC /* xueqiu_lm_fu.bundle in Resources */,
-				2DD74E212744FFA900B50BBC /* DaisyPig.bundle in Resources */,
-				2DD74E222744FFA900B50BBC /* ai_face_processor.bundle in Resources */,
-				2DD74E232744FFA900B50BBC /* ai_human_processor.bundle in Resources */,
-				2DD74E242744FFA900B50BBC /* face_makeup.bundle in Resources */,
-				2DD74E252744FFA900B50BBC /* body_slim.bundle in Resources */,
-				2DD74E262744FFA900B50BBC /* face_beautification.bundle in Resources */,
-				2DD74E0B2744FF8200B50BBC /* FaceUnity.strings in Resources */,
 				457BFBDB23901362004017FE /* InfoPlist.strings in Resources */,
+				2DBB3E35288E8A0200F244FF /* DaisyPig.bundle in Resources */,
+				2DBB3DE3288E89BC00F244FF /* face_beautification.bundle in Resources */,
+				2DBB3E21288E8A0200F244FF /* linjia.bundle in Resources */,
+				2DBB3E27288E8A0200F244FF /* jianling.bundle in Resources */,
+				2DBB3E31288E8A0200F244FF /* FaceUnity.xcassets in Resources */,
+				2DBB3E2A288E8A0200F244FF /* renyu.bundle in Resources */,
+				2DBB3E24288E8A0200F244FF /* ziyun.bundle in Resources */,
+				2DBB3DD7288E89BC00F244FF /* ai_hand_processor.bundle in Resources */,
+				2DBB3E34288E8A0200F244FF /* xueqiu_lm_fu.bundle in Resources */,
+				2DBB3DE1288E89BC00F244FF /* body_slim.bundle in Resources */,
 				453DE2C32379458C0083E759 /* LaunchScreen.storyboard in Resources */,
+				2DBB3E2B288E8A0200F244FF /* qianzhihe.bundle in Resources */,
+				2DBB3E33288E8A0200F244FF /* sdlu.bundle in Resources */,
 				455AAF0A237AEF3C00AF4A3C /* Localizable.strings in Resources */,
+				2DBB3DD6288E89BC00F244FF /* ai_face_recognizer.bundle in Resources */,
 				453DE2C02379458C0083E759 /* Assets.xcassets in Resources */,
+				2DBB3DDB288E89BC00F244FF /* ai_human_processor.bundle in Resources */,
+				2DBB3DDE288E89BC00F244FF /* fxaa.bundle in Resources */,
+				2DBB3DDA288E89BC00F244FF /* ai_face_processor_lite.bundle in Resources */,
+				2DBB3E20288E8A0200F244FF /* Rose.bundle in Resources */,
+				2DBB3E29288E8A0200F244FF /* chuju.bundle in Resources */,
+				2DBB3E1F288E8A0200F244FF /* oumei.bundle in Resources */,
+				2DBB3E2C288E8A0200F244FF /* wumei.bundle in Resources */,
 				45C56C2A237A9993009BDB9F /* LICENSE in Resources */,
 				406436D024BDA86D0032FF93 /* UGCKitResources.bundle in Resources */,
+				2DBB3DE2288E89BC00F244FF /* fuzzytoonfilter.bundle in Resources */,
+				2DBB3DE0288E89BC00F244FF /* controller_cpp.bundle in Resources */,
+				2DBB3DDC288E89BC00F244FF /* ai_human_processor_gpu.bundle in Resources */,
+				2DBB3E32288E8A0200F244FF /* fashi.bundle in Resources */,
+				2DBB3E2F288E8A0200F244FF /* nuandong.bundle in Resources */,
 				453DE2BE2379458A0083E759 /* Main.storyboard in Resources */,
+				2DBB3DD8288E89BC00F244FF /* ai_face_processor.bundle in Resources */,
+				2DBB3E1E288E8A0200F244FF /* FaceUnity.strings in Resources */,
 				406436D124BDA8750032FF93 /* TCBeautyPanelResources.bundle in Resources */,
+				2DBB3E30288E8A0200F244FF /* xinggan.bundle in Resources */,
 				45C56C6A237AA12E009BDB9F /* TCVideoEditPrevViewController.xib in Resources */,
+				2DBB3E26288E8A0200F244FF /* hongfeng.bundle in Resources */,
+				2DBB3E22288E8A0200F244FF /* yanshimao.bundle in Resources */,
+				2DBB3E25288E8A0200F244FF /* chaomo.bundle in Resources */,
 				45C56CA7237AA21F009BDB9F /* MJRefresh.bundle in Resources */,
+				2DBB3DDF288E89BC00F244FF /* face_makeup.bundle in Resources */,
+				2DBB3E2E288E8A0200F244FF /* chuqiu.bundle in Resources */,
 				45C56C2B237A9993009BDB9F /* README.mdown in Resources */,
+				2DBB3DD9288E89BC00F244FF /* ai_bgseg_green.bundle in Resources */,
+				2DBB3E23288E8A0200F244FF /* tianmei.bundle in Resources */,
 				453EA3CB23A236D3007C45F2 /* FilterResource.bundle in Resources */,
+				2DBB3DDD288E89BC00F244FF /* tongue.bundle in Resources */,
+				2DBB3E2D288E8A0200F244FF /* shaonv.bundle in Resources */,
+				2DBB3E28288E8A0200F244FF /* gangfeng.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1680,11 +1696,11 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		2DD74DF02744FF1600B50BBC /* FaceUnity.strings */ = {
+		2DBB3E02288E8A0200F244FF /* FaceUnity.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				2DD74DEE2744FF1600B50BBC /* zh-Hans */,
-				2DD74DEF2744FF1600B50BBC /* en */,
+				2DBB3E03288E8A0200F244FF /* zh-Hans */,
+				2DBB3E17288E8A0200F244FF /* en */,
 			);
 			name = FaceUnity.strings;
 			sourceTree = "<group>";

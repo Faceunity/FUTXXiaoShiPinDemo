@@ -11,6 +11,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <FURenderKit/FURenderKit.h>
 
+
 @protocol FUManagerProtocol <NSObject>
 
 //用于检测是否有ai人脸和人形
@@ -22,10 +23,11 @@
 
 @property (nonatomic, weak) id<FUManagerProtocol>delegate;
 
+@property (nonatomic, assign, readonly) FUDevicePerformanceLevel devicePerformanceLevel;
+
 /// 用于道具是否镜像
 @property (nonatomic, assign) BOOL flipx;
 @property(nonatomic, assign) BOOL isRender;
-
 
 + (FUManager *)shareManager;
 
@@ -43,5 +45,7 @@
 
 /// 渲染接口
 - (CVPixelBufferRef)renderItemsToPixelBuffer:(CVPixelBufferRef)pixelBuffer;
+
+- (int)renderItemWithTexture:(int)texture Width:(int)width Height:(int)height;
 
 @end
