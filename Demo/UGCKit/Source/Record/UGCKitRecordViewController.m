@@ -165,6 +165,8 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
 @property (assign, nonatomic) CaptureMode captureMode;
 
 @property (strong, nonatomic) UGCKitRecordPreviewController *previewController;
+@property(nonatomic, strong) FUDemoManager *demoManager;
+
 
 @end
 
@@ -251,7 +253,7 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
     if (@available(iOS 11.0, *)) {
         safeAreaBottom = [UIApplication sharedApplication].delegate.window.safeAreaInsets.bottom;
     }
-    [FUDemoManager setupFaceUnityDemoInController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 160];
+    self.demoManager = [[FUDemoManager alloc] initWithTargetController:self originY:CGRectGetHeight(self.view.frame) - FUBottomBarHeight - safeAreaBottom - 160];
     
 }
 
@@ -269,26 +271,8 @@ UGCKitVideoRecordMusicViewDelegate, UGCKitAudioEffectPanelDelegate,TXVideoCustom
         [[FUGLContext shareGLContext] setCustomGLContext:[EAGLContext currentContext]];
     }
     
-    if ([FUManager shareManager].isRender) {
-        [[FUTestRecorder shareRecorder] processFrameWithLog];
-        [[FUManager shareManager] updateBeautyBlurEffect];
-        FURenderInput *input = [[FURenderInput alloc] init];
-        input.renderConfig.imageOrientation = FUImageOrientationDown;
-        input.renderConfig.isFromFrontCamera = [FUManager shareManager].flipx;
-        input.renderConfig.stickerFlipH = [FUManager shareManager].flipx;
-        FUTexture tex = {texture, CGSizeMake(width, height)};
-        input.texture = tex;
-        
-        //开启重力感应，内部会自动计算正确方向，设置fuSetDefaultRotationMode，无须外面设置
-        input.renderConfig.gravityEnable = YES;
-        input.renderConfig.textureTransform = CCROT0_FLIPVERTICAL;
-        
-        FURenderOutput *output = [[FURenderKit shareRenderKit] renderWithInput:input];
-        if (output) {
-            return output.texture.ID;
-        }
-    }
-    return 0;
+    int ret = [[FUManager shareManager] renderItemWithTexture:texture Width:width Height:height];
+    return ret;
 }
 
 - (void)viewWillAppear:(BOOL)animated{

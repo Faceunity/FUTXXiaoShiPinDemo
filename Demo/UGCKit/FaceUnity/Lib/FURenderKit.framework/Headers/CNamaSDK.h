@@ -67,7 +67,12 @@ typedef enum FUAITYPE {
   FUAITYPE_HUMAN_PROCESSOR_3D_SELFIE = 1 << 24,
   FUAITYPE_HUMAN_PROCESSOR_3D_DANCE = 1 << 25,
   FUAITYPE_HUMAN_PROCESSOR_SEGMENTATION = 1 << 26,
-  FUAITYPE_FACE_RECOGNIZER = 1 << 27
+  FUAITYPE_FACE_RECOGNIZER = 1 << 27,
+  FUAITYPE_IMAGE_BEAUTY = 1 << 28,
+  FUAITYPE_HUMAN_PROCESSOR_2D_IMGSLIM = 1 << 29,
+  FUAITYPE_FACE_ATTRIBUTE_PROCESSOR = 1 << 30,
+  FUAITYPE_IMAGE_BEAUTY_UNKNOW = 1 << 31
+
 } FUAITYPE;
 
 typedef enum FUAIGESTURETYPE {
@@ -167,6 +172,27 @@ typedef enum FUAISCENESTATE {
   FUAISCENE_DANCE = 1,
   FUAISCENE_SLIM = 2,
 } FUAISCENESTATE;
+
+typedef enum FUAIHUMANFOLLOWMODE {
+  FUAIHUMAN_FOLLOW_MODE_UNKNOWN = -1,
+  FUAIHUMAN_FOLLOW_MODE_FIX = 0,
+  FUAIHUMAN_FOLLOW_MODE_ALIGN = 1,
+  FUAIHUMAN_FOLLOW_MODE_STAGE = 2
+} FUAIHUMANFOLLOWMODE;
+
+typedef enum FUAIHUMANMIRRORTYPE {
+  FUAIHUMAN_MIRROR_LR = 0,
+  FUAIHUMAN_MIRROR_TB = 1,
+  FUAIHUMAN_MIRROR_BOTH = 2,
+  FUAIHUMAN_MIRROR_NONE = 3
+} FUAIHUMANMIRRORTYPE;
+
+typedef enum FUAIHUMANROTTYPE {
+  FUAIHUMAN_ROT_0 = 0,
+  FUAIHUMAN_ROT_90 = 1,
+  FUAIHUMAN_ROT_180 = 2,
+  FUAIHUMAN_ROT_270 = 3
+} FUAIHUMANROTTYPE;
 
 typedef enum TRANSFORM_MATRIX {
   /*
@@ -428,6 +454,9 @@ FUNAMA_API bool fuMakeGLContextCurrent();
 FUNAMA_API int fuSetup(float* sdk_data, int sz_sdk_data, float* ardata,
                        void* authdata, int sz_authdata);
 
+FUNAMA_API int fuSetupWithoutRetry(float* sdk_data, int sz_sdk_data,
+                                   float* ardata, void* authdata,
+                                   int sz_authdata);
 /**
  \brief offline authentication
         Initialize and authenticate your SDK instance to the FaceUnity server,
@@ -448,6 +477,7 @@ FUNAMA_API int fuSetup(float* sdk_data, int sz_sdk_data, float* ardata,
  \param offline_bundle_sz is size of offline bundle
  \return non-zero for success, zero for failure
 */
+
 FUNAMA_API int fuSetupLocal(float* v3data, int sz_v3data, float* ardata,
                             void* authdata, int sz_authdata,
                             void** offline_bundle_ptr, int* offline_bundle_sz);
@@ -1025,6 +1055,18 @@ FUNAMA_API int fuSetDeviceOrientation(int deviceOrientation);
 FUNAMA_API int fuSetMaxFaces(int n_max_faces);
 
 /**
+ \brief Set detect face every how number of frame when no face
+ \param n is the number of frame
+*/
+FUNAMA_API void fuSetFaceProcessorDetectEveryNFramesWhenNoFace(int n_frames);
+
+/**
+ \brief Set detect face every how number of frame when having face
+ \param n is the number of frame
+*/
+FUNAMA_API void fuSetFaceProcessorDetectEveryNFramesWhenFace(int n_frames);
+
+/**
  \brief Get the unique identifier for each face during current tracking
         Lost face tracking will change the identifier, even for a quick retrack
  \param face_id is the id of face, index is smaller than which is set in
@@ -1256,6 +1298,12 @@ FUNAMA_API int fuSetFaceTrackParam(void* name, void* pinput);
 FUNAMA_API const char* fuGetVersion();
 
 /**
+ \brief Get SDK commit time string
+ \return SDK commit time string in const char*
+*/
+FUNAMA_API const char* fuGetCommitTime();
+
+/**
  \brief Load AI model data, to support tongue animation.
  \param data - the pointer to AI model data 'ai_xxx.bundle',which is along
 beside lib files in SDK package
@@ -1265,6 +1313,18 @@ issues
  \return zero for failure, one for success.
 */
 FUNAMA_API int fuLoadAIModelFromPackage(void* data, int sz, FUAITYPE type);
+
+/**
+ \brief Preprocess AI model.
+ \param data - the pointer to AI model data 'ai_xxx.bundle',which is along
+beside lib files in SDK package
+ \param sz - the data size, we use plain int to avoid cross-language compilation
+issues
+ \param type - define in FUAITYPE enumeration.
+ \return zero for failure, one for success.
+*/
+FUNAMA_API int fuPreprocessAIModelFromPackage(void* data, int sz,
+                                              FUAITYPE type);
 
 /**
  \brief Release AI Model, when no more need some type of AI albility.
@@ -1463,6 +1523,19 @@ FUNAMA_API void fuFaceProcessorSetMinFaceRatio(float ratio);
 FUNAMA_API void fuFaceProcessorSetFaceLandmarkQuality(int quality);
 
 /**
+ \brief set ai model FaceProcessor's detector mode.
+ \param use, 0 for disable detect small face, 1 for enable detect small face
+ */
+FUNAMA_API void fuFaceProcessorSetDetectSmallFace(int use);
+
+/**
+ \brief set ai model FaceProcessor use capture eye look camera.
+ \param use, 0 for disable, 1 for enable
+ \return zero for failed, one for success
+ */
+FUNAMA_API int fuFaceProcessorSetUseCaptureEyeLookCam(int use);
+
+/**
  \brief get ai model FaceProcessor's tracking hair mask with index.
  \param index, index of fuFaceProcessorGetNumResults.
  \param mask_width,  width of return.
@@ -1509,45 +1582,22 @@ FUNAMA_API int fuFaceProcessorGetNumResults();
 */
 
 /**
+ \brief set humanprocessor's human detect mode. when use 1 for video mode, human
+ detect strategy is opimized for no human scenario. In image process scenario,
+ you should set detect mode into 0 image mode.
+ \param mode, 0 for image, 1 for video, 1 by default
+ */
+FUNAMA_API int fuSetHumanProcessorDetectMode(int mode);
+
+/**
  \brief Reset ai model HumanProcessor's tracking state.
 */
 FUNAMA_API void fuHumanProcessorReset();
 
 /**
- \brief set ai model HumanProcessor's 3d skeleton hierarchy.
- \param data, json file description of skeleton hierarchy. ref to boneMap.json.
- \param size, size of data in bytes.
- */
-FUNAMA_API void fuHumanProcessorSetBonemap(const char* data, const int size);
-
-/**
  \brief set ai model HumanProcessor's maxinum tracking people.
  */
 FUNAMA_API void fuHumanProcessorSetMaxHumans(int max_humans);
-
-/**
- \brief set ai model HumanProcessor's avatar scale
- \param scale.
- */
-FUNAMA_API void fuHumanProcessorSetAvatarScale(float scale);
-
-/**
- \brief set ai model HumanProcessor's avatar global offset
- \param offset x.
- \param offset y.
- \param offset z.
- */
-FUNAMA_API void fuHumanProcessorSetAvatarGlobalOffset(float offset_x,
-                                                      float offset_y,
-                                                      float offset_z);
-/**
-\param use_retarget_root_scale(default True): Set use retarget root scale or
-not.
-\param retarget_root_scale(default 0.0): root movement scale (when <= 0.0, use
-the auto-calculated value)
- */
-FUNAMA_API void fuHumanProcessorSetAvatarUseRetargetRootScale(
-    bool use_retarget_root_scale, float retarget_root_scale);
 
 /**
 \param n_buffer_frames(default 5 and > 0): filter buffer frames.
@@ -1637,20 +1687,48 @@ FUNAMA_API const float* fuHumanProcessorGetResultJoint2ds(int index, int* size);
 FUNAMA_API const float* fuHumanProcessorGetResultJoint3ds(int index, int* size);
 
 /**
- \brief get ai model HumanProcessor's 3d joint transform, rotation only.
- \param index, index of fuHumanProcessorGetNumResults
- \param size,  size of return data.
+ \brief get ai model HumanProcessor's pof2d joint with index.(The joint2ds
+ generated by human driver). \param index, index of
+ fuHumanProcessorGetNumResults \param size,  size of return data.
  */
-FUNAMA_API const float* fuHumanProcessorGetResultTransformArray(int index,
+FUNAMA_API const float* fuHumanProcessorGetResultPofJoint2ds(int index,
+                                                             int* size);
+
+/**
+ \brief get ai model HumanProcessor's pof2d joint scores with index. (The
+ joint2ds generated by human driver). \param index, index of
+ fuHumanProcessorGetNumResults \param size,  size of return data.
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultPofJointScores(int index,
                                                                 int* size);
 
 /**
- \brief get ai model HumanProcessor's 3d root joint's transform.
- \param index, index of fuHumanProcessorGetNumResults
- \param size,  size of return data.
+ \brief enable model HumanProcessor's BVH motion frame output.
+ \param enable: (default is true).
  */
-FUNAMA_API const float* fuHumanProcessorGetResultModelMatrix(int index,
-                                                             int* size);
+FUNAMA_API void fuHumanProcessorSetEnableBVHOutput(bool enable);
+
+/**
+ \brief set the inplane rotation of model HumanProcessor's BVH output.
+ \param inplane_rot: inplane counter-clock-wise rotation type.
+ */
+FUNAMA_API void fuHumanProcessorSetBVHInPlaneRotation(
+    FUAIHUMANROTTYPE inplane_rot);
+
+/**
+ \brief set the inplane mirror type of model HumanProcessor's BVH output.
+ \param inplane_mirror_type: inplane mirror type.
+ */
+FUNAMA_API void fuHumanProcessorSetBVHInPlaneMirrorType(
+    FUAIHUMANMIRRORTYPE inplane_mirror_type);
+
+/**
+ \brief get model HumanProcessor's BVH motiont frame output.
+ \param index: index of fuHumanProcessorGetNumResults
+ \param size:  size of return data.
+ */
+FUNAMA_API const float* fuHumanProcessorGetResultBVHMotionFrameOutput(
+    int index, int* size);
 
 /**
  \brief get ai model HumanProcessor's tracking full body mask with index.
@@ -1733,6 +1811,12 @@ FUNAMA_API long long fuProfileGetTimerMax(int index);
 FUNAMA_API int fuProfileResetAllTimers();
 
 FUNAMA_API void fuSetForcePortraitMode(int mode);
+
+// in_format 0->RGB 1->RGBA
+FUNAMA_API void fuImageBeautyResetPic(void* in_ptr, int w, int h, int format,
+                                      void* out_ptr, int out_w, int out_h);
+
+FUNAMA_API void fuImageBeautyNewPic();
 
 #ifdef __cplusplus
 }
