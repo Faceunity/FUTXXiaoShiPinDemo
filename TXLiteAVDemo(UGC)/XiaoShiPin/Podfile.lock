@@ -1,0 +1,97 @@
+PODS:
+  - AFNetworking (4.0.1):
+    - AFNetworking/NSURLSession (= 4.0.1)
+    - AFNetworking/Reachability (= 4.0.1)
+    - AFNetworking/Security (= 4.0.1)
+    - AFNetworking/Serialization (= 4.0.1)
+    - AFNetworking/UIKit (= 4.0.1)
+  - AFNetworking/NSURLSession (4.0.1):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (4.0.1)
+  - AFNetworking/Security (4.0.1)
+  - AFNetworking/Serialization (4.0.1)
+  - AFNetworking/UIKit (4.0.1):
+    - AFNetworking/NSURLSession
+  - BeautySettingKit (0.1.0):
+    - ZipArchive
+  - FURenderKit_nama (8.13.0)
+  - Masonry (1.1.0)
+  - MBProgressHUD (1.2.0)
+  - MJRefresh (3.7.6)
+  - QCloudCore/WithoutMTA (6.4.4)
+  - QCloudCOSXML/Slim (6.4.4):
+    - QCloudCore/WithoutMTA (= 6.4.4)
+  - QCloudQuic (6.3.9):
+    - QCloudQuic/Default (= 6.3.9)
+  - QCloudQuic/Default (6.3.9)
+  - SDWebImage (5.19.4):
+    - SDWebImage/Core (= 5.19.4)
+  - SDWebImage/Core (5.19.4)
+  - UGCKit/UGC (0.1.0):
+    - AFNetworking (= 4.0.1)
+    - BeautySettingKit
+    - FURenderKit_nama (= 8.13.0)
+    - QCloudCOSXML/Slim (= 6.4.4)
+    - QCloudQuic (= 6.3.9)
+    - xmagickit
+  - XMagic (2.5.0.250)
+  - xmagickit (0.1.0):
+    - Masonry
+    - SDWebImage
+    - XMagic (= 2.5.0.250)
+    - ZipArchive
+  - ZipArchive (1.4.0)
+
+DEPENDENCIES:
+  - AFNetworking
+  - BeautySettingKit (from `BeautySettingKit/BeautySettingKit.podspec`)
+  - FURenderKit_nama (= 8.13.0)
+  - MBProgressHUD
+  - MJRefresh
+  - SDWebImage (= 5.19.4)
+  - UGCKit/UGC (from `UGCKit/UGCKit.podspec`)
+  - xmagickit (from `xmagickit/xmagickit.podspec`)
+
+SPEC REPOS:
+  https://mirrors.tuna.tsinghua.edu.cn/git/CocoaPods/Specs.git:
+    - AFNetworking
+    - FURenderKit_nama
+    - Masonry
+    - MBProgressHUD
+    - MJRefresh
+    - QCloudCore
+    - QCloudCOSXML
+    - QCloudQuic
+    - SDWebImage
+    - XMagic
+    - ZipArchive
+
+EXTERNAL SOURCES:
+  BeautySettingKit:
+    :path: BeautySettingKit/BeautySettingKit.podspec
+  UGCKit:
+    :path: UGCKit/UGCKit.podspec
+  xmagickit:
+    :path: xmagickit/xmagickit.podspec
+
+SPEC CHECKSUMS:
+  AFNetworking: 3bd23d814e976cd148d7d44c3ab78017b744cd58
+  BeautySettingKit: 4767b458268accc0439c2ccc74ab2fe11ca66558
+  FURenderKit_nama: 0737ac79ece72d2a23b56887cf57d70edb9586fe
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
+  MJRefresh: 2fe7fb43a5167ceda20bb7e63f130c04fd1814a5
+  QCloudCore: 9b13ad49cf5fc4537f416811f31c41cf46d8f3c2
+  QCloudCOSXML: b24d8a1225e4b3270d36bbcfa66478fedc1c6de6
+  QCloudQuic: 81e2c29fa8122c1d5e8323a90349683e52c8e101
+  SDWebImage: 066c47b573f408f18caa467d71deace7c0f8280d
+  UGCKit: ce4680ca08ac760002c09fe20271bb90f1788ed1
+  XMagic: 8150a6fb1a0743a582e39eea60ad75c007dbe3b3
+  xmagickit: 4e57260929a55f37b749dc58fcfb4770160f429a
+  ZipArchive: e25a4373192673e3229ac8d6e9f64a3e5713c966
+
+PODFILE CHECKSUM: a45880f6e61f9470a2ad54c701e43b0dab8a9fc7
+
+COCOAPODS: 1.16.2
